@@ -15,7 +15,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="app-version" content="1.3.3-preview">
+<meta name="app-version" content="1.3.6-preview">
 <style>
 /* Fredoka (SIL Open Font License, see OFL-Fredoka.txt), self-hosted so the app never waits on a third-party server */
 @font-face{font-family:"Fredoka";font-style:normal;font-weight:300 700;font-display:swap;src:url("fredoka-latin.woff2") format("woff2")}
@@ -522,7 +522,7 @@ const APP = {
   mascot: "🦉",
   mascotName: "Professor Hoot",
   pinLength: 4,
-  version: "1.3.3-preview",
+  version: "1.3.6-preview",
 };
 const AVATARS = ["🦊","🐼","🦄","🐯","🐸","🐙","🦖","🐰","🐨","🦁","🐧","🐝","🐬","🦋","🐱","🐶"];
 const REWARDS = {
@@ -723,7 +723,55 @@ const MINIGAMES = [
   { id: "sillystories", name: "Silly Stories", emoji: "📖", blurb: "Fill in the silly story!", href: "games/silly-stories.html",
     key: "logicquest.minigame.sillystories.v1",
     interlude: true, role: "interlude", roundLabel: "1 story", minutes: 3, enabled: true },
+  // Climb the Quiz (1.3.6): free play from the home tile. Tokens use Climb's own rates (no daily cap).
+  // hideForYounger: Steve's younger (non-reader) mode for Little Thinkers hasn't shipped yet, so the tile is hidden for them.
+  // It stays in this list so any tokens a kid already earned are still claimed.
+  { id: "climb", name: "Climb the Quiz", emoji: "🧗", blurb: "Climb the puzzle tower!",
+    href: "games/climb-the-quiz.html?elzee=1&mode=free&ret=..%2Findex.html%23home",
+    key: "logicquest.minigame.climb.v1", act: "launchClimb", hideForYounger: true,
+    interlude: true, role: "challenge", flagship: true, roundLabel: "3 floors", minutes: 4, enabled: true },
 ];
+const isYoungerProfile = pl => !!pl && pl.pathId === "little";
+const homeGames = pl => MINIGAMES.filter(g => !(g.hideForYounger && isYoungerProfile(pl)));
+/* Climb question pack (spec §6.1): review items only from levels this kid has finished. Returns null if there
+   aren't enough yet, and the game then uses its built-in sample pack. */
+const CLIMB_PACK_KEY = "logicquest.climb.pack.v1";
+function buildClimbPack(pl, n = 7) {
+  if (!pl) return null;
+  const path = getPath(pl.pathId), today = todayStr();
+  const prev = readJSON(CLIMB_PACK_KEY);
+  const recent = new Set(isObj(prev) && Array.isArray(prev.recentRefs) ? prev.recentRefs.filter(r => typeof r === "string") : []);
+  const levels = [];
+  path.tracks.forEach((t, ti) => t.levels.forEach((lv, li) => {
+    const p = progOf(pl, path.id, ti, li);
+    if (!p.done) return;
+    const doneToday = !!p.last && ymd(new Date(p.last)) === today;
+    levels.push({ t, li, lv, stars: p.stars || 0, last: p.last || 0, doneToday });
+  }));
+  if (!levels.length) return null;
+  levels.sort((a, b) => (b.doneToday - a.doneToday) || (a.stars - b.stars) || (a.last - b.last));
+  const pick = [], used = new Set();
+  const take = (pass) => {
+    for (const L of levels) {
+      let fromToday = 0;
+      for (let qi = 0; qi < L.lv.qs.length && pick.length < n; qi++) {
+        const q = L.lv.qs[qi], ref = `${path.id}/${L.t.id}/${L.li}/${qi}`;
+        if (used.has(ref) || (pass === 0 && recent.has(ref))) continue;
+        if (L.doneToday && fromToday >= 2 && pass === 0) break;
+        if (!Array.isArray(q.c) || q.c.length < 2) continue;
+        used.add(ref); if (L.doneToday) fromToday++;
+        pick.push({ ref, source: L.doneToday ? "today" : "review", pic: q.pic || "", q: q.q || "", ask: q.ask || "", c: q.c.slice(), why: q.why || "",
+          ...(q.kind ? { kind: q.kind } : {}), ...(q.line ? { line: q.line } : {}), ...(q.board ? { board: q.board } : {}) });
+      }
+    }
+  };
+  take(0); if (pick.length < n) take(1);
+  if (pick.length < 3) return null;
+  const packId = "p-" + today.replace(/-/g, "") + "-" + Math.random().toString(36).slice(2, 6);
+  const recentRefs = [...pick.map(x => x.ref), ...recent].slice(0, 30);
+  const pack = { v: 1, packId, profileId: pl.id, createdAt: Date.now(), pathId: path.id, items: pick, recentRefs };
+  return writeJSON(CLIMB_PACK_KEY, pack) ? pack : null;
+}
 const CLAIM_KEY = "logicquest.minigame.claims.v1"; // { [gameId]: { [profileId]: { claimed, day, today } } }
 function readJSON(key) { try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; } }
 function writeJSON(key, value) {
@@ -1115,7 +1163,7 @@ function renderHome() {
   const offsets = [0, 80, -80, 40, -40];
   $app.innerHTML = topBar(pl) + `
     <div class="hello"><div class="mascot">${APP.mascot}</div><div class="bubble">${greeting(pl)}</div></div>
-    ${MINIGAMES.map(g => `<a class="gamecard" href="${g.href}" data-game="${g.id}"><span class="ge">${g.emoji}</span>
+    ${homeGames(pl).map(g => `<a class="gamecard" href="${g.href}" data-game="${g.id}"${g.act ? ` data-act="${g.act}"` : ""}><span class="ge">${g.emoji}</span>
       <span><b>${esc(g.name)}</b><small>${esc(g.blurb)}</small></span><span class="go">▶</span></a>`).join("")}
     <div class="tabs">${PATHS.map(p => `<button class="tab ${p.id === pathId ? "on" : ""}" data-act="viewPath" data-v="${p.id}">${p.emoji} ${esc(p.title)}</button>`).join("")}</div>
     ${path.tracks.map((t, ti) => `
@@ -1453,6 +1501,12 @@ function onParentFieldChange(el) {
    ACTIONS (event delegation)
    ========================================================================== */
 const actions = {
+  launchClimb(el, e) { // write a fresh pack first, then open the game with it (falls back to the built-in pack)
+    if (e) e.preventDefault();
+    const g = MINIGAMES.find(x => x.id === "climb");
+    let pack = null; try { pack = buildClimbPack(player()); } catch (err) { pack = null; }
+    location.href = g.href + (pack ? "&pack=" + encodeURIComponent(pack.packId) : "");
+  },
   picker() { Speech.stop(); go("picker"); },
   addPlayer() { go("addPlayer"); },
   setup() { render(); }, // the setup card was removed in 1.2.2; kept so a stale tap is harmless
