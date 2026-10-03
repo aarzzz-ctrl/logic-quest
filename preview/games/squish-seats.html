@@ -3,13 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<!-- Offline-only: the page may not load anything from anywhere (no fonts, images, scripts, or fetches). -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; media-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'">
+<!-- Same device only: scripts and styles are inline. Fonts, the app icon, and version.json stay on this site. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; media-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#7c4dff">
+<link rel="icon" type="image/png" href="../icon-192.png">
 <title>Squish Seats · Elzee</title>
 <style>
-/* Visual language matches Elzee (lq-site/index.html): cream background, purple brand, chunky 3D buttons. */
+/* Fredoka (SIL Open Font License, see ../OFL-Fredoka.txt), self-hosted. */
+@font-face{font-family:"Fredoka";font-style:normal;font-weight:300 700;font-display:swap;src:url("../fredoka-latin.woff2") format("woff2")}
+/* Visual language matches Elzee: cream background, purple brand, chunky 3D buttons. */
 :root{
   --bg:#fff8e7; --ink:#2d2a4a; --muted:#7a7699; --card:#fff; --line:#e7e2f5;
   --brand:#7c4dff; --brand-d:#5a2fd6; --brand-l:#efe9ff;
@@ -42,6 +45,8 @@ h1,h2,h3{margin:0}
   box-shadow:0 4px 0 var(--line);display:inline-flex;align-items:center;justify-content:center;position:relative}
 .iconbtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
 .iconbtn.on{background:var(--brand-l);box-shadow:0 4px 0 #cbbcff}
+.modebtn{width:auto;min-width:60px;height:auto;min-height:60px;padding:6px 12px;gap:4px;flex-direction:column;font-size:13px;font-weight:700;line-height:1.1}
+.modebtn small{font-size:13px;font-weight:700}
 
 /* top bar */
 .top{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
@@ -78,16 +83,17 @@ h1,h2,h3{margin:0}
 .nostar{filter:grayscale(1);opacity:.3}
 
 /* play */
-.play{display:grid;gap:16px;align-items:start}
-.lcol{display:grid;gap:16px;min-width:0}
+.play{display:grid;gap:16px;align-items:start;min-width:0}
+.lcol{display:grid;gap:16px;min-width:0;max-width:100%}
 @media (orientation:landscape) and (min-width:900px){
-  .play{grid-template-columns:1.1fr 1fr}
-  .lcol{position:sticky;top:8px}
+  .play{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+  .lcol{position:sticky;top:8px;align-self:start}
+  .clues{padding-bottom:28px}
 }
-.stage{background:linear-gradient(#e9f7ff,#fdf6ff);border-radius:28px;padding:16px 12px 18px;box-shadow:0 6px 0 var(--line);position:relative;overflow:hidden}
+.stage{background:linear-gradient(#e9f7ff,#fdf6ff);border-radius:28px;padding:16px 12px 18px;box-shadow:0 6px 0 var(--line);position:relative;overflow:hidden;max-width:100%;min-width:0}
 .stage .scenebg{position:absolute;right:10px;top:4px;font-size:44px;opacity:.55;pointer-events:none}
 .stage .lvtitle{font-weight:700;font-size:22px;margin:0 0 10px 6px;min-height:28px}
-.bench{display:flex;justify-content:center;gap:8px;padding:6px 0 0}
+.bench{display:flex;justify-content:center;gap:8px;padding:6px 0 0;min-width:0;max-width:100%}
 .seat{flex:1 1 0;min-width:0;max-width:var(--seat);min-height:calc(var(--seat) + 20px);border-radius:22px;border:4px dashed #c9bdf3;background:rgba(255,255,255,.75);
   display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:4px 0 0;position:relative}
 .seat .sn{font-weight:700;color:var(--brand-d);font-size:22px;line-height:1;margin-bottom:2px}
@@ -118,19 +124,20 @@ h1,h2,h3{margin:0}
 .ghost-drag svg{width:100%;height:100%}
 
 /* clue cards */
-.clues{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;align-content:start}
-.clue{background:#fff;border-radius:20px;box-shadow:0 5px 0 var(--line);border:4px solid var(--line);padding:10px 12px;position:relative;
-  display:flex;flex-direction:column;align-items:center;gap:8px;min-height:120px}
-.clue .cn{position:absolute;left:10px;top:6px;font-weight:700;color:var(--muted);font-size:16px}
-.clue .say{position:absolute;right:6px;top:6px;width:48px;height:48px;font-size:24px}
-.clue .pic{display:flex;align-items:center;justify-content:center;gap:4px;min-height:68px;padding:0 40px}
-.clue .txt{font-size:19px;text-align:center;line-height:1.25;padding:0 18px}
+.clues{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:12px;align-content:start;min-width:0}
+.clue{background:#fff;border-radius:20px;box-shadow:0 5px 0 var(--line);border:4px solid var(--line);padding:8px 12px 12px;
+  display:flex;flex-direction:column;align-items:stretch;gap:6px;min-width:0;max-width:100%}
+.cluehead{display:flex;align-items:center;gap:8px;width:100%;min-height:48px}
+.clue .cn{font-weight:700;color:var(--muted);font-size:18px}
+.clue .say{width:48px;height:48px;font-size:24px;margin-left:auto}
+.clue .pic{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:4px;min-height:64px;max-width:100%;padding:2px 0}
+.clue .txt{font-size:19px;text-align:center;line-height:1.3;padding:0 6px;max-width:100%}
 .clue.ok{border-color:var(--good);background:var(--good-l)}
-.clue.bad{border-color:var(--oops);background:var(--oops-l);animation:wiggle .4s 2}
-.clue .mark{position:absolute;left:8px;bottom:6px;font-size:26px}
+.clue.bad{border-color:#ff5d6c;background:#fff1f0;box-shadow:0 0 0 5px #ffb4bc, 0 5px 0 #e07b15;animation:wiggle .4s 2}
+.clue .mark{font-size:26px;line-height:1;min-width:28px}
 @keyframes wiggle{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.mb{display:flex;gap:3px;padding:4px;background:#c98d5b;border-radius:12px}
-.mb .c{width:40px;height:40px;border-radius:9px;background:#fff6ec;display:flex;align-items:center;justify-content:center;position:relative}
+.mb{display:flex;gap:3px;padding:4px;background:#c98d5b;border-radius:12px;max-width:100%}
+.mb .c{width:40px;height:40px;border-radius:9px;background:#fff6ec;display:flex;align-items:center;justify-content:center;position:relative;flex:0 0 auto}
 .mb .c.dim{background:#e9dccd}
 .mb .c svg{width:36px;height:36px}
 .mb .c.ghost svg{opacity:.45}
@@ -178,6 +185,15 @@ h1,h2,h3{margin:0}
 .holdbtn{position:relative;overflow:hidden}
 .holdbtn i{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,93,108,.35)}
 .note{background:#fff;border-radius:18px;padding:12px 16px;box-shadow:0 4px 0 var(--line);margin:10px 0;font-size:18px}
+.dots{display:flex;justify-content:center;gap:10px;margin:10px 0}
+.dots i{width:16px;height:16px;border-radius:50%;border:3px solid var(--brand);display:block}
+.dots i.on{background:var(--brand)}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.key{height:58px;border-radius:16px;border:none;background:#fff;font-size:28px;font-weight:700;box-shadow:0 4px 0 var(--line)}
+.key:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.err{min-height:1.3em;color:#d23b4a;font-size:18px;font-weight:600;margin:4px 0}
+.panel.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 @media (max-width:640px){
   .clue .txt{font-size:17px}
   .mb .c{width:32px;height:32px}.mb .c svg{width:29px;height:29px}
@@ -205,6 +221,7 @@ const GAME = {
   storageKey: "logicquest.minigame.squishseats.v1", // this game's own key
   mainKey: "logicquest.v1",                          // main app key: READ ONLY, never written here
 };
+const BUILD = "1.3.2-preview";
 const ECON = {
   firstClear: 3,        // first time a level is solved
   firstThreeStars: 2,   // first time a level earns 3 stars
@@ -287,7 +304,7 @@ const LEVELS = [
   { scene: "⛵", title: "Boat Ride",     b: "DCABF", sol: "BCFAD", c: [["at","F",2],["end","D"],["end","B"],["rightBefore","C","F"],["before","B","A"]] },
   { scene: "🎪", title: "Puppet Show",   b: "DCABF", sol: "DAFCB", c: [["between","D","A","C"],["nextTo","A","F"],["at","B",4],["notEnd","C"],["nextTo","D","A"]] },
   { scene: "🌙", title: "Sleepover",     b: "DCABF", sol: "CAFBD", c: [["before","A","B"],["notAt","C",1],["notEnd","A"],["rightBefore","F","B"],["notNextTo","A","D"]] },
-  { scene: "🚀", title: "Rocket Trip",   b: "DCABF", sol: "FDABC", c: [["notNextTo","B","F"],["notNextTo","A","F"],["before","F","C"],["notAt","B",4],["between","C","D","F"],["before","A","B"]] },
+  { scene: "🚀", title: "Rocket Trip",   b: "DCABF", sol: "FDABC", c: [["notNextTo","B","F"],["notNextTo","A","F"],["before","F","C"],["notAt","B",4],["between","F","D","C"],["before","A","B"]] },
 ];
 // Collectible sticker for each level (earned by play only; no randomness, no purchases).
 const STICKERS = [["D","🔍"],["C","⚖️"],["A","🫧"],["B","🥕"],["F","🧋"],["D","🎈"],["C","🍉"],["A","🌈"],["B","⭐"],["F","👑"]];
@@ -309,12 +326,12 @@ const clueOk = (seats, [t, ...args]) => RULES[t](seats, args);
 const N = id => BUDDIES[id].name;
 function clueText([t, a, b, c]) {
   switch (t) {
-    case "at": return `${N(a)} sits in seat ${b + 1}.`;
-    case "notAt": return `${N(a)} does NOT sit in seat ${b + 1}.`;
+    case "at": return `${N(a)} sits in seat\u00A0${b + 1}.`;
+    case "notAt": return `${N(a)} does NOT sit in seat\u00A0${b + 1}.`;
     case "end": return `${N(a)} sits at an end.`;
     case "notEnd": return `${N(a)} does NOT sit at an end.`;
     case "before": return `${N(a)} sits somewhere to the LEFT of ${N(b)}.`;
-    case "rightBefore": return `${N(a)} sits right next to ${N(b)}, on the left side.`;
+    case "rightBefore": return `${N(a)} sits just LEFT of ${N(b)}. They touch.`;
     case "nextTo": return `${N(a)} and ${N(b)} sit side by side.`;
     case "notNextTo": return `${N(a)} and ${N(b)} do NOT sit side by side.`;
     case "between": return `${N(b)} sits somewhere between ${N(a)} and ${N(c)}.`;
@@ -325,11 +342,11 @@ function miniBench(n, cells) {
   let h = `<div class="mb">`;
   for (let i = 0; i < n; i++) {
     const c = cells[i] || {};
-    h += `<div class="c ${c.dim ? "dim" : ""} ${c.ghost ? "ghost" : ""}">${c.b ? buddySVG(c.b) : ""}${c.ban ? `<span class="ban">${BAN_SVG}</span>` : ""}</div>`;
+    h += `<div class="c ${c.dim ? "dim" : ""} ${c.ghost ? "ghost" : ""}"${c.b ? ` data-who="${c.b}"` : ""}>${c.b ? buddySVG(c.b) : ""}${c.ban ? `<span class="ban">${BAN_SVG}</span>` : ""}</div>`;
   }
   return h + `</div>`;
 }
-const chip = b => `<span class="chip">${buddySVG(b)}</span>`;
+const chip = b => `<span class="chip" data-who="${b}">${buddySVG(b)}</span>`;
 function cluePic([t, a, b, c], n) {
   const cells = [];
   switch (t) {
@@ -388,6 +405,8 @@ const Store = {
           pending: num(k.pending), lifetime: num(k.lifetime),
           noRead: typeof k.noRead === "boolean" ? k.noRead : null,
           sound: typeof k.sound === "boolean" ? k.sound : null,
+          puzzle: k.puzzle && typeof k.puzzle === "object" ? k.puzzle : null,
+          gateLockUntil: num(k.gateLockUntil), gateFails: num(k.gateFails),
         };
       }
     }
@@ -398,7 +417,7 @@ const Store = {
 let me = readMainProfile();
 function kid() {
   const d = Store.data;
-  if (!d.kids[me.id]) d.kids[me.id] = { progress: {}, day: null, earnedToday: 0, replayPaidToday: 0, pending: 0, lifetime: 0, noRead: null, sound: null };
+  if (!d.kids[me.id]) d.kids[me.id] = { progress: {}, day: null, earnedToday: 0, replayPaidToday: 0, pending: 0, lifetime: 0, noRead: null, sound: null, puzzle: null, gateLockUntil: 0, gateFails: 0 };
   const k = d.kids[me.id];
   if (k.day !== todayStr()) { k.day = todayStr(); k.earnedToday = 0; k.replayPaidToday = 0; }
   return k;
@@ -465,6 +484,7 @@ const Speech = {
 /* ---------- screens ---------- */
 let view = "map";
 let play = null; // { li, seats, locked:Set, sel, checks, hints, status }
+let resetArmed = false; // hold-to-reset does nothing until the grown-up gate passes
 
 function topBar(back) {
   const k = kid(), pct = Math.round(100 * k.earnedToday / ECON.dailyCap), nr = noRead();
@@ -473,7 +493,7 @@ function topBar(back) {
     <div class="pill" aria-label="Player"><span class="av">${esc(me.avatar)}</span>${nr ? "" : `<span class="nm">${esc(me.name)}</span>`}</div>
     <div class="pill jar" aria-label="Tokens earned today ${k.earnedToday} of ${ECON.dailyCap}">🪙 <b>${k.earnedToday}</b><span class="jarbar"><i style="width:${pct}%"></i></span>${k.earnedToday >= ECON.dailyCap ? "✅" : ""}</div>
     <div class="spacer"></div>
-    <button class="iconbtn ${nr ? "on" : ""}" data-act="toggleRead" aria-label="Picture mode (no reading)" aria-pressed="${nr}">${nr ? "🖼️" : "🔤"}</button>
+    <button class="iconbtn modebtn ${nr ? "on" : ""}" data-act="toggleRead" aria-label="${nr ? "Pictures. Tap to show words." : "Words. Tap to show pictures."}" aria-pressed="${nr}"><span aria-hidden="true">${nr ? "🖼️" : "🔤"}</span><small>${nr ? "Pictures" : "Words"}</small></button>
     <button class="iconbtn" data-act="toggleSound" aria-label="Sound" aria-pressed="${soundOn()}">${soundOn() ? "🔊" : "🔇"}</button>
     ${back ? "" : `<button class="iconbtn" data-act="book" aria-label="Sticker book">📒</button>
     <button class="iconbtn" data-act="grown" aria-label="For grown-ups">ⓘ</button>`}
@@ -503,7 +523,32 @@ function renderMap() {
 function startLevel(li) {
   const L = LEVELS[li];
   play = { li, seats: Array(L.b.length).fill(null), locked: new Set(), sel: null, checks: 0, hints: 0, status: null, done: false };
+  savePuzzle();
   view = "play"; render(); window.scrollTo(0, 0);
+}
+function savePuzzle() {
+  if (!play || play.done) return;
+  kid().puzzle = {
+    li: play.li, seats: play.seats.slice(), locked: [...play.locked], sel: play.sel,
+    checks: play.checks, hints: play.hints, status: play.status ? play.status.slice() : null, savedAt: Date.now(),
+  };
+  Store.save();
+}
+function puzzleLoad() {
+  const raw = kid().puzzle;
+  if (!raw || typeof raw !== "object") return null;
+  const li = num(raw.li);
+  if (li < 0 || li >= LEVELS.length || !isUnlocked(li)) return null;
+  if (typeof raw.savedAt !== "number" || Date.now() - raw.savedAt > 12 * 3600000) return null;
+  const buddies = LEVELS[li].b.split("");
+  if (!Array.isArray(raw.seats) || raw.seats.length !== buddies.length) return null;
+  const seats = raw.seats.map(s => (typeof s === "string" && buddies.includes(s) ? s : null));
+  const seen = new Set();
+  for (const s of seats) { if (s) { if (seen.has(s)) return null; seen.add(s); } }
+  const locked = new Set(Array.isArray(raw.locked) ? raw.locked.filter(b => buddies.includes(b) && seats.includes(b)) : []);
+  const status = Array.isArray(raw.status) && raw.status.length === LEVELS[li].c.length ? raw.status.map(Boolean) : null;
+  const sel = typeof raw.sel === "string" && buddies.includes(raw.sel) && !locked.has(raw.sel) ? raw.sel : null;
+  return { li, seats, locked, sel, checks: num(raw.checks), hints: num(raw.hints), status, done: false };
 }
 
 function renderPlay() {
@@ -534,12 +579,14 @@ function renderPlay() {
     </div></div>
     <div class="clues">${L.c.map((c, i) => {
       const st = play.status ? (play.status[i] ? "ok" : "bad") : "";
-      return `<div class="clue ${st}" aria-label="Clue ${i + 1}: ${esc(clueText(c))}">
-        <span class="cn">${i + 1}</span>
-        ${Speech.ok ? `<button class="iconbtn say" data-act="say" data-ci="${i}" aria-label="Read clue aloud">🔈</button>` : ""}
+      return `<div class="clue ${st}" ${st === "bad" ? 'aria-invalid="true"' : ""} aria-label="Clue ${i + 1}: ${esc(clueText(c))}">
+        <div class="cluehead">
+          <span class="cn">${i + 1}</span>
+          ${st ? `<span class="mark" aria-hidden="true">${st === "ok" ? "✅" : "❌"}</span>` : `<span class="mark"></span>`}
+          ${Speech.ok ? `<button class="iconbtn say" data-act="say" data-ci="${i}" aria-label="Read clue aloud">🔈</button>` : ""}
+        </div>
         <div class="pic">${cluePic(c, n)}</div>
         ${nr ? "" : `<div class="txt">${esc(clueText(c))}</div>`}
-        ${st ? `<span class="mark" aria-hidden="true">${st === "ok" ? "✅" : "❌"}</span>` : ""}
       </div>`; }).join("")}</div>
   </div>`;
   placeHand();
@@ -571,7 +618,7 @@ function place(b, target) {
     play.seats[target] = b;
     if (from >= 0) play.seats[from] = occ || null;
   }
-  play.sel = null; play.status = null; Sound.tap(); render();
+  play.sel = null; play.status = null; Sound.tap(); savePuzzle(); render();
 }
 
 function check() {
@@ -581,13 +628,16 @@ function check() {
   play.status = L.c.map(c => clueOk(play.seats, c));
   if (play.status.every(Boolean)) {
     play.done = true;
+    kid().puzzle = null;
     const stars = Math.max(1, 3 - Math.min(2, (play.checks - 1) + play.hints));
     const res = award(play.li, stars);
     render(); Sound.win(); confetti();
     setTimeout(() => showWin(stars, res), 700);
   } else {
-    Sound.oops(); render();
-    if (kid() && !noRead()) toastNote("Some clue cards say ❌. Swap buddies and try again!");
+    Sound.oops(); savePuzzle(); render();
+    const badCard = document.querySelector(".clue.bad");
+    if (badCard) badCard.scrollIntoView({ block: "nearest", inline: "nearest" });
+    if (!noRead()) toastNote("Some clue cards say ❌. Swap buddies and try again!");
   }
 }
 
@@ -602,7 +652,7 @@ function hint() {
     if (from >= 0) play.seats[from] = null;
     play.seats[i] = b; play.locked.add(b);
     if (occ && from >= 0) play.seats[from] = occ; // swap the one we bumped
-    play.hints++; play.status = null; play.sel = null; Sound.pick(); render();
+    play.hints++; play.status = null; play.sel = null; Sound.pick(); savePuzzle(); render();
     return;
   }
 }
@@ -616,9 +666,9 @@ function showWin(stars, res) {
     <h2>${nr ? "🎉" : "🎉 Everyone's happy!"}</h2>
     <div class="winbench">${play.seats.map(b => `<span class="tok dance">${buddySVG(b, "yay")}</span>`).join("")}</div>
     <div class="bigstars">${[0, 1, 2].map(i => `<span style="animation-delay:${.2 + i * .2}s" class="${i < stars ? "" : "nostar"}">⭐</span>`).join("")}</div>
-    ${res.got ? `<div class="coins">+${res.got} 🪙</div>` : ""}
-    ${!nr && res.lines.length ? `<div class="muted" style="font-size:17px">${res.lines.map(([k, v]) => `${words[k]} +${v}`).join(" · ")}</div>` : ""}
-    ${res.capped ? `<div class="note">${nr ? "🪙✅🌙" : "Your token jar is full for today. Come back tomorrow for more. Puzzles are always free to play! 🌙"}</div>` : ""}
+    <div class="coins">+${res.got} 🪙</div>
+    ${!nr && !res.capped && res.lines.length ? `<div class="muted" style="font-size:17px">${res.lines.map(([k, v]) => `${words[k]} +${v}`).join(" · ")}</div>` : ""}
+    ${res.capped ? `<div class="note" data-jar="full">${nr ? "🪙✅🌙" : (res.got ? `Your token jar is almost full, so you got ${res.got} token${res.got === 1 ? "" : "s"} today. Come back tomorrow for more!` : "Your token jar is full for today, so you get 0 tokens. You still did great! Come back tomorrow for more. You can always keep playing.")}</div>` : ""}
     ${res.newSticker ? `<div class="sticker" aria-label="New sticker: ${BUDDIES[sb].full}"><div class="inner"><div class="face"><div class="stk">${buddySVG(sb, "yay")}<span class="acc">${acc}</span></div></div><div class="back">?</div></div></div>
       ${nr ? "" : `<div class="muted">New sticker for your book!</div>`}` : ""}
     <div class="row">
@@ -626,7 +676,7 @@ function showWin(stars, res) {
       <button class="btn ghost" data-act="replay" aria-label="Play again"><span class="ico">🔁</span></button>
       ${nextOk ? `<button class="btn" data-act="next" aria-label="Next level"><span class="ico">▶️</span>${nr ? "" : "Next"}</button>` : ""}
     </div></div></div>`;
-  if (soundOn()) Speech.say(res.got ? `Everyone is happy! You earned ${res.got} tokens!` : "Everyone is happy! Great thinking!");
+  if (soundOn()) Speech.say(res.got ? `Everyone is happy! You earned ${res.got} tokens!` : "Everyone is happy! Your token jar is full for today.");
 }
 
 function showBook() {
@@ -649,7 +699,7 @@ function showGrown() {
     <div class="note">Player: ${esc(me.avatar)} ${esc(me.name)} ${me.linked ? "(from Elzee)" : "(no Elzee player found on this device)"}<br>
       Today: ${k.earnedToday}/${ECON.dailyCap} · Waiting to go into the Elzee jar: <b>${k.pending}</b> · All-time: ${k.lifetime}</div>
     <p class="muted" style="font-size:16px">Tokens from this game move into the kid's Elzee jar the next time Elzee's home screen opens (up to ${ECON.dailyCap} a day). Picture mode hides all words; 🔈 buttons read clues aloud with the device's own voice.</p>
-    <p class="muted" style="font-size:16px">Hold the button below for 2 seconds to reset this kid's puzzle progress and stickers. Today's token count is kept so the daily cap can't be reset.</p>
+    <p class="muted" style="font-size:16px">A grown-up has to answer a question, or enter the PIN, before the button below will work. Then hold it for 2 seconds to reset this kid's puzzle progress and stickers. Today's token count is kept so the daily cap can't be reset.</p>
     <div class="row"><button class="btn ghost holdbtn" data-hold="reset" aria-label="Hold to reset puzzle progress"><i></i>Hold to reset</button>
       <button class="btn" data-act="closeOv">Close</button></div></div></div>`;
 }
@@ -663,7 +713,7 @@ function confetti(n = 70) {
   const colors = ["#7c4dff", "#3ccf4e", "#ffc83d", "#ff6b3d", "#ff8fab", "#4dc3ff"];
   for (let i = 0; i < n; i++) {
     const c = document.createElement("div"); c.className = "confetti";
-    c.style.left = Math.random() * 100 + "vw"; c.style.background = colors[i % colors.length];
+    c.style.left = Math.random() * 100 + "%"; c.style.background = colors[i % colors.length];
     c.style.animationDuration = (1.6 + Math.random() * 1.6) + "s"; c.style.animationDelay = (Math.random() * .4) + "s";
     document.body.appendChild(c); setTimeout(() => c.remove(), 3800);
   }
@@ -677,15 +727,15 @@ function render() {
 
 /* ---------- input: buttons ---------- */
 const ACTS = {
-  map() { $ov.innerHTML = ""; view = "map"; play = null; render(); window.scrollTo(0, 0); },
+  map() { resetArmed = false; $ov.innerHTML = ""; view = "map"; play = null; render(); window.scrollTo(0, 0); checkGameUpdate(); },
   start(el) { const li = +el.dataset.li; if (isUnlocked(li)) { Sound.tap(); startLevel(li); } },
   locked() { Sound.oops(); },
   toggleRead() { kid().noRead = !noRead(); Store.save(); render(); },
   toggleSound() { kid().sound = !soundOn(); Store.save(); if (!soundOn()) Speech.stop(); render(); },
   book() { showBook(); }, grown() { showGrown(); },
-  closeOv() { $ov.innerHTML = ""; render(); },
+  closeOv() { resetArmed = false; $ov.innerHTML = ""; render(); },
   check() { check(); }, hint() { hint(); },
-  clear() { if (!play || play.done) return; play.seats = play.seats.map(b => (b && play.locked.has(b) ? b : null)); play.sel = null; play.status = null; Sound.tap(); render(); },
+  clear() { if (!play || play.done) return; play.seats = play.seats.map(b => (b && play.locked.has(b) ? b : null)); play.sel = null; play.status = null; Sound.tap(); savePuzzle(); render(); },
   say(el) { const c = LEVELS[play.li].c[+el.dataset.ci]; if (c) Speech.say(clueText(c)); },
   replay() { $ov.innerHTML = ""; startLevel(play.li); },
   next() { $ov.innerHTML = ""; startLevel(Math.min(LEVELS.length - 1, play.li + 1)); },
@@ -753,16 +803,133 @@ function endDrag(e, cancelled) {
 document.addEventListener("pointerup", e => endDrag(e, false));
 document.addEventListener("pointercancel", e => endDrag(e, true));
 
-/* hold-to-confirm (grown-up reset) */
+/* Grown-up gate for Hold to reset. Reads the Elzee PIN if one exists; never writes logicquest.v1.
+   Lockouts live on this kid's game record so a wrong try can't touch the token jar. */
+function sha256(text) {
+  const rr = (v, n) => (v >>> n) | (v << (32 - n));
+  const K = [], H = [];
+  for (let p = 2, c = 0; c < 64; p++) {
+    let prime = true; for (let i = 2; i * i <= p; i++) if (p % i === 0) { prime = false; break; }
+    if (!prime) continue;
+    if (c < 8) H[c] = (Math.pow(p, 1 / 2) * 4294967296) | 0;
+    K[c++] = (Math.pow(p, 1 / 3) * 4294967296) | 0;
+  }
+  const bytes = Array.from(new TextEncoder().encode(String(text)));
+  const bitLen = bytes.length * 8;
+  bytes.push(0x80); while (bytes.length % 64 !== 56) bytes.push(0);
+  for (let i = 7; i >= 0; i--) bytes.push(i >= 4 ? 0 : (bitLen >>> (i * 8)) & 255);
+  const w = new Array(64);
+  for (let j = 0; j < bytes.length; j += 64) {
+    for (let i = 0; i < 16; i++) w[i] = (bytes[j + 4 * i] << 24) | (bytes[j + 4 * i + 1] << 16) | (bytes[j + 4 * i + 2] << 8) | bytes[j + 4 * i + 3];
+    for (let i = 16; i < 64; i++) {
+      const s0 = rr(w[i - 15], 7) ^ rr(w[i - 15], 18) ^ (w[i - 15] >>> 3), s1 = rr(w[i - 2], 17) ^ rr(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+      w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+    }
+    let [a, b, c, d, e, f, g, h] = H;
+    for (let i = 0; i < 64; i++) {
+      const t1 = (h + (rr(e, 6) ^ rr(e, 11) ^ rr(e, 25)) + ((e & f) ^ (~e & g)) + K[i] + w[i]) | 0;
+      const t2 = ((rr(a, 2) ^ rr(a, 13) ^ rr(a, 22)) + ((a & b) ^ (a & c) ^ (b & c))) | 0;
+      h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+    }
+    H[0] = (H[0] + a) | 0; H[1] = (H[1] + b) | 0; H[2] = (H[2] + c) | 0; H[3] = (H[3] + d) | 0;
+    H[4] = (H[4] + e) | 0; H[5] = (H[5] + f) | 0; H[6] = (H[6] + g) | 0; H[7] = (H[7] + h) | 0;
+  }
+  return H.map(x => (x >>> 0).toString(16).padStart(8, "0")).join("");
+}
+const hashPin = (salt, pin) => sha256(`${GAME.mainKey}:${salt}:${pin}`);
+function readParentAuth() {
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem(GAME.mainKey)); } catch (e) { raw = null; }
+  if (!raw || typeof raw !== "object") return { kind: "math" };
+  if (typeof raw.pinHash === "string" && /^[0-9a-f]{64}$/.test(raw.pinHash) && typeof raw.pinSalt === "string" && raw.pinSalt)
+    return { kind: "pin", salt: raw.pinSalt, hash: raw.pinHash };
+  if (typeof raw.pin === "string" && /^\d{4}$/.test(raw.pin)) return { kind: "plain", pin: raw.pin };
+  return { kind: "math" };
+}
+function waitText(until) {
+  const s = Math.max(1, Math.ceil((until - Date.now()) / 1000));
+  if (s > 90) { const m = Math.ceil(s / 60); return m === 1 ? "1 minute" : `${m} minutes`; }
+  return s === 1 ? "1 second" : `${s} seconds`;
+}
+function paintGate({ title, msg, length, onSubmit }) {
+  let value = "";
+  $ov.innerHTML = `<div class="ov"><div class="panel" role="dialog" aria-label="${esc(title)}">
+    <h2 style="font-size:28px">${esc(title)}</h2>
+    <p>${esc(msg)}</p>
+    <div class="dots">${"<i></i>".repeat(length)}</div>
+    <div class="err" data-err></div>
+    <div class="keypad">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(k => `<button class="key" data-k="${k}">${k}</button>`).join("")}
+      <button class="key" data-k="cancel" aria-label="Cancel">Cancel</button><button class="key" data-k="0">0</button>
+      <button class="key" data-k="back" aria-label="Delete">⌫</button></div>
+  </div></div>`;
+  const panel = $ov.querySelector(".panel");
+  const dots = [...$ov.querySelectorAll(".dots i")];
+  const err = $ov.querySelector("[data-err]");
+  const paint = () => dots.forEach((d, i) => d.classList.toggle("on", i < value.length));
+  const api = {
+    error(text) { err.textContent = text; panel.classList.remove("shake"); void panel.offsetWidth; panel.classList.add("shake"); value = ""; paint(); },
+  };
+  $ov.querySelector(".keypad").addEventListener("click", e => {
+    const k = e.target.closest("[data-k]"); if (!k) return;
+    const key = k.dataset.k;
+    if (key === "cancel") { showGrown(); return; }
+    if (key === "back") { value = value.slice(0, -1); paint(); return; }
+    if (value.length >= length) return;
+    value += key; err.textContent = ""; paint();
+    if (value.length === length) { const v = value; setTimeout(() => { if (panel.isConnected) onSubmit(v, api); }, 120); }
+  });
+}
+function armReset() {
+  resetArmed = true;
+  const k = kid(); k.gateFails = 0; k.gateLockUntil = 0; Store.save();
+  showGrown();
+  toastNote("Thanks! Now hold the button to reset.");
+}
+function openResetGate() {
+  const k = kid();
+  if (k.gateLockUntil > Date.now()) { toastNote(`Please wait ${waitText(k.gateLockUntil)} and try again.`); return; }
+  const auth = readParentAuth();
+  if (auth.kind === "math") {
+    const a = 24 + Math.floor(Math.random() * 26), b = 13 + Math.floor(Math.random() * 17);
+    const ans = String(a * b);
+    paintGate({ title: "A grown-up needs to do this", msg: `Grown-ups only: what is ${a} × ${b}? Type the answer, not a PIN.`, length: ans.length, onSubmit(v) {
+      if (v === ans) { armReset(); return; }
+      const kk = kid(); kk.gateFails += 1; kk.gateLockUntil = Date.now() + 60000; Store.save();
+      showGrown();
+      toastNote(`That's not right. Please wait ${waitText(kk.gateLockUntil)} before trying again.`);
+    }});
+    return;
+  }
+  paintGate({ title: "Grown-up check", msg: "Enter the grown-up PIN to unlock reset.", length: 4, onSubmit(v, api) {
+    const ok = auth.kind === "plain" ? v === auth.pin : hashPin(auth.salt, v) === auth.hash;
+    if (ok) { armReset(); return; }
+    const kk = kid(); kk.gateFails += 1;
+    if (kk.gateFails >= 3) {
+      kk.gateLockUntil = Date.now() + 30000; kk.gateFails = 0; Store.save();
+      showGrown();
+      toastNote(`Too many tries. Please wait ${waitText(kk.gateLockUntil)}.`);
+      return;
+    }
+    Store.save();
+    api.error(`Hmm, that's not the PIN. ${3 - kk.gateFails} more ${3 - kk.gateFails === 1 ? "try" : "tries"}.`);
+  }});
+}
+
+/* hold-to-confirm (grown-up reset): the 2-second hold only runs after the gate */
 let hold = null;
 document.addEventListener("pointerdown", e => {
   const el = e.target.closest("[data-hold]"); if (!el) return;
+  e.preventDefault();
+  const k = kid();
+  if (k.gateLockUntil > Date.now()) { toastNote(`Please wait ${waitText(k.gateLockUntil)} and try again.`); return; }
+  if (!resetArmed) { openResetGate(); return; }
   const bar = el.querySelector("i"), t0 = Date.now();
   hold = setInterval(() => {
-    const p = Math.min(1, (Date.now() - t0) / 2000); bar.style.width = (p * 100) + "%";
+    const p = Math.min(1, (Date.now() - t0) / 2000); if (bar) bar.style.width = (p * 100) + "%";
     if (p >= 1) {
       clearInterval(hold); hold = null;
-      const k = kid(); k.progress = {}; Store.save(); $ov.innerHTML = ""; render(); toastNote("Puzzle progress reset.");
+      const kk = kid(); kk.progress = {}; kk.puzzle = null; resetArmed = false; Store.save();
+      $ov.innerHTML = ""; render(); toastNote("Puzzle progress reset.");
     }
   }, 50);
 });
@@ -770,12 +937,36 @@ document.addEventListener("pointerdown", e => {
   if (hold) { clearInterval(hold); hold = null; document.querySelectorAll("[data-hold] i").forEach(b => b.style.width = "0"); }
 }));
 
+/* A newer build reloads only on the level map, never in the middle of a puzzle. */
+let updateCheckedAt = 0;
+function checkGameUpdate() {
+  if (view === "play") return;
+  const now = Date.now();
+  if (now - updateCheckedAt < 15000) return;
+  updateCheckedAt = now;
+  fetch("../version.json?t=" + now, { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(j => {
+    if (!j || typeof j.version !== "string" || j.version === BUILD || view === "play") return;
+    try { if (sessionStorage.getItem("squish.update") === j.version) return; sessionStorage.setItem("squish.update", j.version); } catch (e) { return; }
+    if (view !== "play") location.reload();
+  }).catch(() => {});
+}
+
 /* keep in sync if the main app switches player in another tab; re-place the hand on rotate */
 window.addEventListener("storage", e => { if (e.key === GAME.mainKey) { me = readMainProfile(); render(); } else if (e.key === GAME.storageKey) { Store.load(); render(); } });
 window.addEventListener("resize", () => { if (view === "play") placeHand(); });
 window.addEventListener("scroll", () => { if (view === "play") placeHand(); }, { passive: true });
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checkGameUpdate(); });
 
-Store.load(); render();
+Store.load();
+const savedPlay = puzzleLoad();
+if (savedPlay) {
+  play = savedPlay; view = "play"; render();
+  toastNote("Welcome back! Your seats are still here.");
+} else {
+  render();
+  checkGameUpdate();
+}
+if (/[?&]test=1\b/.test(location.search)) window.__squish = { LEVELS, RULES, clueText, GAME, BUILD, Store, kid, get play() { return play; }, get view() { return view; }, get resetArmed() { return resetArmed; } };
 </script>
 </body>
 </html>

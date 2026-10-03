@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Same-origin only. img-src includes 'self' so icon-192.png (favicon and manifest) can load. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; media-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Elzee</title>
 <meta name="description" content="Bite-size puzzles that build reasoning skills for kids.">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,7 +15,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="app-version" content="1.2.2">
+<meta name="app-version" content="1.2.3">
 <style>
 /* Fredoka (SIL Open Font License, see OFL-Fredoka.txt), self-hosted so the app never waits on a third-party server */
 @font-face{font-family:"Fredoka";font-style:normal;font-weight:300 700;font-display:swap;src:url("fredoka-latin.woff2") format("woff2")}
@@ -140,6 +142,8 @@ h1,h2,h3{margin:0;font-weight:700}
 .speak{position:absolute;top:14px;right:14px;width:56px;height:56px;font-size:28px}
 .qcard.hasSpeak .qtext{padding-right:52px}
 .choices{display:grid;gap:12px;align-content:start}
+.showrow{display:flex;justify-content:center;margin-top:2px}
+.showrow .btn{min-height:54px;padding:10px 22px;font-size:20px}
 .choice{display:block;width:100%;text-align:left;font-size:23px;line-height:1.3;padding:16px 20px;min-height:68px;
   border:3px solid var(--line);border-radius:18px;background:#fff;box-shadow:0 5px 0 var(--line)}
 .choice:active{transform:translateY(3px);box-shadow:0 2px 0 var(--line)}
@@ -181,22 +185,24 @@ h1,h2,h3{margin:0;font-weight:700}
 .tally b{color:var(--gold-d)}
 
 /* ---------- shop ---------- */
-.shopgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;margin:16px 0}
-.prize{background:#fff;border-radius:var(--radius);padding:18px;box-shadow:0 6px 0 var(--line);display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center}
+.shopgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:16px;margin:16px 0;min-width:0}
+.prize{background:#fff;border-radius:var(--radius);padding:18px;box-shadow:0 6px 0 var(--line);display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center;min-width:0}
 .prize .pe{font-size:62px;line-height:1.1}
-.prize .pn{font-size:22px;font-weight:600;flex:1}
+.prize .pn{font-size:22px;font-weight:600;flex:1;overflow-wrap:anywhere;max-width:100%}
 .prize .pc{font-size:24px;font-weight:700;color:var(--gold-d)}
 .prize .need{font-size:16px;color:var(--muted)}
 .card{background:#fff;border-radius:var(--radius);padding:18px 20px;box-shadow:0 6px 0 var(--line);margin:16px 0}
 .card h3{font-size:24px;margin-bottom:10px}
 .list{list-style:none;margin:0;padding:0}
-.list li{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:2px dashed var(--line);font-size:19px}
+.list li{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:10px 0;border-bottom:2px dashed var(--line);font-size:19px}
+.list li span:first-child{overflow-wrap:anywhere;min-width:0}
 .list li:last-child{border:none}
 .muted{color:var(--muted)}
 
 /* ---------- parent ---------- */
-.prow{display:grid;grid-template-columns:76px 1fr 110px 60px;gap:10px;align-items:center;margin:10px 0}
-.prow .text{font-size:20px;padding:10px 12px}
+.prow{display:grid;grid-template-columns:minmax(56px,76px) minmax(0,1fr) minmax(78px,110px) 60px;gap:10px;align-items:center;margin:10px 0;min-width:0}
+.prow .text{font-size:20px;padding:10px 12px;min-width:0;width:100%}
+.prizescroll{max-height:min(52vh,560px);overflow:auto;-webkit-overflow-scrolling:touch}
 .prow .emo{text-align:center;font-size:28px}
 .plrow{border:2px solid var(--line);border-radius:18px;padding:12px;margin:12px 0}
 .plrow .line{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:6px 0}
@@ -505,7 +511,7 @@ const APP = {
   mascot: "🦉",
   mascotName: "Professor Hoot",
   pinLength: 4,
-  version: "1.2.2",
+  version: "1.2.3",
 };
 const AVATARS = ["🦊","🐼","🦄","🐯","🐸","🐙","🦖","🐰","🐨","🦁","🐧","🐝","🐬","🦋","🐱","🐶"];
 const REWARDS = {
@@ -520,10 +526,20 @@ const REWARDS = {
   streakPerDay: 3,      // daily bonus = streakPerDay * min(streak, streakCap)
   streakCap: 5,
 };
+const PRIZE_CATALOG = "2026-10-prizes"; // one-time flag; once stored, a deleted prize is never put back
+const ADDED_PRIZES = [
+  { emoji: "🍫", name: "Feastables chocolate bar after dinner", cost: 40 },
+  { emoji: "📱", name: "15 more minutes of tablet time", cost: 50 },
+  { emoji: "📱", name: "60 more minutes of tablet time", cost: 175 },
+  { emoji: "🍩", name: "Dad goes and gets donuts", cost: 250 },
+  { emoji: "🏫", name: "Skip EDP (after-school program) for a day", cost: 300 },
+  { emoji: "🧸", name: "Grand prize: pick a squishy at Rabbit Ladders", cost: 500 },
+];
 const DEFAULT_PRIZES = [
   { emoji: "🎬", name: "Pick the movie for movie night", cost: 30 },
   { emoji: "🍦", name: "Ice cream treat", cost: 60 },
   { emoji: "🌙", name: "15 extra minutes before bed", cost: 100 },
+  ...ADDED_PRIZES,
 ];
 const GATE = {
   pinTriesBeforeLock: 3,   // wrong PINs in a row before a lockout
@@ -531,6 +547,7 @@ const GATE = {
   lockMaxMs: 15 * 60000,
   checkLockMs: 60000,      // after a wrong grown-up math answer (Forgot PIN only); never longer than this
 };
+const SHOW_ME_MAX = 3; // reveals per lesson; running out disables the button and never blocks answering
 const PRAISE = ["Great thinking!", "You got it!", "Brainy!", "Super sleuth!", "Hoot hoot, correct!", "Nailed it!", "Logic legend!"];
 const GENTLE = ["Not quite — good try!", "Ooh, a tricky one!", "Almost! Here's the secret:", "Good thinking, but not this time!"];
 
@@ -593,6 +610,7 @@ const Store = {
       profiles: [],
       activeId: null,
       prizes: DEFAULT_PRIZES.map(p => ({ id: uid(), ...p })),
+      prizeCatalog: PRIZE_CATALOG, // new devices already have the added prizes, so the migration must not run again
       log: [],            // redemptions: {ts, profileId, who, avatar, emoji, name, cost}
       pinHash: null, pinSalt: null,   // PIN is stored only as a salted hash
       pinFails: 0, pinLockUntil: 0,   // lockout after repeated wrong PINs
@@ -604,7 +622,9 @@ const Store = {
     let raw = null;
     try { raw = JSON.parse(localStorage.getItem(APP.storageKey)); } catch (e) { raw = null; }
     this.data = this.sanitize(raw);
-    if (raw && typeof raw === "object" && "pin" in raw) this.save(); // finish migrating an old plain-text PIN
+    const catalogDirty = !!(this.data && this.data._saveSoon);
+    if (this.data) delete this.data._saveSoon;
+    if (catalogDirty || (raw && typeof raw === "object" && "pin" in raw)) this.save(); // persist the one-time prize flag, or a migrated PIN
   },
   // Repairs missing / wrong-typed fields so old or damaged saves never crash the app.
   sanitize(raw) {
@@ -636,6 +656,17 @@ const Store = {
       d.prizes = raw.prizes.filter(p => p && typeof p === "object").map(p => ({
         id: str(p.id, uid(), 40), emoji: str(p.emoji, "🎁", 16), name: str(p.name, "Prize", 60), cost: Math.max(1, Math.min(9999, num(p.cost, 10))) }));
     }
+    // Append the parent's prize pack once. The flag stays even if a prize is later deleted.
+    if (raw.prizeCatalog !== PRIZE_CATALOG) {
+      const have = new Set(d.prizes.map(p => p.name.trim().toLowerCase()));
+      for (const p of ADDED_PRIZES) {
+        if (have.has(p.name.trim().toLowerCase())) continue;
+        d.prizes.push({ id: uid(), emoji: p.emoji, name: p.name, cost: p.cost });
+        have.add(p.name.trim().toLowerCase());
+      }
+      d._saveSoon = true;
+    }
+    d.prizeCatalog = PRIZE_CATALOG;
     d.log = (Array.isArray(raw.log) ? raw.log : []).filter(l => l && typeof l === "object").slice(0, 500).map(l => ({
       ts: num(l.ts, Date.now()), profileId: String(l.profileId ?? ""), who: str(l.who, "?", 40), avatar: str(l.avatar, "🙂", 16),
       emoji: str(l.emoji, "🎁", 16), name: str(l.name, "Prize", 60), cost: num(l.cost) }));
@@ -807,7 +838,11 @@ function pinPad({ title, msg = "", length = APP.pinLength, forgot = false, onSub
 const hasPin = () => !!state().pinHash;
 const checkPin = v => hasPin() && hashPin(state().pinSalt, v) === state().pinHash;
 const secondsLeft = until => Math.max(1, Math.ceil((until - Date.now()) / 1000));
-function waitText(until) { const s = secondsLeft(until); return s > 90 ? `${Math.ceil(s / 60)} minutes` : `${s} seconds`; }
+function waitText(until) {
+  const s = secondsLeft(until);
+  if (s > 90) { const m = Math.ceil(s / 60); return m === 1 ? "1 minute" : `${m} minutes`; }
+  return s === 1 ? "1 second" : `${s} seconds`;
+}
 
 /** Harder grown-up check (2-digit × 2-digit), one try per question, with an escalating wait after a miss. */
 function grownUpCheck(title, onPass) {
@@ -833,12 +868,14 @@ function createPin(onDone) {
       }});
     }});
 }
-/** One-time parent setup: grown-up check first, then PIN. Never offered as a side effect of a kid-facing gate. */
-function startGrownUpSetup(onDone) { createPin(onDone); }
+/** First PIN on this device: the harder grown-up math check must pass before createPin. Kids still launch straight into play. */
+function startGrownUpSetup(onDone) {
+  grownUpCheck("A grown-up needs to do this", () => createPin(onDone));
+}
 
 function requireGrownUp(reason, onOk) {
   const st = state();
-  if (!hasPin()) { createPin(onOk); return; } // beta: no forced setup or math check; the first grown-up action makes the PIN once
+  if (!hasPin()) { startGrownUpSetup(onOk); return; } // math check first, then make the PIN; the prize or settings open only after that
   if (st.pinLockUntil > Date.now()) { toast(`Too many tries. Please wait ${waitText(st.pinLockUntil)}.`, 2600); return; }
   pinPad({ title: "Grown-up check 🔒", msg: reason, forgot: true, onSubmit(v, a) {
     if (checkPin(v)) { st.pinFails = 0; st.pinLockUntil = 0; Store.save(); a.close(); onOk(); return; }
@@ -873,10 +910,55 @@ function render() {
      results: renderResults, shop: renderShop, parent: renderParent })[view.name]();
 }
 let lastNavAt = 0; // used to swallow stray double-taps that land on the next screen
-function go(name, extra = {}) {
+let histBooted = false;
+function historySnapshot() {
+  const snap = { elzee: 1, name: view.name };
+  if (view.result) snap.result = view.result;
+  if (view.pathId) snap.pathId = view.pathId;
+  if (view.form) snap.form = { name: view.form.name, avatar: view.form.avatar, pathId: view.form.pathId };
+  return snap;
+}
+function recordHistory(replace) {
+  const url = location.pathname + location.search;
+  try {
+    if (!histBooted) {
+      // A base entry under the current screen traps Safari swipe-back so it can't fall through to about:blank.
+      history.replaceState({ elzee: "base" }, "", url);
+      history.pushState(historySnapshot(), "", url);
+      histBooted = true;
+      return;
+    }
+    if (replace) history.replaceState(historySnapshot(), "", url);
+    else history.pushState(historySnapshot(), "", url);
+  } catch (e) { /* private mode */ }
+}
+function go(name, extra = {}, opts = {}) {
   lastNavAt = Date.now();
   document.querySelectorAll(".confetti, .float").forEach(el => el.remove());
-  view = { name, ...extra }; render(); window.scrollTo(0, 0);
+  const sameScreen = histBooted && view.name === name;
+  view = { name, ...extra };
+  render();
+  window.scrollTo(0, 0);
+  if (!opts.fromPop) recordHistory(!!opts.replace || sameScreen);
+  if (view.name !== "lesson") checkForUpdate();
+}
+function onPopState() {
+  const s = history.state;
+  if (!s || s.elzee !== 1) {
+    try { history.pushState(historySnapshot(), "", location.pathname + location.search); } catch (e) {}
+    return;
+  }
+  if (s.name === "parent") {
+    // Forwarding back into grown-up settings must not skip the PIN.
+    go(player() ? "home" : "picker", {}, { replace: true });
+    return;
+  }
+  const extra = {};
+  if (s.result) extra.result = s.result;
+  if (s.pathId) extra.pathId = s.pathId;
+  if (s.form) extra.form = s.form;
+  go(s.name || "picker", extra, { fromPop: true });
+  if (view.name !== s.name) recordHistory(true);
 }
 
 function topBar(pl, { back = false } = {}) {
@@ -981,11 +1063,15 @@ const LessonSave = {
     if (d.cur === null && !d.queue.length) return (this.clear(), null);
     const nChoices = d.cur !== null ? level.qs[d.cur].c.length : 0;
     const order = Array.isArray(d.order) && d.order.length === nChoices && [...d.order].sort().every((v, i) => v === i) ? d.order : null;
-    const fb = d.feedback && typeof d.feedback === "object" && Number.isInteger(d.feedback.picked) && d.feedback.picked >= 0 && d.feedback.picked < nChoices
-      ? { picked: d.feedback.picked, ok: d.feedback.picked === 0, gained: Math.max(0, d.feedback.gained | 0), comboNote: String(d.feedback.comboNote || "") } : null;
+    const revealed = !!(d.feedback && d.feedback.revealed);
+    const pickedOk = d.feedback && Number.isInteger(d.feedback.picked) && d.feedback.picked >= 0 && d.feedback.picked < nChoices;
+    const fb = d.feedback && typeof d.feedback === "object" && (revealed || pickedOk)
+      ? { picked: revealed ? null : d.feedback.picked, ok: !revealed && d.feedback.picked === 0, gained: Math.max(0, d.feedback.gained | 0),
+          comboNote: String(d.feedback.comboNote || ""), revealed, text: typeof d.feedback.text === "string" ? d.feedback.text.slice(0, 700) : "" } : null;
+    const showMeLeft = Number.isInteger(d.showMeLeft) ? Math.min(SHOW_ME_MAX, Math.max(0, d.showMeLeft)) : SHOW_ME_MAX;
     return { profileId: d.profileId, lesson: { pathId: d.pathId, ti: d.ti, li: d.li, replay: !!d.replay, total: n, queue: d.queue.slice(),
       mastered: new Set(d.mastered), missed: new Set(d.missed), mistakes: Math.max(0, d.mistakes | 0), earned: Math.max(0, d.earned | 0),
-      combo: Math.max(0, d.combo | 0), cur: d.cur, order: order || (d.cur !== null ? shuffle(level.qs[d.cur].c.map((_, i) => i)) : null),
+      combo: Math.max(0, d.combo | 0), showMeLeft, cur: d.cur, order: order || (d.cur !== null ? shuffle(level.qs[d.cur].c.map((_, i) => i)) : null),
       answered: !!(d.answered && fb && order), feedback: d.answered && fb && order ? fb : null } };
   },
 };
@@ -993,7 +1079,7 @@ function startLesson(pathId, ti, li) {
   const level = getPath(pathId).tracks[ti].levels[li];
   const replay = !!progOf(player(), pathId, ti, li).done;
   lesson = { pathId, ti, li, replay, total: level.qs.length, queue: level.qs.map((_, i) => i), mastered: new Set(),
-             missed: new Set(), mistakes: 0, earned: 0, combo: 0, cur: null, order: null, answered: false };
+             missed: new Set(), mistakes: 0, earned: 0, combo: 0, showMeLeft: SHOW_ME_MAX, cur: null, order: null, answered: false };
   nextQuestion();
 }
 const lessonTrack = () => getPath(lesson.pathId).tracks[lesson.ti];
@@ -1024,9 +1110,21 @@ function renderQuestion() {
         <div class="qtext">${esc(q.q)}</div><div class="ask">${esc(q.ask)}</div>
       </div>
       <div class="choices">${lesson.order.map(i => `<button class="choice" data-act="answer" data-i="${i}">${esc(q.c[i])}</button>`).join("")}</div>
+      <div class="showrow"><button class="btn ghost" data-act="showMe" ${lesson.showMeLeft > 0 ? "" : "disabled"} aria-disabled="${lesson.showMeLeft > 0 ? "false" : "true"}" aria-label="Show me the answer. ${lesson.showMeLeft} left.">Show me · ${lesson.showMeLeft} left</button></div>
     </div>
     <div class="sheetpad"></div></div>
     <div class="sheet" id="sheet"></div>`;
+}
+/** Kid-friendly why. Uses the question's own why when we have one, and always names the right answer on a miss or a reveal. */
+function explain(q, { picked, ok, revealed } = {}) {
+  const choices = q && Array.isArray(q.c) ? q.c : [];
+  const right = choices[0] != null ? choices[0] : "the green answer";
+  const why = (q && typeof q.why === "string" && q.why.trim())
+    ? q.why.trim()
+    : "The clues in the story fit this answer, and not the other ones.";
+  if (ok && !revealed) return why;
+  if (revealed || picked == null || choices[picked] == null) return `The answer is ${right}. ${why}`;
+  return `${choices[picked]} doesn't fit this time. The right answer is ${right}. ${why}`;
 }
 function answer(btn) {
   if (lesson.answered) return;
@@ -1045,25 +1143,54 @@ function answer(btn) {
   } else {
     lesson.mistakes++; lesson.combo = 0; lesson.missed.add(lesson.cur); lesson.queue.push(lesson.cur); Sound.oops();
   }
-  lesson.feedback = { picked, ok, gained, comboNote };
+  lesson.feedback = { picked, ok, gained, comboNote, revealed: false, text: explain(q, { picked, ok }) };
   LessonSave.save(); // save the scored answer before anything else can happen
   showFeedback(lesson.feedback);
-  if (pl.readAloud) Speech.say((ok ? "Correct! " : "Not quite. ") + q.why);
+  if (pl.readAloud) Speech.say((ok ? "Correct! " : "") + lesson.feedback.text);
+}
+/** Reveal the answer. No tokens for this question. Counts as a mistake unless it was already missed. The lesson can still be finished. */
+function showMe() {
+  if (!lesson || lesson.answered || lesson.showMeLeft <= 0) return;
+  const q = lessonQ();
+  lesson.answered = true;
+  lesson.showMeLeft--;
+  if (!lesson.missed.has(lesson.cur)) lesson.mistakes++;
+  lesson.combo = 0;
+  lesson.mastered.add(lesson.cur);
+  lesson.missed.add(lesson.cur);
+  lesson.feedback = { picked: null, ok: false, gained: 0, comboNote: "", revealed: true, text: explain(q, { revealed: true }) };
+  LessonSave.save();
+  showFeedback(lesson.feedback);
+  Sound.tap();
+  if (player().readAloud) Speech.say(lesson.feedback.text);
 }
 /** Draws the answered state + feedback sheet. Pure display: safe to call again after a reload. */
-function showFeedback({ picked, ok, gained, comboNote }) {
+function showFeedback(fb) {
+  const { picked, ok, gained, comboNote, revealed } = fb;
   const q = lessonQ();
+  const text = fb.text || explain(q, { picked, ok, revealed });
   document.querySelectorAll(".choice").forEach(b => {
     const i = Number(b.dataset.i); b.disabled = true;
-    b.classList.add(i === 0 ? "correct" : i === picked ? "wrong" : "dim");
+    if (revealed) b.classList.add(i === 0 ? "correct" : "dim");
+    else b.classList.add(i === 0 ? "correct" : i === picked ? "wrong" : "dim");
   });
+  const showBtn = document.querySelector('[data-act="showMe"]');
+  if (showBtn) {
+    showBtn.disabled = true;
+    showBtn.setAttribute("aria-disabled", "true");
+    showBtn.textContent = `Show me · ${lesson.showMeLeft} left`;
+  }
   document.querySelectorAll("[data-pot]").forEach(el => el.textContent = "+" + lesson.earned);
   document.querySelector(".bar .fill").style.width = (lesson.mastered.size / lesson.total * 100) + "%";
   const sheet = document.getElementById("sheet");
   sheet.className = "sheet " + (ok ? "good" : "oops");
+  const title = revealed ? "Here's the answer!" : ok ? "🎉 " + pickOne(PRAISE) : "💛 " + pickOne(GENTLE);
+  const note = revealed ? "This one doesn't add tokens. You can keep going!"
+    : ok ? `${lesson.replay ? "Practice round 💪" : `+${gained} tokens`}${comboNote}`
+    : "We'll try this one again in a bit 👍";
   sheet.innerHTML = `<div class="inner">
-      <div><h3>${ok ? "🎉 " + pickOne(PRAISE) : "💛 " + pickOne(GENTLE)}</h3>
-        <p>${esc(q.why)}</p>${ok ? `<p class="muted">${lesson.replay ? "Practice round 💪" : `+${gained} tokens`}${comboNote}</p>` : `<p class="muted">We'll try this one again in a bit 👍</p>`}</div>
+      <div><h3>${esc(title)}</h3>
+        <p>${esc(text)}</p><p class="muted">${esc(note)}</p></div>
       <div class="row">${Speech.supported ? `<button class="iconbtn" data-act="speakWhy" aria-label="Read aloud">🔊</button>` : ""}
         <button class="btn ${ok ? "" : "oops"}" data-act="continue">Continue</button></div></div>`;
   requestAnimationFrame(() => {
@@ -1113,7 +1240,7 @@ function finishLesson() {
   Store.save();
   const result = { stars, lines, total, pathId: lesson.pathId };
   lesson = null;
-  go("results", { result });
+  go("results", { result }, { replace: true });
   Sound.win(); confetti();
   if (pl.readAloud) Speech.say(result.total ? `Lesson complete! You earned ${result.total} tokens!` : "Lesson complete! Great practice!");
 }
@@ -1170,7 +1297,7 @@ function renderParent() {
   const pathSelect = (p) => `<select data-field="pathId" data-kind="player" data-id="${p.id}">${PATHS.map(x => `<option value="${x.id}" ${x.id === p.pathId ? "selected" : ""}>${x.emoji} ${esc(x.title)} (${esc(x.ages)})</option>`).join("")}</select>`;
   const done = (p) => Object.values(p.progress).filter(x => x.done).length;
   const totalLessons = PATHS.reduce((s, x) => s + x.tracks.reduce((a, t) => a + t.levels.length, 0), 0);
-  $app.innerHTML = `<div class="top"><button class="iconbtn" data-act="leaveParent" aria-label="Back">⬅️</button><h2>⚙️ Grown-ups</h2></div>
+  $app.innerHTML = `<div class="top"><button class="iconbtn" data-act="leaveParent" aria-label="Back">⬅️</button><h2>⚙️ Grown-ups</h2><span class="muted" style="font-weight:700">Version ${esc(APP.version)}</span></div>
 
     <div class="card"><h3>Players</h3>
       ${st.profiles.map(p => `<div class="plrow">
@@ -1187,11 +1314,13 @@ function renderParent() {
 
     <div class="card"><h3>Prizes (shared by all players)</h3>
       <p class="muted" style="margin-top:0">Changes save automatically. Each kid spends their own tokens.</p>
+      <div class="prizescroll">
       ${st.prizes.map(p => `<div class="prow">
         <input class="text emo" maxlength="16" value="${esc(p.emoji)}" data-field="emoji" data-kind="prize" data-id="${p.id}" aria-label="Emoji">
         <input class="text" maxlength="60" value="${esc(p.name)}" data-field="name" data-kind="prize" data-id="${p.id}" aria-label="Prize name">
         <input class="text" type="number" inputmode="numeric" min="1" max="9999" value="${p.cost}" data-field="cost" data-kind="prize" data-id="${p.id}" aria-label="Cost">
         <button class="iconbtn" data-act="deletePrize" data-id="${p.id}" aria-label="Delete prize">🗑️</button></div>`).join("")}
+      </div>
       <button class="btn small brand" data-act="addPrize">＋ Add prize</button>
     </div>
 
@@ -1242,7 +1371,7 @@ const actions = {
   },
   choosePlayer(el) { LessonSave.clear(); lesson = null; if (!state().profiles.some(p => p.id === el.dataset.id)) return go("picker"); state().activeId = el.dataset.id; Store.save(); Sound.tap(); go("home"); },
   home() { go("home"); },
-  viewPath(el) { view.pathId = el.dataset.v; render(); },
+  viewPath(el) { view.pathId = el.dataset.v; render(); recordHistory(true); },
   startLesson(el) {
     if (!player()) return go("picker");
     const pathId = el.dataset.path, ti = Number(el.dataset.t), li = Number(el.dataset.l);
@@ -1250,10 +1379,11 @@ const actions = {
     Sound.tap(); startLesson(pathId, ti, li);
   },
   answer(el) { if (lesson && !lesson.answered) answer(el); },
+  showMe() { if (lesson && !lesson.answered) showMe(); },
   continue() { if (lesson && lesson.answered) nextQuestion(); },
   speakQ() { if (lesson) Speech.say(questionSpeech(lessonQ())); },
-  speakWhy() { if (lesson) Speech.say(lessonQ().why); },
-  quitLesson() { confirmBox("Leave this lesson?", lesson && !lesson.replay ? "Tokens are saved when you finish the lesson. If you leave now, this lesson's tokens won't count." : "You can come back any time!", "Leave", () => { lesson = null; LessonSave.clear(); go("home"); }); },
+  speakWhy() { if (lesson && lesson.feedback) Speech.say(lesson.feedback.text || explain(lessonQ(), lesson.feedback)); else if (lesson) Speech.say(explain(lessonQ(), { ok: true })); },
+  quitLesson() { confirmBox("Leave this lesson?", lesson && !lesson.replay ? "Tokens are saved when you finish the lesson. If you leave now, this lesson's tokens won't count." : "You can come back any time!", "Leave", () => { lesson = null; LessonSave.clear(); go("home", {}, { replace: true }); }); },
   shop() { go("shop"); },
   redeem(el) { redeem(el.dataset.id); },
   parent() { requireGrownUp("This area is for grown-ups.", () => go("parent")); },
@@ -1305,6 +1435,37 @@ window.addEventListener("resize", () => {
 /* ==========================================================================
    INIT
    ========================================================================== */
+let updatePending = null, updateCheckedAt = 0;
+function checkForUpdate() {
+  if (view.name === "lesson" || lesson) return; // never reload mid-lesson; progress stays in localStorage until then
+  if (updatePending) { maybeApplyUpdate(); return; }
+  const now = Date.now();
+  if (now - updateCheckedAt < 15000) return;
+  updateCheckedAt = now;
+  let url;
+  try { url = new URL("version.json", document.baseURI); } catch (e) { return; }
+  url.searchParams.set("t", String(now));
+  fetch(url.href, { cache: "no-store", credentials: "same-origin" }).then(r => r.ok ? r.json() : null).then(data => {
+    const remote = data && typeof data.version === "string" ? data.version.trim() : "";
+    if (!remote || remote === APP.version) return;
+    updatePending = remote;
+    maybeApplyUpdate();
+  }).catch(() => {});
+}
+function maybeApplyUpdate() {
+  if (!updatePending || lesson || view.name === "lesson") return;
+  if (!["home", "picker", "shop", "parent"].includes(view.name)) return; // let a results celebration finish
+  try {
+    const key = APP.storageKey + ".update";
+    if (sessionStorage.getItem(key) === updatePending) { updatePending = null; return; }
+    sessionStorage.setItem(key, updatePending);
+  } catch (e) { return; }
+  location.reload();
+}
+window.addEventListener("popstate", onPopState);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") checkForUpdate();
+});
 Store.load();
 Speech.pickVoice();
 const resumed = LessonSave.load();
@@ -1316,7 +1477,7 @@ if (resumed) {
   toast("Welcome back! Let's keep going. 🦉");
 } else go("picker"); // otherwise always start on the "Who's playing?" screen
 lastNavAt = 0; // nothing to guard against on first load
-if (/[?&]test=1\b/.test(location.search)) window.__app = { PATHS, Store, get lesson() { return lesson; } }; // automated tests only
+if (/[?&]test=1\b/.test(location.search)) window.__app = { PATHS, Store, APP, explain, get lesson() { return lesson; } }; // automated tests only
 try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch (e) {}
 </script>
 </body>
