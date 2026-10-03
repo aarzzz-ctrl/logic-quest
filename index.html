@@ -15,7 +15,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="app-version" content="1.3.7">
+<meta name="app-version" content="1.3.8">
 <style>
 /* Fredoka (SIL Open Font License, see OFL-Fredoka.txt), self-hosted so the app never waits on a third-party server */
 @font-face{font-family:"Fredoka";font-style:normal;font-weight:300 700;font-display:swap;src:url("fredoka-latin.woff2") format("woff2")}
@@ -803,7 +803,7 @@ const APP = {
   mascot: "🦉",
   mascotName: "Professor Hoot",
   pinLength: 4,
-  version: "1.3.7",
+  version: "1.3.8",
 };
 const AVATARS = ["🦊","🐼","🦄","🐯","🐸","🐙","🦖","🐰","🐨","🦁","🐧","🐝","🐬","🦋","🐱","🐶"];
 const REWARDS = {
@@ -1019,23 +1019,29 @@ const MINIGAMES = [
     key: "logicquest.minigame.sillystories.v1",
     interlude: true, role: "interlude", roundLabel: "1 story", minutes: 3, enabled: true },
   // Climb the Quiz (1.3.6): free play from the home tile. Tokens use Climb's own rates (no daily cap).
-  // hideForYounger: Steve's younger (non-reader) mode for Little Thinkers hasn't shipped yet, so the tile is hidden for them.
-  // It stays in this list so any tokens a kid already earned are still claimed.
+  // 1.3.8: Steve's younger (non-reader, picture-only) mode shipped, so Little Thinkers see the tile too (hideForYounger removed).
   { id: "climb", name: "Climb the Quiz", emoji: "🧗", blurb: "Climb the puzzle tower!",
     href: "games/climb-the-quiz.html?elzee=1&mode=free&ret=..%2Findex.html%23home",
-    key: "logicquest.minigame.climb.v1", act: "launchClimb", hideForYounger: true,
+    key: "logicquest.minigame.climb.v1", act: "launchClimb",
     interlude: true, role: "challenge", flagship: true, roundLabel: "3 floors", minutes: 4, enabled: true },
 ];
 const isYoungerProfile = pl => !!pl && pl.pathId === "little";
 const homeGames = pl => MINIGAMES.filter(g => !(g.hideForYounger && isYoungerProfile(pl)));
 /* Climb question pack (spec §6.1): review items only from levels this kid has finished. Returns null if there
-   aren't enough yet, and the game then uses its built-in sample pack. */
+   aren't enough yet, and the game then uses its built-in sample pack.
+   Younger profiles (1.3.8): band "younger" with no items; the game fills the climb from its own picture-only set
+   (our lesson items are text-based, so the game would drop them anyway). */
 const CLIMB_PACK_KEY = "logicquest.climb.pack.v1";
 function buildClimbPack(pl, n = 7) {
   if (!pl) return null;
   const path = getPath(pl.pathId), today = todayStr();
   const prev = readJSON(CLIMB_PACK_KEY);
   const recent = new Set(isObj(prev) && Array.isArray(prev.recentRefs) ? prev.recentRefs.filter(r => typeof r === "string") : []);
+  if (isYoungerProfile(pl)) {
+    const packId = "p-" + today.replace(/-/g, "") + "-" + Math.random().toString(36).slice(2, 6);
+    const pack = { v: 1, packId, profileId: pl.id, createdAt: Date.now(), pathId: path.id, band: "younger", items: [], recentRefs: [...recent].slice(0, 30) };
+    return writeJSON(CLIMB_PACK_KEY, pack) ? pack : null;
+  }
   const levels = [];
   path.tracks.forEach((t, ti) => t.levels.forEach((lv, li) => {
     const p = progOf(pl, path.id, ti, li);
@@ -1064,7 +1070,7 @@ function buildClimbPack(pl, n = 7) {
   if (pick.length < 3) return null;
   const packId = "p-" + today.replace(/-/g, "") + "-" + Math.random().toString(36).slice(2, 6);
   const recentRefs = [...pick.map(x => x.ref), ...recent].slice(0, 30);
-  const pack = { v: 1, packId, profileId: pl.id, createdAt: Date.now(), pathId: path.id, items: pick, recentRefs };
+  const pack = { v: 1, packId, profileId: pl.id, createdAt: Date.now(), pathId: path.id, band: "older", items: pick, recentRefs };
   return writeJSON(CLIMB_PACK_KEY, pack) ? pack : null;
 }
 const CLAIM_KEY = "logicquest.minigame.claims.v1"; // { [gameId]: { [profileId]: { claimed, day, today } } }

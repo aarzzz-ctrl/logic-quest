@@ -205,6 +205,8 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 /* overlays */
 #ov:empty{display:none}
 #ov{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(45,42,74,.35)}
+/* start + end-of-climb screens: the card's dimmer starts below the top bar, so 🏠 back to Elzee, 🖼️/🔤, 🔊 and ⓘ stay tappable */
+body:has(#ov #startCard) #ov,body:has(#ov #finishCard) #ov{top:80px;padding-top:8px}
 #ov.clear{background:transparent;pointer-events:none}
 #ov.clear .panel{pointer-events:auto}
 .panel{background:var(--bg);border-radius:30px;padding:20px;max-width:640px;width:100%;max-height:calc(100% - 8px);overflow:hidden;text-align:center;
@@ -352,8 +354,8 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 <div id="app"></div>
 <div id="ov"></div>
 <script>
-/*AVATAR-START v1.1.0*/
-/* ElzeeAvatar v1.1.0 - shared avatar renderer for Elzee (closet + Climb the Quiz).
+/*AVATAR-START v1.2.0*/
+/* ElzeeAvatar v1.2.0 - shared avatar renderer for Elzee (closet + Climb the Quiz).
    Source of truth: lq-games/shared/avatar.js. Inline it into a page between the
    AVATAR markers (see shared/elzee-avatar.md); never load it with <script src>.
    One global: window.ElzeeAvatar. No imports, no network, no fonts, no images,
@@ -362,7 +364,7 @@ button{font-family:inherit;color:inherit;cursor:pointer}
    viewBox 0 0 200 300, head crop 40 10 120 120, limbs pivot at shoulders/elbows/hips/knees. */
 (function (root) {
   "use strict";
-  var VERSION = "1.1.0";
+  var VERSION = "1.2.0";
   var INK = "#2d2a4a";
 
   /* ---------------- data: palette, skins, hair colors, eyes ---------------- */
@@ -428,21 +430,27 @@ button{font-family:inherit;color:inherit;cursor:pointer}
   var TORSO = "M73 138C73 127 85 121 100 121C115 121 127 127 127 138L130 194C130 202 120 204 100 204C80 204 70 202 70 194Z";
   var NECKLINE = P("M89 122Q100 138 111 122Z", "{s}");
   var HIP = "M71 186L129 186L131 212C120 216 108 214 100 208C92 214 80 216 69 212Z";
-  function sleeves(kind, fill, stroke) { // -> {armL, armR, foreL, foreR}
-    var o = {};
+  function sleeves(kind, fill, stroke, cuff) { // -> {armL, armR, foreL, foreR}; v1.2: hem band, cuffs, shine, fold
+    var o = {}, hl = function (x, y1, y2) { return '<path d="M' + (x - 4) + " " + y1 + "L" + (x - 4) + " " + y2 + '" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".3"/>'; };
     ["L", "R"].forEach(function (k) {
       var x = AX[k];
-      if (kind === "short") o["arm" + k] = cap(x, 137, x, 150, 18, fill, stroke);
-      if (kind === "long") { o["arm" + k] = cap(x, 137, x, 166, 18, fill, stroke); o["fore" + k] = cap(x, 163, x, 184, 17, fill, stroke); }
+      if (kind === "short") o["arm" + k] = cap(x, 137, x, 150, 18, fill, stroke) + '<path d="M' + (x - 9) + " 150L" + (x + 9) + ' 150" stroke="' + (cuff || stroke) + '" stroke-width="3.5" stroke-linecap="round"/>' + hl(x, 139, 145);
+      if (kind === "long") {
+        o["arm" + k] = cap(x, 137, x, 166, 18, fill, stroke) + hl(x, 139, 158) + '<path d="M' + (x - 6) + " 160Q" + x + " 163 " + (x + 6) + ' 160" stroke="' + stroke + '" stroke-width="2" fill="none" opacity=".6"/>';
+        o["fore" + k] = cap(x, 163, x, 184, 17, fill, stroke) + cap(x, 181, x, 184, 18, cuff || stroke, stroke) + '<path d="M' + (x - 5) + " 182.5L" + (x + 5) + ' 182.5" stroke="#fff" stroke-width="1.5" opacity=".5"/>';
+      }
     });
     return o;
   }
-  function legs(len, w, fill, stroke, cuff) { // pant legs -> {thighL, shinL, thighR, shinR}
-    var o = {};
+  function legs(len, w, fill, stroke, cuff, roll) { // pant legs -> {thighL, shinL, thighR, shinR}; v1.2: shine, knee fold, cuffs
+    var o = {}, hl = function (x, y1, y2) { return '<path d="M' + (x - w / 4) + " " + y1 + "L" + (x - w / 4) + " " + y2 + '" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".2"/>'; };
     ["L", "R"].forEach(function (k) {
       var x = LX[k];
-      o["thigh" + k] = cap(x, 204, x, len === "short" ? 220 : 238, w, fill, stroke);
-      if (len !== "short") o["shin" + k] = cap(x, 236, x, len === "ankle" ? 268 : 264, w - 2, fill, stroke) + (cuff ? cap(x, 264, x, 266, w, cuff, stroke) : "");
+      o["thigh" + k] = cap(x, 204, x, len === "short" ? 220 : 238, w, fill, stroke) + hl(x, 208, len === "short" ? 216 : 232) +
+        (len === "short" && cuff ? cap(x, 218, x, 220, w + 1, cuff, stroke) : "");
+      if (len !== "short") o["shin" + k] = cap(x, 236, x, len === "ankle" ? 268 : 264, w - 2, fill, stroke) + hl(x, 242, 258) +
+        '<path d="M' + (x - 5) + " 238Q" + x + " 241 " + (x + 5) + ' 238" stroke="' + stroke + '" stroke-width="2" fill="none" opacity=".55"/>' +
+        (roll ? cap(x, 261, x, 266, w + 1, fill, stroke) + '<path d="M' + (x - w / 2 + 1) + " 263.5L" + (x + w / 2 - 1) + ' 263.5" stroke="#fff" stroke-width="1.5" opacity=".45"/>' : cuff ? cap(x, 264, x, 266, w, cuff, stroke) : "");
     });
     return o;
   }
@@ -450,9 +458,42 @@ button{font-family:inherit;color:inherit;cursor:pointer}
   function feet(body) { return { footL: shoe("L", body), footR: shoe("R", body) }; }
   function lowShoe(x, s) {
     var t = x + s * 2;
-    return P("M" + (t - 14) + " 284C" + (t - 14) + " 268 " + (t + 14) + " 268 " + (t + 14) + " 282L" + (t + 15) + " 286C" + (t + 15) + " 291 " + (t - 15) + " 291 " + (t - 15) + " 286Z", "{c1}", "{c1d}");
+    return P("M" + (t - 14) + " 284C" + (t - 14) + " 268 " + (t + 14) + " 268 " + (t + 14) + " 282L" + (t + 15) + " 286C" + (t + 15) + " 291 " + (t - 15) + " 291 " + (t - 15) + " 286Z", "{c1}", "{c1d}") +
+      '<ellipse cx="' + (t - 7) + '" cy="276" rx="4" ry="2.5" fill="#fff" opacity=".45"/>';
   }
   function merge() { var o = {}, i, k; for (i = 0; i < arguments.length; i++) for (k in arguments[i]) o[k] = (o[k] || "") + arguments[i][k]; return o; }
+  /* v1.2.0 art helpers: shine, strands, folds, shading, scallops (curls, puffs, ruffles) */
+  function SHINE(d, w) { return '<path d="' + d + '" stroke="{hs}" stroke-width="' + (w || 4) + '" stroke-linecap="round" fill="none" opacity=".8"/>'; }
+  function STRANDS(d) { return '<path d="' + d + '" stroke="{hd}" stroke-width="2" stroke-linecap="round" fill="none" opacity=".5"/>'; }
+  function FOLD(d, c) { return '<path d="' + d + '" stroke="' + (c || "{c1d}") + '" stroke-width="2" stroke-linecap="round" fill="none" opacity=".6"/>'; }
+  function STITCH(d, c) { return '<path d="' + d + '" stroke="' + (c || "#ffc83d") + '" stroke-width="1.6" stroke-dasharray="3 2.5" fill="none" opacity=".9"/>'; }
+  function HI(d, op) { return '<path d="' + d + '" fill="#fff" opacity="' + (op || ".22") + '"/>'; }
+  function SH(d, c, op) { return '<path d="' + d + '" fill="' + (c || "{c1d}") + '" opacity="' + (op || ".32") + '"/>'; }
+  function DOTS(list, r, c, op) { var s = '<g fill="' + (c || "#fff") + '" opacity="' + (op || ".85") + '">'; for (var i = 0; i < list.length; i += 2) s += '<circle cx="' + list[i] + '" cy="' + list[i + 1] + '" r="' + r + '"/>'; return s + "</g>"; }
+  function BTN(x, y, c) { return '<circle cx="' + x + '" cy="' + y + '" r="3" fill="' + (c || "{c1d}") + '"/><circle cx="' + (x - 0.9) + '" cy="' + (y - 0.9) + '" r="1" fill="#fff" opacity=".7"/>'; }
+  function bumpy(cx, cy, rx, ry, n, b, a0) { // scalloped ellipse
+    var d = "", i, a, am, T = Math.PI * 2; a0 = a0 || 0;
+    for (i = 0; i <= n; i++) {
+      a = a0 + i * T / n;
+      var x = (cx + rx * Math.cos(a)).toFixed(1), y = (cy + ry * Math.sin(a)).toFixed(1);
+      if (!i) { d = "M" + x + " " + y; continue; }
+      am = a - Math.PI / n;
+      d += "Q" + (cx + rx * (1 + b) * Math.cos(am)).toFixed(1) + " " + (cy + ry * (1 + b) * Math.sin(am)).toFixed(1) + " " + x + " " + y;
+    }
+    return d + "Z";
+  }
+  // flared skirt with a scalloped (ruffle) hem: waist tl..tr at ty, hem bl..br at by, n scallops of depth h
+  function skirt(tl, tr, ty, bl, br, by, n, h) {
+    var d = "M" + tl + " " + ty + "L" + tr + " " + ty + "L" + br + " " + by, i, w = (br - bl) / n, x;
+    for (i = 0; i < n; i++) { x = br - w * (i + 1); d += "Q" + (x + w / 2).toFixed(1) + " " + (by + h + 4 * Math.sin(Math.PI * (i + 0.5) / n)).toFixed(1) + " " + x.toFixed(1) + " " + (by + 4 * Math.sin(Math.PI * (i + 1) / n)).toFixed(1); }
+    return d + "Z";
+  }
+  function pleats(tl, tr, ty, bl, br, by, n) { var d = "", i; for (i = 1; i < n; i++) d += "M" + (tl + (tr - tl) * i / n).toFixed(1) + " " + (ty + 5) + "L" + (bl + (br - bl) * i / n).toFixed(1) + " " + (by - 2); return FOLD(d); }
+  // shared top shading: right shade, left highlight, waist folds, armpit creases, hem
+  var TOP_SHADE = SH("M114 124C122 128 126 134 126 140L129 194C129 199 123 201 114 202C119 180 119 150 114 124Z") +
+    HI("M82 130C77 137 75 152 75 170L74 192C77 194 79 194 81 193C80 170 80 148 84 130Z") +
+    FOLD("M84 189Q91 184 98 190M104 191Q111 185 118 190M76 146Q80 151 80 158M124 146Q120 151 120 158") + FOLD("M71 196Q100 203 129 196");
+  var RIB = '<path d="M88 122Q100 141 112 122" stroke="{c1d}" stroke-width="4" fill="none" stroke-linecap="round"/>';
   var HAIR_CAP = "M50 82C46 40 70 20 100 20C130 20 154 40 150 82C148 70 144 62 138 56C120 58 82 58 62 56C56 62 52 70 50 82Z";
   var HAIR_SIDE = "M50 84C46 40 70 20 100 20C132 20 154 40 150 84C147 68 140 58 130 52C118 48 110 42 106 34C98 48 80 56 62 58C56 64 52 72 50 84Z";
   var HAIR_BACK_TOP = "M48 66C48 26 76 14 100 14C124 14 152 26 152 66";
@@ -472,92 +513,179 @@ button{font-family:inherit;color:inherit;cursor:pointer}
      torso (top/dress body), over (bib/straps drawn over the top), hip (bottom's waist),
      armL/armR (upper sleeve), foreL/foreR (lower sleeve), thighL/R, shinL/R (pant legs), footL/R (shoes). */
   var ITEMS = [
-    // hair styles (12) - colored by look.hairColor
-    hairItem("hair.buzz", "Buzz", "", P("M54 60C56 34 78 24 100 24C122 24 144 34 146 60C132 48 116 44 100 44C84 44 68 48 54 60Z", "{h}", "{hd}")),
-    hairItem("hair.crop", "Short crop", "", P("M50 72C46 36 72 18 100 18C128 18 154 36 150 72C146 58 138 50 128 46L122 54L114 44L104 52L96 42L88 52L80 44L74 50C64 52 56 60 50 72Z", "{h}", "{hd}")),
-    hairItem("hair.curly", "Curly top", "", P("M50 76C46 40 72 22 100 22C128 22 154 40 150 76C140 60 120 52 100 52C80 52 60 60 50 76Z", "{h}", "{hd}") +
-      '<g fill="{h}" stroke="{hd}" stroke-width="3"><circle cx="58" cy="58" r="11"/><circle cx="142" cy="58" r="11"/><circle cx="66" cy="40" r="14"/><circle cx="134" cy="40" r="14"/><circle cx="82" cy="30" r="15"/><circle cx="118" cy="30" r="15"/><circle cx="100" cy="26" r="16"/><circle cx="76" cy="50" r="9"/><circle cx="92" cy="47" r="9"/><circle cx="108" cy="47" r="9"/><circle cx="124" cy="50" r="9"/></g>'),
-    hairItem("hair.bob", "Bob", P(HAIR_BACK_TOP + "L154 112C150 122 136 124 128 116L72 116C64 124 50 122 46 112Z", "{h}", "{hd}"), P(HAIR_CAP, "{h}", "{hd}")),
-    hairItem("hair.shoulder", "Shoulder straight", P(HAIR_BACK_TOP + "L156 138C146 148 128 146 122 136L78 136C72 146 54 148 44 138Z", "{h}", "{hd}"), P(HAIR_SIDE, "{h}", "{hd}")),
-    hairItem("hair.long", "Long straight", P(HAIR_BACK_TOP + "L158 172C150 182 132 182 124 172L76 172C68 182 50 182 42 172Z", "{h}", "{hd}"), P(HAIR_SIDE, "{h}", "{hd}")),
-    hairItem("hair.waves", "Long waves", P(HAIR_BACK_TOP + "C162 90 150 104 160 124C170 146 150 156 158 172C146 182 130 178 124 168L76 168C70 178 54 182 42 172C50 156 30 146 40 124C50 104 38 90 48 66Z", "{h}", "{hd}"),
-      P("M50 84C46 40 70 20 100 20C130 20 154 40 150 84C148 66 140 56 128 54C116 60 104 50 96 42C88 56 72 60 60 60C54 66 51 74 50 84Z", "{h}", "{hd}")),
-    hairItem("hair.ponytail", "Ponytail", P("M138 40C178 40 186 92 168 136C160 118 158 104 150 92C150 70 146 54 138 40Z", "{h}", "{hd}") + '<circle cx="146" cy="46" r="7" fill="#ff7aa2" stroke="#d65f86" stroke-width="3"/>', P(HAIR_CAP, "{h}", "{hd}")),
-    hairItem("hair.puffs", "Two puffs", '<g fill="{h}" stroke="{hd}" stroke-width="3"><circle cx="56" cy="34" r="24"/><circle cx="144" cy="34" r="24"/></g>',
-      P("M52 74C50 40 74 24 100 24C126 24 150 40 148 74C140 56 122 46 100 46C78 46 60 56 52 74Z", "{h}", "{hd}")),
+    // hair styles (12) - colored by look.hairColor ({h} gradient fill, {hd} outline, {hs} shine)
+    hairItem("hair.buzz", "Buzz", "", P("M54 62C53 34 76 24 100 24C124 24 147 34 146 62C134 50 118 45 100 45C82 45 66 50 54 62Z", "{h}", "{hd}") +
+      STRANDS("M68 42l2 4M80 35l1 4M92 31l.5 4M108 31l-.5 4M120 35l-1 4M132 42l-2 4M74 51l1 3M88 46l.5 3M112 46l-.5 3M126 51l-1 3") + SHINE("M74 36Q90 27 108 29", 3)),
+    hairItem("hair.crop", "Short crop", "", P("M50 72C46 36 72 18 100 18C128 18 154 36 150 72C146 58 138 50 128 46L122 54L114 44L104 52L96 42L88 52L80 44L74 50C64 52 56 60 50 72Z", "{h}", "{hd}") +
+      STRANDS("M80 44L84 30M96 42L97 26M113 44L112 27M124 50L128 36M66 52Q70 40 78 32") + SHINE("M68 38Q84 24 104 24")),
+    hairItem("hair.curly", "Curly top", "", P("M50 76C46 40 72 22 100 22C128 22 154 40 150 76C140 60 120 52 100 52C80 52 60 60 50 76Z", "{h}", "{hd}") + (function () {
+      var c = [58, 60, 10, 142, 60, 10, 66, 41, 13, 134, 41, 13, 82, 30, 14, 118, 30, 14, 100, 25, 15, 76, 52, 9, 92, 48, 9, 108, 48, 9, 124, 52, 9], s = "", i;
+      for (i = 0; i < c.length; i += 3) s += P(bumpy(c[i], c[i + 1], c[i + 2], c[i + 2], 6, 0.22, i), "{h}", "{hd}") + STRANDS("M" + (c[i] - 3) + " " + c[i + 1] + "a3.5 3.5 0 1 1 3.5 3.5");
+      return s + SHINE("M90 18Q100 13 110 18", 3) + SHINE("M60 34Q66 29 72 30", 3) + SHINE("M128 30Q134 29 140 34", 3);
+    })()),
+    hairItem("hair.bob", "Bob", P(HAIR_BACK_TOP + "C160 84 160 104 156 114C152 125 138 127 130 118L70 118C62 127 48 125 44 114C40 104 40 84 48 66Z", "{h}", "{hd}") + STRANDS("M52 88Q49 104 56 116M148 88Q151 104 144 116"),
+      P("M50 86C44 38 72 18 102 18C132 18 156 40 150 86C146 68 140 58 130 54C114 62 86 60 64 50C58 58 52 70 50 86Z", "{h}", "{hd}") +
+      STRANDS("M102 22Q94 37 78 46M120 24Q116 42 104 54M138 36Q140 48 142 62") + SHINE("M68 36Q86 23 110 25")),
+    hairItem("hair.shoulder", "Shoulder straight", P(HAIR_BACK_TOP + "C160 90 158 120 158 136C152 147 136 147 128 138L72 138C64 147 48 147 42 136C42 120 40 90 48 66Z", "{h}", "{hd}") +
+      STRANDS("M50 92Q47 116 52 136M150 92Q153 116 148 136M58 118Q57 128 60 138M142 118Q143 128 140 138"),
+      P(HAIR_SIDE, "{h}", "{hd}") + STRANDS("M106 36Q118 46 132 52M100 30Q86 48 64 56M140 58Q146 66 148 78") + SHINE("M66 40Q84 24 108 24")),
+    hairItem("hair.long", "Long straight", P(HAIR_BACK_TOP + "C162 100 160 140 160 170C154 181 140 183 132 174L68 174C60 183 46 181 40 170C40 140 38 100 48 66Z", "{h}", "{hd}") +
+      STRANDS("M50 100Q46 140 52 170M150 100Q154 140 148 170M58 124Q56 152 60 172M142 124Q144 152 140 172"),
+      P("M50 86C44 40 70 18 100 18C130 18 156 40 150 86C146 64 132 48 106 40L100 34L94 40C68 48 54 64 50 86Z", "{h}", "{hd}") +
+      STRANDS("M94 40Q72 52 60 70M106 40Q128 52 140 70") + SHINE("M64 44Q76 28 94 24") + SHINE("M108 24Q126 28 136 44")),
+    hairItem("hair.waves", "Long waves", P(HAIR_BACK_TOP + "C162 90 150 104 160 124C170 146 150 156 158 172C146 182 130 178 124 168L76 168C70 178 54 182 42 172C50 156 30 146 40 124C50 104 38 90 48 66Z", "{h}", "{hd}") +
+      STRANDS("M50 92C42 110 56 122 46 140C40 152 52 160 48 170M150 92C158 110 144 122 154 140C160 152 148 160 152 170M60 130C56 142 64 150 60 162M140 130C144 142 136 150 140 162"),
+      P("M50 84C46 40 70 20 100 20C130 20 154 40 150 84C148 66 140 56 128 54C116 60 104 50 96 42C88 56 72 60 60 60C54 66 51 74 50 84Z", "{h}", "{hd}") +
+      STRANDS("M96 42Q84 54 64 58M110 30Q118 46 130 52M140 58C146 64 144 72 148 80") + SHINE("M66 40Q84 25 106 24")),
+    hairItem("hair.ponytail", "Ponytail", P("M136 40C176 34 192 80 180 120C174 140 160 150 150 146C162 132 164 112 156 96C150 76 146 56 136 40Z", "{h}", "{hd}") +
+      STRANDS("M150 50Q174 74 170 112M146 62Q162 86 160 124M172 96Q178 116 166 134") + SHINE("M156 52Q172 64 176 84", 3) +
+      P(bumpy(144, 45, 8, 8, 7, 0.25), "#ff7aa2", "#d65f86") + '<circle cx="142" cy="43" r="2" fill="#fff" opacity=".7"/>',
+      P(HAIR_CAP, "{h}", "{hd}") + STRANDS("M58 60Q78 36 122 32M74 56Q96 42 134 42M92 54Q110 46 138 50") + SHINE("M66 40Q84 25 106 24")),
+    hairItem("hair.puffs", "Two puffs", P(bumpy(55, 34, 24, 24, 9, 0.16), "{h}", "{hd}") + P(bumpy(145, 34, 24, 24, 9, 0.16, 0.3), "{h}", "{hd}") +
+      STRANDS("M46 30a5 5 0 1 1 5 5M60 42a4 4 0 1 1 4 -4M136 30a5 5 0 1 1 5 5M150 42a4 4 0 1 1 4 -4M52 20a4 4 0 1 0 6 2M142 20a4 4 0 1 0 6 2") +
+      SHINE("M40 26Q46 16 56 15", 3.5) + SHINE("M130 26Q136 16 146 15", 3.5) +
+      '<g fill="#ff7aa2" stroke="#d65f86" stroke-width="2.5"><ellipse cx="66" cy="53" rx="9" ry="5" transform="rotate(-35 66 53)"/><ellipse cx="134" cy="53" rx="9" ry="5" transform="rotate(35 134 53)"/></g>',
+      P("M52 74C50 40 74 24 100 24C126 24 150 40 148 74C140 56 122 46 100 46C78 46 60 56 52 74Z", "{h}", "{hd}") + STRANDS("M100 28L100 44M88 30Q76 36 68 50M112 30Q124 36 132 50") + SHINE("M70 40Q82 30 94 29", 3)),
     hairItem("hair.braids", "Braids", (function () {
-      var s = "", x, y; for (x = 52; x <= 148; x += 96) { s += P("M" + (x - 6) + " 70L" + (x + 6) + " 70L" + (x + 4) + " 100L" + (x - 4) + " 100Z", "{h}", "{hd}"); for (y = 104; y <= 158; y += 18) s += '<ellipse cx="' + x + '" cy="' + y + '" rx="9" ry="10" fill="{h}" stroke="{hd}" stroke-width="3"/>'; s += '<circle cx="' + x + '" cy="172" r="5" fill="#ff7aa2"/>'; } return s;
-    })(), P("M50 82C46 40 70 20 100 20C130 20 154 40 150 82C146 64 136 54 124 50C112 46 104 40 100 30C96 40 88 46 76 50C64 54 54 64 50 82Z", "{h}", "{hd}")),
-    hairItem("hair.bun", "Bun", '<circle cx="100" cy="20" r="19" fill="{h}" stroke="{hd}" stroke-width="3"/>', P("M52 70C50 38 74 22 100 22C126 22 150 38 148 70C138 50 120 42 100 42C80 42 62 50 52 70Z", "{h}", "{hd}")),
-    hairItem("hair.afro", "Afro", '<ellipse cx="100" cy="64" rx="66" ry="58" fill="{h}" stroke="{hd}" stroke-width="3"/>', P("M52 74C50 42 72 28 100 28C128 28 150 42 148 74C140 56 122 48 100 48C78 48 60 56 52 74Z", "{h}", "{hd}")),
+      var s = "", x, y, k;
+      for (k = 0; k < 2; k++) {
+        x = k ? 148 : 52;
+        s += P("M" + (x - 8) + " 66L" + (x + 8) + " 66L" + (x + 6) + " 100L" + (x - 6) + " 100Z", "{h}", "{hd}");
+        for (y = 102; y <= 158; y += 14) {
+          s += '<ellipse cx="' + (x - 3) + '" cy="' + y + '" rx="7.5" ry="9" transform="rotate(-28 ' + (x - 3) + " " + y + ')" fill="{h}" stroke="{hd}" stroke-width="2.5"/>';
+          s += '<ellipse cx="' + (x + 3) + '" cy="' + (y + 7) + '" rx="7.5" ry="9" transform="rotate(28 ' + (x + 3) + " " + (y + 7) + ')" fill="{h}" stroke="{hd}" stroke-width="2.5"/>';
+        }
+        s += P("M" + (x - 5) + " 174Q" + (x - 9) + " 190 " + (x - 2) + " 192Q" + x + " 186 " + (x + 2) + " 192Q" + (x + 9) + " 190 " + (x + 5) + " 174Z", "{h}", "{hd}");
+        s += P("M" + x + " 174L" + (x - 10) + " 168L" + (x - 10) + " 180Z M" + x + " 174L" + (x + 10) + " 168L" + (x + 10) + " 180Z", "#ff7aa2", "#d65f86") + '<circle cx="' + x + '" cy="174" r="3.5" fill="#d65f86"/>';
+        s += SHINE("M" + (x - 4) + " 72L" + (x - 3) + " 94", 2.5);
+      }
+      return s;
+    })(), P("M50 82C46 40 70 20 100 20C130 20 154 40 150 82C146 64 136 54 124 50C112 46 104 40 100 30C96 40 88 46 76 50C64 54 54 64 50 82Z", "{h}", "{hd}") +
+      STRANDS("M100 22L100 30M96 34Q84 44 66 52M104 34Q116 44 134 52") + SHINE("M66 40Q80 26 96 24") + SHINE("M106 24Q120 26 134 38")),
+    hairItem("hair.bun", "Bun", P("M100 0C112 0 120 9 120 20C120 31 112 39 100 39C88 39 80 31 80 20C80 9 88 0 100 0Z", "{h}", "{hd}") +
+      STRANDS("M86 16Q98 4 112 14Q116 26 102 30Q90 28 92 20Q96 12 106 16") + SHINE("M88 9Q94 4 102 4", 3) +
+      '<path d="M86 36Q100 42 114 36" stroke="#ff7aa2" stroke-width="5" fill="none" stroke-linecap="round"/>',
+      P("M52 72C50 38 74 22 100 22C126 22 150 38 148 72C138 52 120 44 100 44C80 44 62 52 52 72Z", "{h}", "{hd}") +
+      STRANDS("M62 62Q78 40 96 28M138 62Q122 40 104 28M80 50Q90 36 99 28M120 50Q110 36 101 28") + SHINE("M70 42Q84 28 98 26")),
+    hairItem("hair.afro", "Afro", P(bumpy(100, 64, 64, 56, 16, 0.09), "{h}", "{hd}") +
+      STRANDS("M54 70a4 4 0 1 1 4 4M146 70a4 4 0 1 0 -4 4M62 36a4 4 0 1 1 4 4M138 36a4 4 0 1 0 -4 4M84 16a4 4 0 1 1 4 4M116 16a4 4 0 1 0 -4 4M48 98a4 4 0 1 1 4 4M152 98a4 4 0 1 0 -4 4M100 12a3 3 0 1 1 3 3") +
+      SHINE("M60 26Q76 12 96 10", 5) + SHINE("M42 62Q42 50 48 42", 4),
+      P("M52 74C50 42 72 28 100 28C128 28 150 42 148 74C140 56 122 48 100 48C78 48 60 56 52 74Z", "{h}", "{hd}") + STRANDS("M70 40a3 3 0 1 1 3 3M100 34a3 3 0 1 1 3 3M128 40a3 3 0 1 0 -3 3")),
 
     // tops (8)
-    F("top.tee", "top", "T-shirt", "👕", TOPC, merge({ torso: P(TORSO, "{c1}", "{c1d}") + NECKLINE }, sleeves("short", "{c1}", "{c1d}"))),
+    F("top.tee", "top", "T-shirt", "👕", TOPC, merge({ torso: P(TORSO, "{c1}", "{c1d}") + TOP_SHADE + NECKLINE + RIB }, sleeves("short", "{c1}", "{c1d}"))),
     F("top.striped", "top", "Striped tee", "👕", ["red", "blue", "green", "purple", "orange", "pink", "gold", "black"], merge({
-      torso: P(TORSO, "{c1}", "{c1d}") + '<g fill="#fff" opacity=".75"><rect x="73" y="146" width="54" height="7"/><rect x="72" y="162" width="56" height="7"/><rect x="71" y="178" width="58" height="7"/></g>' + NECKLINE
-    }, sleeves("short", "{c1}", "{c1d}"))),
+      torso: P(TORSO, "{c1}", "{c1d}") + '<g fill="#fff" opacity=".8"><path d="M73.6 146L126.4 146L126.8 153L73.2 153Z"/><path d="M72.8 162L127.2 162L127.7 169L72.3 169Z"/><path d="M72 178L128 178L128.6 185L71.4 185Z"/></g>' + TOP_SHADE + NECKLINE + RIB
+    }, sleeves("short", "{c1}", "{c1d}"), { armL: '<path d="M70 144L86 144" stroke="#fff" stroke-width="4" opacity=".8"/>', armR: '<path d="M114 144L130 144" stroke="#fff" stroke-width="4" opacity=".8"/>' })),
     F("top.hoodie", "top", "Hoodie", "🧥", ["gray", "black", "purple", "sky", "lime", "pink", "red", "teal"], merge({
-      torso: P(TORSO, "{c1}", "{c1d}") + NECKLINE + P("M80 123C84 142 116 142 120 123C116 134 84 134 80 123Z", "{c1d}") + P("M84 172L116 172L120 194L80 194Z", "{c1d}", null, ' opacity=".55"') +
-        '<path d="M92 132L91 152M108 132L109 152" stroke="#fff" stroke-width="3" stroke-linecap="round"/>'
+      torso: P(TORSO, "{c1}", "{c1d}") + TOP_SHADE + P("M76 128C74 112 126 112 124 128C118 138 82 138 76 128Z", "{c1d}") + NECKLINE + P("M82 122C86 140 114 140 118 122C114 133 86 133 82 122Z", "{c1}", "{c1d}") +
+        P("M83 170L117 170L121 193L79 193Z", "{c1}", "{c1d}") + SH("M83 170L117 170L118 176L82 176Z", null, ".4") + STITCH("M85 173L115 173", "#fff") +
+        '<path d="M92 132L90 154M108 132L110 154" stroke="#fff" stroke-width="3" stroke-linecap="round"/><g fill="#fff"><rect x="87.5" y="153" width="5" height="6" rx="2"/><rect x="107.5" y="153" width="5" height="6" rx="2"/></g>' +
+        '<rect x="72" y="194" width="56" height="8" rx="4" fill="{c1d}" opacity=".7"/>'
     }, sleeves("long", "{c1}", "{c1d}"))),
     F("top.polo", "top", "Polo", "👕", ["sky", "green", "red", "white", "gold", "purple"], merge({
-      torso: P(TORSO, "{c1}", "{c1d}") + NECKLINE + P("M88 122L100 134L90 142Z M112 122L100 134L110 142Z", "#fff", "#d8d2e8") + '<circle cx="100" cy="146" r="2.5" fill="{c1d}"/><circle cx="100" cy="156" r="2.5" fill="{c1d}"/>'
-    }, sleeves("short", "{c1}", "{c1d}"))),
+      torso: P(TORSO, "{c1}", "{c1d}") + TOP_SHADE + NECKLINE + '<path d="M100 134L100 160" stroke="{c1d}" stroke-width="2.5"/>' +
+        P("M87 121L100 134L88 144L82 128Z M113 121L100 134L112 144L118 128Z", "#fff", "#d8d2e8") + SH("M88 136L100 134L88 144Z M112 136L100 134L112 144Z", "#d8d2e8", ".8") + BTN(104, 142) + BTN(104, 153) +
+        P("M110 150L121 150L121 160Q115.5 163 110 160Z", "{c1}", "{c1d}")
+    }, sleeves("short", "{c1}", "{c1d}", "#fff"))),
     F("top.tank", "top", "Tank top", "🎽", ["pink", "sky", "lime", "gold", "white", "purple", "orange"], {
-      torso: P("M82 124L92 124C94 136 106 136 108 124L118 124C122 132 128 136 128 146L130 194C130 202 120 204 100 204C80 204 70 202 70 194L72 146C72 136 78 132 82 124Z", "{c1}", "{c1d}")
+      torso: P("M82 124L92 124C94 136 106 136 108 124L118 124C122 132 128 136 128 146L130 194C130 202 120 204 100 204C80 204 70 202 70 194L72 146C72 136 78 132 82 124Z", "{c1}", "{c1d}") + TOP_SHADE +
+        '<path d="M92 125C94 137 106 137 108 125M83 125C79 133 74 137 73 146M117 125C121 133 126 137 127 146" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".85"/>' +
+        P("M100 150C96 144 88 148 92 154L100 161L108 154C112 148 104 144 100 150Z", "#fff", null, ' opacity=".85"')
     }),
-    F("top.longsleeve", "top", "Long-sleeve", "👚", ["purple", "teal", "red", "sky", "gray", "pink", "green", "black"], merge({ torso: P(TORSO, "{c1}", "{c1d}") + NECKLINE }, sleeves("long", "{c1}", "{c1d}"))),
+    F("top.longsleeve", "top", "Long-sleeve", "👚", ["purple", "teal", "red", "sky", "gray", "pink", "green", "black"], merge({
+      torso: P(TORSO, "{c1}", "{c1d}") + TOP_SHADE + NECKLINE + RIB + FOLD("M90 124L80 140M110 124L120 140") + DOTS([86, 150, 114, 150, 100, 160, 84, 172, 116, 172, 100, 184], 2.2, "#fff", ".7")
+    }, sleeves("long", "{c1}", "{c1d}"))),
     F("top.star", "top", "Star tee", "⭐", ["purple", "blue", "black", "pink", "teal", "red"], merge({
-      torso: P(TORSO, "{c1}", "{c1d}") + NECKLINE + P(star(100, 164, 17), "#ffc83d", "#e0a400")
+      torso: P(TORSO, "{c1}", "{c1d}") + TOP_SHADE + NECKLINE + RIB + P(star(100, 164, 18), "#ffc83d", "#e0a400") + HI(star(97, 160, 7), ".55") +
+        P(star(80, 144, 4.5), "#fff", null, ' opacity=".9"') + P(star(121, 182, 4), "#fff", null, ' opacity=".9"') + P(star(119, 142, 3), "#ffc83d")
     }, sleeves("short", "{c1}", "{c1d}"))),
     F("top.button", "top", "Button shirt", "👔", ["sky", "white", "mint", "lilac", "peach", "red"], merge({
-      torso: P(TORSO, "{c1}", "{c1d}") + NECKLINE + P("M87 122L100 136L90 143Z M113 122L100 136L110 143Z", "{c1}", "{c1d}") +
-        '<path d="M100 137L100 202" stroke="{c1d}" stroke-width="2.5"/><g fill="{c1d}"><circle cx="104" cy="150" r="2.5"/><circle cx="104" cy="166" r="2.5"/><circle cx="104" cy="182" r="2.5"/></g>'
+      torso: P(TORSO, "{c1}", "{c1d}") + TOP_SHADE + NECKLINE + '<path d="M100 137L100 202M104 137L104 202" stroke="{c1d}" stroke-width="1.6" opacity=".8"/>' +
+        BTN(102, 148) + BTN(102, 162) + BTN(102, 176) + BTN(102, 190) + P("M80 146L92 146L92 158Q86 161 80 158Z", "{c1}", "{c1d}") + FOLD("M80 150L92 150") +
+        P("M86 121L100 136L89 145L81 129Z M114 121L100 136L111 145L119 129Z", "{c1}", "{c1d}") + SH("M89 139L100 136L89 145Z M111 139L100 136L111 145Z")
     }, sleeves("long", "{c1}", "{c1d}"))),
 
     // bottoms (6)
-    F("bottom.shorts", "bottom", "Shorts", "🩳", ["denim", "black", "lime", "red", "purple", "gray"], merge({ hip: P(HIP, "{c1}", "{c1d}") }, legs("short", 24, "{c1}", "{c1d}"))),
-    F("bottom.jeans", "bottom", "Jeans", "👖", ["denim", "black", "blue", "gray"], merge({ hip: P(HIP, "{c1}", "{c1d}") + '<path d="M100 190L100 208" stroke="{c1d}" stroke-width="2.5"/>' }, legs("long", 24, "{c1}", "{c1d}", "{c1d}"))),
-    F("bottom.leggings", "bottom", "Leggings", "🦵", ["purple", "black", "pink", "teal", "sky"], merge({ hip: P(HIP, "{c1}", "{c1d}") }, legs("ankle", 21, "{c1}", "{c1d}"))),
-    F("bottom.skirt", "bottom", "Skirt", "🩰", ["pink", "purple", "red", "sky", "denim", "gold"], { hip: P("M72 186L128 186L140 228C122 236 78 236 60 228Z", "{c1}", "{c1d}") + '<path d="M72 192L128 192" stroke="{c1d}" stroke-width="3"/>' }),
-    F("bottom.joggers", "bottom", "Joggers", "👖", ["gray", "black", "purple", "green", "red"], merge({ hip: P(HIP, "{c1}", "{c1d}") + '<path d="M78 190L122 190" stroke="#fff" stroke-width="2" opacity=".7"/>' }, legs("long", 24, "{c1}", "{c1d}", "{c1d}"))),
+    F("bottom.shorts", "bottom", "Shorts", "🩳", ["denim", "black", "lime", "red", "purple", "gray"], merge({
+      hip: P(HIP, "{c1}", "{c1d}") + '<path d="M71 192L129 192" stroke="{c1d}" stroke-width="2.5"/>' + FOLD("M100 192L100 207M78 194Q84 200 90 196M122 194Q116 200 110 196") + HI("M74 194L84 194L82 208L72 210Z", ".18")
+    }, legs("short", 24, "{c1}", "{c1d}", "{c1d}"))),
+    F("bottom.jeans", "bottom", "Jeans", "👖", ["denim", "black", "blue", "gray"], merge({
+      hip: P(HIP, "{c1}", "{c1d}") + '<path d="M71 192L129 192" stroke="{c1d}" stroke-width="2.5"/>' + STITCH("M100 193L100 208M77 195Q83 202 90 197M123 195Q117 202 110 197M72 190L128 190") + BTN(100, 189, "#ffc83d")
+    }, legs("long", 24, "{c1}", "{c1d}", "{c1d}", true))),
+    F("bottom.leggings", "bottom", "Leggings", "🦵", ["purple", "black", "pink", "teal", "sky"], merge({
+      hip: P(HIP, "{c1}", "{c1d}") + '<rect x="71" y="186" width="58" height="7" fill="{c1d}" opacity=".6"/>' + FOLD("M100 196L100 207")
+    }, legs("ankle", 21, "{c1}", "{c1d}"))),
+    F("bottom.skirt", "bottom", "Skirt", "🩰", ["pink", "purple", "red", "sky", "denim", "gold"], {
+      hip: P(skirt(72, 128, 186, 60, 140, 226, 7, 6), "{c1}", "{c1d}") + pleats(72, 128, 186, 60, 140, 226, 7) + SH("M118 190L128 186L140 226L128 230Z") +
+        '<rect x="71" y="185" width="58" height="8" rx="3" fill="{c1d}"/>' + DOTS([80, 206, 98, 214, 116, 204, 70, 220, 130, 218, 108, 226, 88, 226], 2.2, "#fff", ".75")
+    }),
+    F("bottom.joggers", "bottom", "Joggers", "👖", ["gray", "black", "purple", "green", "red"], merge({
+      hip: P(HIP, "{c1}", "{c1d}") + '<rect x="71" y="186" width="58" height="7" fill="{c1d}" opacity=".7"/>' +
+        '<path d="M97 192Q93 200 90 203M103 192Q107 200 110 203" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>' + FOLD("M100 196L100 208")
+    }, legs("long", 24, "{c1}", "{c1d}", "{c1d}"), { thighL: '<path d="M78 206L78 236" stroke="#fff" stroke-width="3" opacity=".75"/>', thighR: '<path d="M122 206L122 236" stroke="#fff" stroke-width="3" opacity=".75"/>',
+      shinL: '<path d="M79 238L79 260" stroke="#fff" stroke-width="3" opacity=".75"/>', shinR: '<path d="M121 238L121 260" stroke="#fff" stroke-width="3" opacity=".75"/>' })),
     F("bottom.overalls", "bottom", "Overalls", "👖", ["denim", "red", "lime", "purple"], merge({
-      hip: P(HIP, "{c1}", "{c1d}"),
-      over: P("M84 158L116 158L118 196L82 196Z", "{c1}", "{c1d}") + '<path d="M86 160L82 125M114 160L118 125" stroke="{c1d}" stroke-width="5" stroke-linecap="round"/><circle cx="87" cy="163" r="3" fill="#ffc83d"/><circle cx="113" cy="163" r="3" fill="#ffc83d"/>'
-    }, legs("long", 24, "{c1}", "{c1d}", "{c1d}"))),
+      hip: P(HIP, "{c1}", "{c1d}") + STITCH("M100 193L100 208"),
+      over: P("M84 158L116 158L118 196L82 196Z", "{c1}", "{c1d}") + STITCH("M87 161L113 161L114.5 193L85.5 193Z") + P("M92 168L108 168L108 180Q100 184 92 180Z", "{c1}", "{c1d}") + STITCH("M94 171L106 171") +
+        '<path d="M86 160L82 125M114 160L118 125" stroke="{c1d}" stroke-width="5" stroke-linecap="round"/>' +
+        '<g fill="#ffc83d" stroke="#e0a400" stroke-width="1.5"><rect x="83" y="158" width="8" height="7" rx="2"/><rect x="109" y="158" width="8" height="7" rx="2"/></g>'
+    }, legs("long", 24, "{c1}", "{c1d}", "{c1d}", true))),
 
     // dresses (4) - replace top + bottom
     F("dress.sun", "dress", "Sun dress", "👗", ["gold", "pink", "sky", "lime", "coral", "lilac"], {
-      torso: P("M80 128L120 128L127 192L73 192Z", "{c1}", "{c1d}") + '<path d="M84 129L82 120M116 129L118 120" stroke="{c1d}" stroke-width="4" stroke-linecap="round"/>' +
-        P("M73 186L127 186L146 238C124 246 76 246 54 238Z", "{c1}", "{c1d}") + '<g fill="#fff" opacity=".8"><circle cx="86" cy="212" r="3"/><circle cx="104" cy="222" r="3"/><circle cx="120" cy="208" r="3"/><circle cx="70" cy="230" r="3"/><circle cx="132" cy="230" r="3"/></g>'
+      torso: P("M80 128L120 128L127 192L73 192Z", "{c1}", "{c1d}") + SH("M114 128L120 128L127 192L118 192Z") + '<path d="M84 129L82 120M116 129L118 120" stroke="{c1d}" stroke-width="4" stroke-linecap="round"/>' +
+        FOLD("M84 140L116 140M83 146L117 146M82 152L118 152") +
+        P(skirt(73, 127, 186, 46, 154, 236, 10, 7), "{c1d}", "{c1d}") + P(skirt(73, 127, 186, 52, 148, 230, 9, 6), "{c1}", "{c1d}") + pleats(73, 127, 186, 52, 148, 230, 6) +
+        SH("M112 190L127 186L148 230L130 234Z", null, ".25") +
+        DOTS([84, 206, 102, 216, 120, 204, 70, 222, 132, 222, 92, 228, 112, 228, 100, 198], 2.6, "#fff", ".85") +
+        '<rect x="72" y="184" width="56" height="8" rx="4" fill="#fff" opacity=".9"/>' + P("M100 188L90 182L90 194Z M100 188L110 182L110 194Z", "#fff", "{c1d}") + '<circle cx="100" cy="188" r="3" fill="{c1d}"/>'
     }),
     F("dress.tee", "dress", "T-shirt dress", "👗", ["purple", "red", "teal", "pink", "sky", "gray"], merge({
-      torso: P("M70 188L130 188L140 232C122 238 78 238 60 232Z", "{c1}", "{c1d}") + P(TORSO, "{c1}", "{c1d}") + NECKLINE
+      torso: P(skirt(70, 130, 186, 58, 142, 232, 1, 4), "{c1}", "{c1d}") + pleats(70, 130, 186, 58, 142, 232, 4) + P(TORSO, "{c1}", "{c1d}") + TOP_SHADE + NECKLINE + RIB +
+        '<path d="M60 226Q100 238 140 226" stroke="{c1d}" stroke-width="4" fill="none" opacity=".7"/>' + P("M108 200L122 200L121 212Q115 215 109 212Z", "{c1}", "{c1d}") + STITCH("M109 203L121 203", "#fff") +
+        P(star(88, 160, 7), "#fff", null, ' opacity=".85"')
     }, sleeves("short", "{c1}", "{c1d}"))),
     F("dress.jumper", "dress", "Jumper dress", "👗", ["red", "denim", "purple", "green", "gold"], merge({
-      torso: P(TORSO, "#ffffff", "#d8d2e8") + NECKLINE + P("M82 150L118 150L124 192L76 192Z", "{c1}", "{c1d}") + '<path d="M85 152L82 125M115 152L118 125" stroke="{c1}" stroke-width="5" stroke-linecap="round"/>' +
-        P("M74 186L126 186L142 234C122 240 78 240 58 234Z", "{c1}", "{c1d}")
-    }, sleeves("short", "#ffffff", "#d8d2e8"))),
+      torso: P(TORSO, "#ffffff", "#d8d2e8") + FOLD("M76 146Q80 151 80 158M124 146Q120 151 120 158", "#d8d2e8") + NECKLINE +
+        P("M100 124C96 134 84 136 82 126Z M100 124C104 134 116 136 118 126Z", "#ffffff", "#d8d2e8") +
+        P("M82 150L118 150L124 192L76 192Z", "{c1}", "{c1d}") + '<path d="M85 152L82 125M115 152L118 125" stroke="{c1}" stroke-width="5" stroke-linecap="round"/>' + BTN(87, 155, "#fff") + BTN(113, 155, "#fff") +
+        P(skirt(74, 126, 186, 56, 144, 234, 1, 3), "{c1}", "{c1d}") + pleats(74, 126, 186, 56, 144, 234, 6) + SH("M114 188L126 186L144 234L128 236Z", null, ".25") +
+        '<rect x="74" y="184" width="52" height="7" rx="3" fill="{c1d}"/>'
+    }, sleeves("short", "#ffffff", "#d8d2e8"), { armL: '<path d="M69 149L87 149" stroke="#d8d2e8" stroke-width="3" stroke-linecap="round"/>', armR: '<path d="M113 149L131 149" stroke="#d8d2e8" stroke-width="3" stroke-linecap="round"/>' })),
     F("dress.overall", "dress", "Play overall-dress", "👗", ["denim", "pink", "lime", "lilac"], merge({
-      torso: P(TORSO, "{c2}", "{c2d}") + NECKLINE + P("M84 154L116 154L120 192L80 192Z", "{c1}", "{c1d}") + '<path d="M86 156L82 125M114 156L118 125" stroke="{c1d}" stroke-width="5" stroke-linecap="round"/><circle cx="87" cy="160" r="3" fill="#ffc83d"/><circle cx="113" cy="160" r="3" fill="#ffc83d"/>' +
-        P("M74 186L126 186L138 230C120 236 80 236 62 230Z", "{c1}", "{c1d}") + P("M86 208L98 208L98 220L86 220Z M102 208L114 208L114 220L102 220Z", "{c1d}", null, ' opacity=".6"')
+      torso: P(TORSO, "{c2}", "{c2d}") + TOP_SHADE.replace(/\{c1d\}/g, "{c2d}") + NECKLINE + P("M84 154L116 154L120 192L80 192Z", "{c1}", "{c1d}") + STITCH("M87 157L113 157L116 189L84 189Z") +
+        '<path d="M86 156L82 125M114 156L118 125" stroke="{c1d}" stroke-width="5" stroke-linecap="round"/><circle cx="87" cy="160" r="3.5" fill="#ffc83d" stroke="#e0a400" stroke-width="1.5"/><circle cx="113" cy="160" r="3.5" fill="#ffc83d" stroke="#e0a400" stroke-width="1.5"/>' +
+        P(skirt(74, 126, 186, 60, 140, 228, 8, 5), "{c1}", "{c1d}") + SH("M114 188L126 186L140 228L126 231Z", null, ".25") +
+        P("M86 204L98 204L98 216Q92 219 86 216Z M102 204L114 204L114 216Q108 219 102 216Z", "{c1}", "{c1d}") + STITCH("M87 207L97 207M103 207L113 207") + STITCH("M62 224Q100 236 138 224")
     }, sleeves("short", "{c2}", "{c2d}")), { c2: "gold" }),
 
-    // shoes (6)
+    // shoes (6): soles, laces, toe caps, shine
     F("shoes.sneakers", "shoes", "Sneakers", "👟", ["white", "red", "sky", "black", "pink", "lime"], feet(function (x, s) {
-      var t = x + s * 2; return lowShoe(x, s) + '<rect x="' + (t - 15) + '" y="283" width="30" height="7" rx="3.5" fill="#fff" stroke="#d8d2e8" stroke-width="2"/><path d="M' + (t - 5) + " 273L" + (t + 5) + " 275M" + (t - 6) + " 278L" + (t + 6) + ' 280" stroke="{c1d}" stroke-width="2" stroke-linecap="round"/>';
+      var t = x + s * 2; return lowShoe(x, s) + SH("M" + (t - 6) + " 271Q" + t + " 268 " + (t + 6) + " 271L" + (t + 5) + " 282L" + (t - 5) + " 282Z", null, ".35") +
+        '<rect x="' + (t - 16) + '" y="283" width="32" height="8" rx="4" fill="#fff" stroke="#c9c3dc" stroke-width="2"/><path d="M' + (t - 12) + " 288L" + (t + 12) + ' 288" stroke="#c9c3dc" stroke-width="1.5" stroke-dasharray="2 2"/>' +
+        '<path d="M' + (t - 5) + " 273L" + (t + 5) + " 277M" + (t + 5) + " 273L" + (t - 5) + " 277M" + (t - 5) + " 278L" + (t + 5) + " 281M" + (t + 5) + " 278L" + (t - 5) + ' 281" stroke="#fff" stroke-width="2" stroke-linecap="round"/>' +
+        '<path d="M' + (t + s * 8) + " 276Q" + (t + s * 12) + " 280 " + (t + s * 13) + ' 284" stroke="{c1d}" stroke-width="2.5" fill="none" stroke-linecap="round"/>';
     })),
     F("shoes.sandals", "shoes", "Sandals", "🩴", ["brown", "pink", "sky", "gold"], feet(function (x, s) {
-      var t = x + s * 2; return '<rect x="' + (t - 14) + '" y="285" width="28" height="6" rx="3" fill="{c1}" stroke="{c1d}" stroke-width="2"/><path d="M' + (t - 11) + " 279L" + (t + 11) + " 279M" + (t - 9) + " 274L" + (t + 9) + ' 274" stroke="{c1}" stroke-width="4" stroke-linecap="round"/>';
+      var t = x + s * 2; return '<rect x="' + (t - 15) + '" y="285" width="30" height="7" rx="3.5" fill="{c1}" stroke="{c1d}" stroke-width="2"/><path d="M' + (t - 12) + " 289L" + (t + 12) + ' 289" stroke="#fff" stroke-width="1.5" opacity=".6"/>' +
+        '<path d="M' + (t - 11) + " 279L" + (t + 11) + " 279M" + (t - 9) + " 273L" + (t + 9) + ' 273" stroke="{c1}" stroke-width="4.5" stroke-linecap="round"/>' +
+        '<circle cx="' + (t + s * 9) + '" cy="279" r="3" fill="#ffc83d" stroke="#e0a400" stroke-width="1.2"/><circle cx="' + (t - s * 2) + '" cy="273" r="2.4" fill="#fff" opacity=".9"/>';
     })),
     F("shoes.rainboots", "shoes", "Rain boots", "🥾", ["gold", "red", "green", "pink", "sky"], feet(function (x, s) {
-      var t = x + s * 2; return P("M" + (x - 12) + " 248L" + (x + 12) + " 248L" + (x + 13) + " 274C" + (t + 16) + " 276 " + (t + 16) + " 290 " + (t + 10) + " 290L" + (t - 12) + " 290C" + (t - 16) + " 290 " + (t - 16) + " 276 " + (x - 13) + " 274Z", "{c1}", "{c1d}") + '<rect x="' + (x - 12) + '" y="248" width="24" height="6" rx="3" fill="{c1d}"/>';
+      var t = x + s * 2; return P("M" + (x - 12) + " 248L" + (x + 12) + " 248L" + (x + 13) + " 274C" + (t + 16) + " 276 " + (t + 16) + " 290 " + (t + 10) + " 290L" + (t - 12) + " 290C" + (t - 16) + " 290 " + (t - 16) + " 276 " + (x - 13) + " 274Z", "{c1}", "{c1d}") +
+        '<rect x="' + (x - 13) + '" y="247" width="26" height="7" rx="3.5" fill="{c1d}"/><path d="M' + (x - 6) + " 258L" + (x - 6) + ' 276" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".55"/>' +
+        '<rect x="' + (t - 16) + '" y="286" width="32" height="5" rx="2.5" fill="' + INK + '" opacity=".75"/><circle cx="' + (x + 5) + '" cy="262" r="2.2" fill="#fff" opacity=".7"/>';
     })),
     F("shoes.slipons", "shoes", "Slip-ons", "👞", ["black", "denim", "red", "purple", "gray"], feet(function (x, s) {
-      var t = x + s * 2; return lowShoe(x, s) + '<rect x="' + (t - 15) + '" y="285" width="30" height="5" rx="2.5" fill="#fff8e7"/><path d="M' + (t - 7) + " 274Q" + t + " 279 " + (t + 7) + ' 274" stroke="#fff" stroke-width="2" fill="none" opacity=".8"/>';
+      var t = x + s * 2; return lowShoe(x, s) + '<rect x="' + (t - 16) + '" y="284" width="32" height="7" rx="3.5" fill="#fff8e7" stroke="#e7e2f5" stroke-width="1.5"/>' +
+        '<path d="M' + (t - 7) + " 274Q" + t + " 279 " + (t + 7) + ' 274" stroke="#fff" stroke-width="2" fill="none" opacity=".8"/>' + STITCH("M" + (t - 12) + " 281L" + (t + 12) + " 281", "#fff");
     })),
     F("shoes.hightops", "shoes", "High-tops", "👟", ["red", "black", "purple", "sky", "white"], feet(function (x, s) {
-      var t = x + s * 2; return '<rect x="' + (x - 12) + '" y="256" width="24" height="24" rx="8" fill="{c1}" stroke="{c1d}" stroke-width="3"/>' + lowShoe(x, s) + '<rect x="' + (t - 15) + '" y="283" width="30" height="7" rx="3.5" fill="#fff" stroke="#d8d2e8" stroke-width="2"/><circle cx="' + x + '" cy="266" r="4" fill="#fff"/>';
+      var t = x + s * 2; return '<rect x="' + (x - 12) + '" y="256" width="24" height="24" rx="8" fill="{c1}" stroke="{c1d}" stroke-width="3"/>' + lowShoe(x, s) +
+        '<rect x="' + (t - 16) + '" y="283" width="32" height="8" rx="4" fill="#fff" stroke="#c9c3dc" stroke-width="2"/><path d="M' + (t - 12) + " 287L" + (t + 12) + ' 287" stroke="#c9c3dc" stroke-width="1.5"/>' +
+        '<path d="M' + (x - 5) + " 260L" + (x + 5) + " 264M" + (x + 5) + " 260L" + (x - 5) + " 264M" + (x - 5) + " 267L" + (x + 5) + " 271M" + (x + 5) + " 267L" + (x - 5) + ' 271" stroke="#fff" stroke-width="2" stroke-linecap="round"/>' +
+        '<circle cx="' + (x - s * 7) + '" cy="266" r="4.5" fill="#fff" stroke="{c1d}" stroke-width="1.5"/>' + P(star(x - s * 7, 266, 3), "{c1}");
     })),
     F("shoes.barefoot", "shoes", "Barefoot", "🦶", null, {}),
 
@@ -613,16 +741,31 @@ button{font-family:inherit;color:inherit;cursor:pointer}
     }, reward(30, { hairMode: "full" }))
   ];
 
-  // Starter look per profile emoji (only free items; skin is never guessed: always s3).
+  /* v1.2.0 prices (Aaron, Oct 3): small free starter set, everything else costs tokens (10 plain .. 60 fancy;
+     dresses + accessories at the high end). Free: all skins + eyes, hair crop/bob/ponytail/afro, hair colors
+     black/dark brown/brown/blonde/ginger, T-shirt, hoodie, shorts, jeans, sun dress, sneakers, sandals, barefoot. */
+  var PRICES = {
+    "hair.buzz": 10, "hair.curly": 15, "hair.shoulder": 15, "hair.bun": 15, "hair.long": 20, "hair.waves": 20, "hair.braids": 25, "hair.puffs": 25,
+    "top.striped": 10, "top.tank": 10, "top.polo": 15, "top.longsleeve": 15, "top.star": 20, "top.button": 20,
+    "bottom.joggers": 10, "bottom.leggings": 15, "bottom.skirt": 20, "bottom.overalls": 25,
+    "shoes.slipons": 10, "shoes.hightops": 20, "shoes.rainboots": 25,
+    "dress.tee": 35, "dress.jumper": 40, "dress.overall": 45,
+    "acc.head.cap": 35, "acc.head.bow": 35, "acc.face.round_glasses": 40, "acc.neck.bandana": 40, "acc.head.fox_ears": 45, "acc.head.frog_hat": 50, "acc.hand.balloon": 50
+  };
+  var HAIR_PRICES = { auburn: 10, gray: 10, platinum: 15, pink: 20, sky_blue: 20, rainbow: 40, galaxy: 60 };
+  ITEMS.forEach(function (it) { if (PRICES[it.id]) it.unlock = { type: "tokens", cost: PRICES[it.id] }; });
+  Object.keys(HAIR_PRICES).forEach(function (k) { HAIR_COLORS[k].unlock = { type: "tokens", cost: HAIR_PRICES[k] }; });
+
+  // Starter look per profile emoji (only FREE items; skin is never guessed: always s3). v1.2: no paid pieces.
   var STARTER = {
-    "🦊": ["top.tee", "orange", "ginger", "acc.head.fox_ears", "orange"], "🐼": ["top.hoodie", "black", "black", null, null],
-    "🦄": ["top.star", "purple", "platinum", "acc.head.bow", "pink"], "🐯": ["top.striped", "orange", "ginger", null, null],
-    "🐸": ["top.tee", "green", "brown", "acc.head.frog_hat", "green"], "🐙": ["top.longsleeve", "purple", "auburn", null, null],
-    "🦖": ["top.hoodie", "lime", "dark_brown", null, null], "🐰": ["top.tee", "pink", "blonde", "acc.head.bow", "white"],
-    "🐨": ["top.hoodie", "gray", "dark_brown", null, null], "🦁": ["top.polo", "gold", "ginger", null, null],
-    "🐧": ["top.button", "white", "black", "acc.head.cap", "blue"], "🐝": ["top.striped", "gold", "black", null, null],
-    "🐬": ["top.tee", "sky", "brown", "acc.head.cap", "blue"], "🦋": ["top.star", "purple", "brown", "acc.head.bow", "purple"],
-    "🐱": ["top.striped", "black", "dark_brown", "acc.head.bow", "pink"], "🐶": ["top.tee", "red", "brown", "acc.head.cap", "red"]
+    "🦊": ["top.tee", "orange", "ginger", null, null], "🐼": ["top.hoodie", "black", "black", null, null],
+    "🦄": ["top.tee", "purple", "blonde", null, null], "🐯": ["top.tee", "orange", "ginger", null, null],
+    "🐸": ["top.tee", "green", "brown", null, null], "🐙": ["top.hoodie", "purple", "dark_brown", null, null],
+    "🦖": ["top.hoodie", "lime", "dark_brown", null, null], "🐰": ["top.tee", "pink", "blonde", null, null],
+    "🐨": ["top.hoodie", "gray", "dark_brown", null, null], "🦁": ["top.tee", "gold", "ginger", null, null],
+    "🐧": ["top.tee", "white", "black", null, null], "🐝": ["top.tee", "gold", "black", null, null],
+    "🐬": ["top.tee", "sky", "brown", null, null], "🦋": ["top.tee", "purple", "brown", null, null],
+    "🐱": ["top.hoodie", "black", "dark_brown", null, null], "🐶": ["top.tee", "red", "brown", null, null]
   };
 
   /* ---------------- spoken words (v1.1.0, for read-aloud + screen readers) ----------------
@@ -814,6 +957,32 @@ button{font-family:inherit;color:inherit;cursor:pointer}
     var h = function (v) { return ("0" + Math.max(0, Math.round(v * (1 - f))).toString(16)).slice(-2); };
     return "#" + h(r) + h(g) + h(b);
   }
+  function tint(hex, f) { // mix toward white
+    var n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+    var h = function (v) { return ("0" + Math.min(255, Math.round(v + (255 - v) * f)).toString(16)).slice(-2); };
+    return "#" + h(r) + h(g) + h(b);
+  }
+  // v1.2 hair: every hair color is a gradient (highlight -> base -> shadow) + a shine tone; rainbow is a diagonal
+  // rainbow; galaxy is a deep-space gradient with fixed (non-random) sparkles that move with the hair.
+  var GALAXY_SPARKS = [62, 30, 4, 84, 18, 3, 118, 22, 4, 140, 38, 3, 52, 58, 3, 148, 62, 4, 70, 44, 2, 128, 48, 2, 100, 14, 3, 44, 92, 3, 156, 96, 3, 50, 128, 4, 150, 130, 4,
+    58, 160, 3, 142, 160, 3, 46, 150, 2, 154, 112, 2, 168, 80, 3, 176, 118, 3, 36, 72, 2, 92, 30, 2, 110, 36, 2];
+  function hairPaint(key, p) { // -> [fill, outline, shine, defs]
+    var raw = HAIR_COLORS[key].c, id = p + "-hair";
+    if (key === "rainbow") return ["url(#" + id + ")", "#7c4dff", "#ffffff", '<linearGradient id="' + id + '" gradientUnits="userSpaceOnUse" x1="40" y1="20" x2="160" y2="140"><stop offset="0" stop-color="#ff7aa2"/><stop offset=".2" stop-color="#ff9f43"/><stop offset=".38" stop-color="#ffd84d"/><stop offset=".55" stop-color="#9be15d"/><stop offset=".72" stop-color="#7fd0ff"/><stop offset=".9" stop-color="#b59cff"/></linearGradient>'];
+    if (key === "galaxy") {
+      var sp = "", i, x, y, r;
+      for (i = 0; i < GALAXY_SPARKS.length; i += 3) {
+        x = GALAXY_SPARKS[i]; y = GALAXY_SPARKS[i + 1]; r = GALAXY_SPARKS[i + 2];
+        sp += r > 2 ? '<path d="M' + x + " " + (y - r) + "L" + (x + r * 0.3) + " " + (y - r * 0.3) + "L" + (x + r) + " " + y + "L" + (x + r * 0.3) + " " + (y + r * 0.3) + "L" + x + " " + (y + r) + "L" + (x - r * 0.3) + " " + (y + r * 0.3) + "L" + (x - r) + " " + y + "L" + (x - r * 0.3) + " " + (y - r * 0.3) + 'Z" fill="#fff"/>'
+          : '<circle cx="' + x + '" cy="' + y + '" r="1.3" fill="' + (i % 2 ? "#ffd6f0" : "#bfe9ff") + '"/>';
+      }
+      return ["url(#" + id + ")", "#1f1846", "#c9b8ff", '<radialGradient id="' + id + '-bg" gradientUnits="userSpaceOnUse" cx="90" cy="50" r="170"><stop offset="0" stop-color="#a77dff"/><stop offset=".4" stop-color="#6544d4"/><stop offset=".75" stop-color="#33289a"/><stop offset="1" stop-color="#17123a"/></radialGradient>' +
+        '<pattern id="' + id + '" patternUnits="userSpaceOnUse" x="0" y="0" width="200" height="300"><rect width="200" height="300" fill="url(#' + id + '-bg)"/>' + sp + "</pattern>"];
+    }
+    var light = parseInt(raw.slice(1, 3), 16) + parseInt(raw.slice(3, 5), 16) + parseInt(raw.slice(5, 7), 16) > 600;
+    return ["url(#" + id + ")", shade(raw, light ? 0.28 : 0.35), light ? "#ffffff" : tint(raw, 0.5),
+      '<linearGradient id="' + id + '" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="' + tint(raw, light ? 0.45 : 0.28) + '"/><stop offset=".5" stop-color="' + raw + '"/><stop offset="1" stop-color="' + shade(raw, 0.2) + '"/></linearGradient>'];
+  }
   function resolve(val, key, p) { // -> [fill, outline]
     if (typeof val !== "string") val = "#cccccc";
     if (val.indexOf("url(#") === 0) { var g = val.slice(5, -1); return ["url(#" + p + "-" + g + ")", GRAD_SHADE[key] || GRAD_SHADE[g === "goldfoil" ? "gold_foil" : g] || "#5a2fd6"]; }
@@ -947,24 +1116,25 @@ button{font-family:inherit;color:inherit;cursor:pointer}
       eyes: "translate(0 80) scale(1 " + n2(1 - 0.92 * clamp01(p.blink)) + ") translate(0 -80)"
     };
   }
-  function eyesSVG(style, mood) {
+  function eyesSVG(style, mood) { // v1.2: bigger, rounder eyes with two shine dots
     var s = "", xs = [82, 118];
-    if (style === "happy") return '<path d="M74 82q8 -9 16 0M110 82q8 -9 16 0" stroke="' + INK + '" stroke-width="3.5" fill="none" stroke-linecap="round"/>';
+    if (style === "happy") return '<path d="M73 82q9 -10 18 0M109 82q9 -10 18 0" stroke="' + INK + '" stroke-width="4" fill="none" stroke-linecap="round"/>';
     xs.forEach(function (x, i) {
-      if (style === "big") s += '<ellipse cx="' + x + '" cy="80" rx="7.5" ry="9" fill="' + INK + '"/><circle cx="' + (x + 2.5) + '" cy="76" r="2.8" fill="#fff"/><circle cx="' + (x - 2.5) + '" cy="84" r="1.4" fill="#fff"/>';
-      else s += '<circle cx="' + x + '" cy="80" r="5.6" fill="' + INK + '"/><circle cx="' + (x + 1.8) + '" cy="78" r="1.8" fill="#fff"/>';
-      if (style === "lash") { var o = i ? 1 : -1; s += '<path d="M' + (x + o * 4) + " 75l" + o * 5 + " -4M" + (x + o * 6) + " 79l" + o * 6 + ' -1" stroke="' + INK + '" stroke-width="2.5" stroke-linecap="round"/>'; }
+      if (style === "big") s += '<ellipse cx="' + x + '" cy="80" rx="8" ry="9.5" fill="' + INK + '"/><ellipse cx="' + x + '" cy="84" rx="5" ry="3.6" fill="#7a6ae0" opacity=".55"/><circle cx="' + (x + 2.8) + '" cy="75.8" r="3.2" fill="#fff"/><circle cx="' + (x - 2.6) + '" cy="84.5" r="1.6" fill="#fff"/>';
+      else s += '<ellipse cx="' + x + '" cy="80" rx="6.2" ry="7" fill="' + INK + '"/><circle cx="' + (x + 2.2) + '" cy="77.2" r="2.4" fill="#fff"/><circle cx="' + (x - 2) + '" cy="83" r="1.1" fill="#fff" opacity=".9"/>';
+      if (style === "lash") { var o = i ? 1 : -1; s += '<path d="M' + (x + o * 4) + " 74l" + o * 5 + " -4M" + (x + o * 6) + " 78l" + o * 6 + ' -1" stroke="' + INK + '" stroke-width="2.5" stroke-linecap="round"/>'; }
     });
     return s;
   }
-  function faceSVG(look, mood) {
-    var m = "";
-    if (mood === "yay") m = '<path d="M89 95q11 15 22 0z" fill="#e35d7a" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>';
-    else if (mood === "sad") m = '<path d="M93 102q7 -6 14 0" stroke="' + INK + '" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M72 68l9 3M128 68l-9 3" stroke="' + INK + '" stroke-width="2.5" stroke-linecap="round"/>';
-    else if (mood === "whoa") m = '<ellipse cx="100" cy="100" rx="5" ry="6.5" fill="#e35d7a" stroke="' + INK + '" stroke-width="2.5"/><path d="M73 66l10 -2M127 66l-10 -2" stroke="' + INK + '" stroke-width="2.5" stroke-linecap="round"/>';
-    else m = '<path d="M92 97q8 7 16 0" stroke="' + INK + '" stroke-width="3" fill="none" stroke-linecap="round"/>';
-    return '<g data-p="eyes">' + eyesSVG(look.eyes, mood) + "</g>" + m +
-      '<ellipse cx="68" cy="94" rx="7" ry="4" fill="#ff8fab" opacity=".55"/><ellipse cx="132" cy="94" rx="7" ry="4" fill="#ff8fab" opacity=".55"/>';
+  function faceSVG(look, mood) { // v1.2: soft brows (hair color), tiny nose, open smile, bigger blush with shine
+    var m = "", brows = '<path d="M75 66q7 -4 14 -1M111 65q7 -3 14 1" stroke="{hd}" stroke-width="3" fill="none" stroke-linecap="round" opacity=".85"/>';
+    if (mood === "yay") m = '<path d="M88 94q12 17 24 0z" fill="#e35d7a" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/><path d="M94 101.5q6 -4 12 0q-6 5 -12 0z" fill="#ff9fb5"/>';
+    else if (mood === "sad") { brows = ""; m = '<path d="M93 102q7 -6 14 0" stroke="' + INK + '" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M72 68l9 3M128 68l-9 3" stroke="' + INK + '" stroke-width="2.5" stroke-linecap="round"/>'; }
+    else if (mood === "whoa") { brows = ""; m = '<ellipse cx="100" cy="100" rx="5" ry="6.5" fill="#e35d7a" stroke="' + INK + '" stroke-width="2.5"/><path d="M73 66l10 -2M127 66l-10 -2" stroke="' + INK + '" stroke-width="2.5" stroke-linecap="round"/>'; }
+    else m = '<path d="M91 95Q100 105 109 95Q100 98.5 91 95Z" fill="#e35d7a" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>';
+    return '<g data-p="eyes">' + eyesSVG(look.eyes, mood) + "</g>" + brows + m + '<path d="M97.5 88.5q2.5 2 5 0" stroke="{sd}" stroke-width="2.2" fill="none" stroke-linecap="round"/>' +
+      '<ellipse cx="67" cy="93" rx="8.5" ry="5" fill="#ff8fab" opacity=".5"/><ellipse cx="133" cy="93" rx="8.5" ry="5" fill="#ff8fab" opacity=".5"/>' +
+      '<circle cx="64" cy="91.5" r="1.5" fill="#fff" opacity=".7"/><circle cx="130" cy="91.5" r="1.5" fill="#fff" opacity=".7"/>';
   }
   var cache = {}, cacheN = 0;
   // opts: crop, size, mood, pose (static name or animation name), t, facing, idPrefix, label, reducedMotion
@@ -991,7 +1161,7 @@ button{font-family:inherit;color:inherit;cursor:pointer}
     var col = function (key) { var v = PALETTE[key]; if (typeof v === "string" && v.indexOf("url(#") === 0) used[v.slice(5, -1)] = 1; return resolve(v, key, p); };
     var skin = SKINS[L.skin].c, sk = [skin, shade(skin, 0.16)];
     var hcRaw = HAIR_COLORS[L.hairColor].c; if (hcRaw.indexOf("url(#") === 0) used[hcRaw.slice(5, -1)] = 1;
-    var hc = resolve(hcRaw, L.hairColor, p);
+    var hc = hairPaint(L.hairColor, p);
     var parts = {}, add = function (item, c1key, c2key) {
       if (!item) return;
       var c1 = c1key ? col(c1key) : ["#cccccc", "#aaaaaa"], c2 = col(c2key || item.c2 || "white"), k;
@@ -1017,7 +1187,7 @@ button{font-family:inherit;color:inherit;cursor:pointer}
       var shin = cap(x, 236, x, 268, 13, sk[0], sk[1]) + '<ellipse cx="' + (x + s) + '" cy="281" rx="12" ry="8" fill="' + sk[0] + '" stroke="' + sk[1] + '" stroke-width="3"/>' + g("shin" + k) + g("foot" + k);
       return G("leg" + k, "av-leg" + k, cap(x, 204, x, 236, 13, sk[0], sk[1]) + g("thigh" + k) + G("shin" + k, "av-shin" + k, shin));
     };
-    var sub = function (s) { return s.replace(/\{sd\}/g, sk[1]).replace(/\{s\}/g, sk[0]).replace(/\{hd\}/g, hc[1]).replace(/\{h\}/g, hc[0]); };
+    var sub = function (s) { return s.replace(/\{sd\}/g, sk[1]).replace(/\{s\}/g, sk[0]).replace(/\{hd\}/g, hc[1]).replace(/\{hs\}/g, hc[2]).replace(/\{h\}/g, hc[0]); };
     var front = mode === "hide" ? "" : (hair ? hair.svg.front : "");
     if (front && mode === "tuck") front = '<g clip-path="url(#' + p + '-tuck)">' + front + "</g>";
     var head = '<circle cx="51" cy="80" r="9" fill="' + sk[0] + '" stroke="' + sk[1] + '" stroke-width="3"/><circle cx="149" cy="80" r="9" fill="' + sk[0] + '" stroke="' + sk[1] + '" stroke-width="3"/>' +
@@ -1029,7 +1199,7 @@ button{font-family:inherit;color:inherit;cursor:pointer}
       G("root", "av-root",
         G("hb", "av-hairBack", hair ? hair.svg.back : "") + limbLeg("L") + limbLeg("R") +
         G("body", "av-body", torso + G("head", "av-head", head) + limbArm("L") + limbArm("R"))));
-    var defs = defsFor(p, used) + (mode === "tuck" ? '<clipPath id="' + p + '-tuck"><rect x="0" y="' + (hat.brimY || 60) + '" width="200" height="260"/></clipPath>' : "");
+    var defs = defsFor(p, used) + hc[3] + (mode === "tuck" ? '<clipPath id="' + p + '-tuck"><rect x="0" y="' + (hat.brimY || 60) + '" width="200" height="260"/></clipPath>' : "");
     var vb = o.crop === "head" ? "40 10 120 120" : "0 0 200 300";
     var size = Number(o.size) > 0 ? Number(o.size) : 0;
     var wh = size ? ' width="' + n2(o.crop === "head" ? size : size * 2 / 3) + '" height="' + n2(size) + '"' : ' width="100%" height="100%"';
@@ -1456,7 +1626,7 @@ const URLP = (() => {
 function readMainProfile() {
   let raw = null;
   try { raw = JSON.parse(localStorage.getItem(GAME.mainKey)); } catch (e) { raw = null; }
-  const base = { id: "guest", name: "Guest", avatar: "🙂", little: false, younger: false, age: null, readAloud: null, sound: true, linked: false, profile: null };
+  const base = { id: "guest", name: "Guest", avatar: "🙂", little: false, younger: false, age: null, readAloud: null, sound: true, linked: false, profile: null, save: null };
   if (!raw || typeof raw !== "object" || !Array.isArray(raw.profiles)) return base;
   const p = raw.profiles.find(x => x && x.id === raw.activeId);
   const sound = typeof raw.sound === "boolean" ? raw.sound : true;
@@ -1468,7 +1638,8 @@ function readMainProfile() {
   return { id: String(p.id).slice(0, 40), name: typeof p.name === "string" && p.name.trim() ? p.name.slice(0, 40) : "Player",
     avatar: typeof p.avatar === "string" && p.avatar ? p.avatar.slice(0, 16) : "🙂", little: p.pathId === "little", younger, age,
     readAloud: typeof p.readAloud === "boolean" ? p.readAloud : null, sound, linked: true,
-    profile: p };   // parsed copy, only handed to ElzeeAvatar.readLook() (pure; never written back)
+    profile: p,     // parsed copy (read only)
+    save: raw };    // the parsed logicquest.v1 save, only handed to ElzeeAvatar.readLookFor(save, id) (pure; never written back)
 }
 
 /* ---------- this game's own store (spec §6.3) ---------- */
@@ -1526,6 +1697,8 @@ const noRead = () => { const k = kid(); return k.noRead === null ? (me.younger |
 // auto read-aloud: on by default in younger mode (and when the Elzee profile has readAloud on); 🗣️ toggles it per kid
 const autoRead = () => { const k = kid(); return k.autoRead !== null ? k.autoRead : me.younger || me.readAloud === true; };
 const youngerMode = () => !!me.younger;
+// read-aloud helpers (🗣️ auto-read toggle + big 🔈 replay): younger players, and any Elzee profile with readAloud on
+const readHelp = () => youngerMode() || me.readAloud === true;
 const soundOn = () => { const k = kid(); return k.sound === null ? me.sound : k.sound; };
 /* Pay tokens (respects ECON.dailyCap only when a cap is switched on); lifetime only ever goes up. */
 function addTokens(want) {
@@ -1593,25 +1766,57 @@ const Speech = {
   ok: "speechSynthesis" in window && typeof SpeechSynthesisUtterance === "function",
   last: "",
   log: [],          // every line handed to speechSynthesis (kept short; the test hook reads it)
-  line(text) { if (text) { this.last = text; if (autoRead()) this.say(text, true); } },   // queued, so a cheer is not cut off by the next line   // feedback / prompt lines: spoken when auto-read is on
+  voice: null,      // chosen on-device English voice (null until the engine has loaded its voices)
+  // iPadOS/iOS Safari (and Chrome) ignore speak() until the page has had a user gesture. Lines asked for before the
+  // first tap are held here (newest wins) and spoken INSIDE that first tap, which also unlocks the engine for good.
+  unlocked: !!(navigator.userActivation && navigator.userActivation.hasBeenActive),
+  pending: null,
+  line(text) { if (text) { this.last = text; if (autoRead()) this.say(text, true); } },   // feedback / prompt lines: spoken when auto-read is on (queued, so a cheer is not cut off by the next line)
   auto(text) {        // automatic prompt read: skip an exact repeat within 2.5 s (gate re-opened, resume)
     const now = Date.now(); if (text === this.autoText && now - this.autoAt < 2500) return;
     this.autoText = text; this.autoAt = now; this.say(text);
+  },
+  pickVoice() {       // Safari fills getVoices() late (often with no voiceschanged event), so this runs again on demand
+    if (!this.ok) return null;
+    let vs = [];
+    try { vs = speechSynthesis.getVoices() || []; } catch (e) { vs = []; }
+    const en = vs.filter(v => v && v.localService !== false && /^en/i.test(v.lang || ""));   // on-device voices only (nothing leaves the iPad)
+    this.voice = en.find(v => v.default) || en.find(v => /^en[-_]US/i.test(v.lang)) || en[0] || null;
+    return this.voice;
+  },
+  init() {
+    if (!this.ok) return;
+    this.pickVoice();
+    const onV = () => this.pickVoice();
+    try { if (speechSynthesis.addEventListener) speechSynthesis.addEventListener("voiceschanged", onV); else speechSynthesis.onvoiceschanged = onV; } catch (e) {}
+    let n = 0; const iv = setInterval(() => { if (this.voice || ++n > 24) clearInterval(iv); else this.pickVoice(); }, 250);   // ~6 s of polling for WebKit
+  },
+  unlock() {          // called from the first touchend / pointerup / click / keydown (capture phase, before the game's own handlers)
+    if (this.unlocked || !this.ok) return;
+    this.unlocked = true;
+    const p = this.pending; this.pending = null;
+    if (p && soundOn()) { this.say(p, false); this.unlockText = p; this.unlockAt = Date.now(); return; }
+    try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); } catch (e) {}   // silent primer inside the gesture
   },
   say(text, queue) {
     if (text) this.last = text;
     text = spokenText(text);          // never let the voice read emoji names ("red circle", "cookie cookie")
     if (!this.ok || !soundOn() || !text) return;
+    if (!this.unlocked) { this.pending = text; return; }                                     // wait for the first tap (iOS rule)
+    if (this.unlockText) {                                                                  // that same first tap already said it: skip its echo once
+      const dup = text === this.unlockText && Date.now() - this.unlockAt < 700; this.unlockText = null; if (dup) return; }
     try {
-      if (!queue) speechSynthesis.cancel();
+      if (!queue && (speechSynthesis.speaking || speechSynthesis.pending)) speechSynthesis.cancel();
+      if (speechSynthesis.paused) speechSynthesis.resume();                                 // Safari can come back from the background paused
       const u = new SpeechSynthesisUtterance(text);
-      const vs = (speechSynthesis.getVoices() || []).filter(v => v.localService !== false && /^en/i.test(v.lang)); // on-device voices only
-      if (vs.length) u.voice = vs[0];
+      const v = this.voice || this.pickVoice();
+      if (v) { u.voice = v; u.lang = v.lang; } else u.lang = "en-US";
       u.rate = 0.88; u.pitch = 1.1; u.onerror = () => {};
-      this.cur = u; speechSynthesis.speak(u); this.log.push(text); if (this.log.length > 400) this.log.shift();
+      this.cur = u;                    // keep a reference: WebKit can garbage-collect a playing utterance and drop its end
+      speechSynthesis.speak(u); this.log.push(text); if (this.log.length > 400) this.log.shift();
     } catch (e) {}
   },
-  stop() { if (this.ok) try { speechSynthesis.cancel(); } catch (e) {} },
+  stop() { this.pending = null; if (this.ok) try { speechSynthesis.cancel(); } catch (e) {} },
 };
 
 function spokenText(t) {
@@ -1739,13 +1944,20 @@ function seededShuffle(arr, seed) {
 for (const ev of ["pointerdown", "touchend", "keydown", "click"]) {
   document.addEventListener(ev, () => { if (!Sound.ctx || Sound.ctx.state !== "running") Sound.unlock(); }, { capture: true, passive: true });
 }
-document.addEventListener("visibilitychange", () => { if (!document.hidden && Sound.ctx && Sound.ctx.state !== "running") Sound.ensure(); });
+for (const ev of ["touchend", "pointerup", "click", "keydown"]) document.addEventListener(ev, () => Speech.unlock(), { capture: true, passive: true });   // speech gesture unlock (iOS: touchend/click count, pointerdown does not)
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) { Speech.stop(); return; }                 // no voice from a backgrounded tab
+  if (Sound.ctx && Sound.ctx.state !== "running") Sound.ensure();
+  if (!Speech.voice) Speech.pickVoice();
+});
+Speech.init();
 /* ---------- avatar adapter (THE HOOK) ----------
    The game talks to the avatar only through AvatarAdapter, which wraps the shared
    ElzeeAvatar v1 renderer (lq-games/shared/avatar.js, inlined above between the AVATAR markers):
      AvatarAdapter.lookFor(kidRecord, mainProfile) -> ElzeeAvatar look
-        = ElzeeAvatar.readLook(profile, { owned: unlocks })   (closet look, read-only from logicquest.v1)
-          + the start-screen pick (shirt color / hat / skin) ONLY when the profile has no closet look yet
+        = ElzeeAvatar.readLookFor(save, activeKidId, { owned: unlocks })   (closet look of the ACTIVE kid, read-only from logicquest.v1;
+          one kid's closet.owned never applies to another kid; guest -> readLook({avatar}) starter look)
+          + the start-screen pick (shirt color / hair style / skin) ONLY when the profile has no closet look yet
           + Climb floor rewards tried on in-game (preview; the main app grants them for real)
      AvatarAdapter.create(el, look) -> handle { setAnimation(name, opts), setFacing(1|-1|0), update(dt), setLook(look), destroy() }
         animations used: idle, walk, climb, crouch, jump (height 0, game moves the wrapper), fall, cheer, dance, oops, land
@@ -1753,14 +1965,16 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden && So
    When the avatar closet ships, delete AVATAR_PICK and the start-screen picker; nothing else changes. */
 const AVATAR_PICK = {                                   // start-screen choices, used until the closet exists
   colors: ["purple", "pink", "sky", "orange", "green", "red"],      // top.tee colorways
-  hats: ["none", "acc.head.cap", "acc.head.bow", "acc.head.frog_hat"],
+  // ElzeeAvatar 1.2.0 prices items: hats cost tokens, so the quick pick offers only FREE items (a pick of an unowned hat
+  // would be stripped by normalizeLook). Free hair styles replace the old hat row.
+  hairs: ["hair.crop", "hair.bob", "hair.ponytail", "hair.afro"],
   skins: ["s1", "s2", "s3", "s4", "s6", "s8"],
 };
 const PICK_SWATCH = { purple: "#7c4dff", pink: "#ff7aa2", sky: "#7fd0ff", orange: "#ff9f43", green: "#3ccf4e", red: "#e8413c",
   s1: "#ffe4d3", s2: "#f7d1bf", s3: "#f0bf96", s4: "#dda274", s6: "#a06a44", s8: "#5b3624" };
 function sanitizePickLook(l) {
   if (!l || typeof l !== "object") return null;
-  return { color: AVATAR_PICK.colors.includes(l.color) ? l.color : "purple", hat: AVATAR_PICK.hats.includes(l.hat) ? l.hat : "none",
+  return { color: AVATAR_PICK.colors.includes(l.color) ? l.color : "purple", hair: AVATAR_PICK.hairs.includes(l.hair) ? l.hair : AVATAR_PICK.hairs[0],
     skin: AVATAR_PICK.skins.includes(l.skin) ? l.skin : "s3" };
 }
 const EA = () => (window.ElzeeAvatar && typeof window.ElzeeAvatar.create === "function" ? window.ElzeeAvatar : null);
@@ -1768,8 +1982,7 @@ function profileHasLook(p) { return !!(p && p.look && typeof p.look === "object"
 function applyPick(look, pick) {
   const l = JSON.parse(JSON.stringify(look)); l.acc = l.acc || {}; l.accC = l.accC || {};
   l.top = "top.tee"; l.topC = pick.color; l.skin = pick.skin; l.dress = null;
-  if (pick.hat === "none") { l.acc.head = null; l.accC.head = null; }
-  else { l.acc.head = pick.hat; const it = EA().item(pick.hat); const cw = (it && it.colorways) || []; l.accC.head = cw.includes(pick.color) ? pick.color : cw[0] || null; }
+  if (pick.hair) l.hair = pick.hair;
   return l;
 }
 function previewRewards(look, wear) {   // try on Climb rewards in-game (later rewards win a shared slot: crown over helmet)
@@ -1786,11 +1999,17 @@ const AvatarAdapter = {
   canPick() { return !!EA() && !profileHasLook(me.profile); },
   lookFor(k, profile) {
     const A = EA(); if (!A) return null;
-    const owned = ((k && k.unlocks) || []).slice();
+    // ownership (ElzeeAvatar 1.2.0 enforces prices): this kid's Climb unlocks PLUS the active profile's own closet.owned.
+    // opts.owned replaces the closet list inside readLook, so both are passed; another kid's closet is never read.
+    const pr = profile || me.profile, closet = pr && pr.closet && Array.isArray(pr.closet.owned) ? pr.closet.owned.filter(x => typeof x === "string").slice(0, 300) : [];
+    const unl = ((k && k.unlocks) || []).slice(), owned = [...new Set([...closet, ...unl])];
     let look;
-    try { look = A.readLook(profile || { avatar: me.avatar }, { owned }); } catch (e) { look = A.defaultLook(); }
+    try {
+      look = me.linked && me.save && typeof A.readLookFor === "function" ? A.readLookFor(me.save, me.profile ? me.profile.id : me.id, { owned })
+        : A.readLook(profile || { avatar: me.avatar }, { owned });
+    } catch (e) { look = A.defaultLook(); }
     if (!profileHasLook(profile)) look = applyPick(look, (k && k.look) || defaultPickFor(me));
-    if (owned.length) look = previewRewards(look, owned);
+    if (unl.length) look = previewRewards(look, unl);   // try on Climb floor rewards only (never the whole closet)
     try { return A.normalizeLook(look, { owned }); } catch (e) { return look; }
   },
   svg(look, o = {}) {
@@ -1803,7 +2022,7 @@ const AvatarAdapter = {
     el.innerHTML = `<div class="avh"></div>`;
     const host = el.firstChild;
     if (!A) { host.innerHTML = this.svg(look); return { setAnimation() {}, setFacing() {}, update() {}, setLook() {}, destroy() { el.innerHTML = ""; } }; }
-    const inst = A.create(host, look, { manual: true, facing: "right", label: "You" });
+    const inst = A.create(host, look, { manual: true, facing: "right", label: "You", describe: true });   // screen readers: "You: <outfit>"
     let cur = "idle";
     return {
       setAnimation(name, opts) {
@@ -1823,7 +2042,7 @@ const AvatarAdapter = {
 };
 function defaultPickFor(p) {      // stable starter pick derived from the profile until the kid chooses
   const h = hash32(p.id + (p.avatar || ""));
-  return { color: AVATAR_PICK.colors[h % 6], skin: AVATAR_PICK.skins[(h >> 4) % 6], hat: AVATAR_PICK.hats[1 + ((h >> 8) % 3)] };
+  return { color: AVATAR_PICK.colors[h % 6], skin: AVATAR_PICK.skins[(h >> 4) % 6], hair: AVATAR_PICK.hairs[(h >> 8) % 4] };
 }
 /* ---------- play state ---------- */
 let view = "boot";            // boot | start | climb | error
@@ -2649,14 +2868,17 @@ function renderTop() {
   const top = $("#top"); if (!top) return;
   const k = kid(), nr = noRead(), pct = capOn() ? Math.round(100 * k.earnedToday / ECON.dailyCap) : 0;
   const fl = play ? Math.min(TOWER.floors, play.mid.floor) : Math.min(TOWER.floors, k.floor + 1);
+  // Elzee 1.3.3 opens games with a plain link (games/<file>.html, no params): with a linked Elzee player the start
+  // screen offers 🏠 back to ../index.html#home like the other games; launched with ?elzee=1 it is the contract button.
   const left = URLP.elzee ? `<button class="iconbtn" data-act="home" aria-label="Back to Elzee">🏠</button>`
-    : view === "climb" ? `<button class="iconbtn" data-act="tostart" aria-label="Back">⬅️</button>` : "";
+    : view === "climb" ? `<button class="iconbtn" data-act="tostart" aria-label="Back">⬅️</button>`
+    : me.linked ? `<a class="iconbtn" href="../index.html#home" data-act="homelink" aria-label="Back to Elzee">🏠</a>` : "";
   top.innerHTML = `${left}
     <div class="pill" aria-label="Player"><span class="av">${AvatarAdapter.svg(currentLook(), { crop: "head", idPrefix: "top" })}</span>${nr ? "" : `<span class="nm">${esc(me.name)}</span>`}</div>
     <div class="pill jar" aria-label="${capOn() ? `Tokens earned today ${k.earnedToday} of ${ECON.dailyCap}` : `Tokens earned today ${k.earnedToday}`}">🪙 <b>${k.earnedToday}</b>${capOn() ? `<span class="jarbar"><i style="width:${pct}%"></i></span>${k.earnedToday >= ECON.dailyCap ? "✅" : ""}` : ""}</div>
     <div class="pill" aria-label="Floor ${fl} of ${TOWER.floors}">🏢 ${fl}</div>
     <div class="spacer"></div>
-    ${youngerMode() ? `<button class="iconbtn ${autoRead() ? "on" : ""}" data-act="toggleAuto" aria-label="Read out loud by itself" aria-pressed="${autoRead()}">${autoRead() ? "🗣️" : "🤐"}</button>` : ""}
+    ${readHelp() ? `<button class="iconbtn ${autoRead() ? "on" : ""}" data-act="toggleAuto" aria-label="Read out loud by itself" aria-pressed="${autoRead()}">${autoRead() ? "🗣️" : "🤐"}</button>` : ""}
     <button class="iconbtn ${nr ? "on" : ""}" data-act="toggleRead" aria-label="Picture mode (no reading)" aria-pressed="${nr}">${nr ? "🖼️" : "🔤"}</button>
     <button class="iconbtn" data-act="toggleSound" aria-label="Sound" aria-pressed="${soundOn()}">${soundOn() ? "🔊" : "🔇"}</button>
     ${URLP.elzee ? "" : `<button class="iconbtn${view === "climb" ? " wideonly" : ""}" data-act="info" aria-label="For grown-ups">ⓘ</button>`}`;
@@ -2677,8 +2899,8 @@ function renderControls() {
   }
   // younger mode: a big 🔈 "say it again" that is always there (climbing, gates, cards)
   const rb = $("#replayBtn");
-  if (youngerMode() && !rb) c.insertAdjacentHTML("afterbegin", `<button class="iconbtn bigsay" id="replayBtn" data-act="replay" aria-label="Say it again">🔈</button>`);
-  else if (!youngerMode() && rb) rb.remove();
+  if (readHelp() && !rb) c.insertAdjacentHTML("afterbegin", `<button class="iconbtn bigsay" id="replayBtn" data-act="replay" aria-label="Say it again">🔈</button>`);
+  else if (!readHelp() && rb) rb.remove();
   $("#jumpBtn .dir").textContent = dir;
 }
 function wireJump() {
@@ -2708,7 +2930,7 @@ function showStart() {
     <div class="bigav">${AvatarAdapter.svg(look, { mood: "happy", idPrefix: "st" })}</div>
     ${pk ? `${nr ? "" : `<p>Pick your climber!</p>`}
       <div class="row">${AVATAR_PICK.colors.map(c => `<button class="swatch${pk.color === c ? " on" : ""}" style="--c:${PICK_SWATCH[c]}" data-pick-color="${c}" aria-label="${esc(pickSay("color", c))}"></button>`).join("")}</div>
-      <div class="row">${AVATAR_PICK.hats.map(h => `<button class="hatbtn${pk.hat === h ? " on" : ""}" data-pick-hat="${h}" aria-label="${esc(pickSay("hat", h))}">${AvatarAdapter.svg(AvatarAdapter.lookFor({ ...k, look: { ...pk, hat: h } }, me.profile), { crop: "head", idPrefix: "hat" + AVATAR_PICK.hats.indexOf(h) })}</button>`).join("")}</div>
+      <div class="row">${AVATAR_PICK.hairs.map(h => `<button class="hatbtn${pk.hair === h ? " on" : ""}" data-pick-hair="${h}" aria-label="${esc(pickSay("hair", h))}">${AvatarAdapter.svg(AvatarAdapter.lookFor({ ...k, look: { ...pk, hair: h } }, me.profile), { crop: "head", idPrefix: "hair" + AVATAR_PICK.hairs.indexOf(h) })}</button>`).join("")}</div>
       <div class="row">${AVATAR_PICK.skins.map(s => `<button class="swatch${pk.skin === s ? " on" : ""}" style="--c:${PICK_SWATCH[s]}" data-pick-skin="${s}" aria-label="Skin color"></button>`).join("")}</div>` : ""}
     <div style="font-size:26px;font-weight:700">🏢 ${k.floor} / ${TOWER.floors}${nc ? ` · ${REWARD_ICON[TOWER.rewards[nc]]} ${nc}` : " 👑"}</div>
     <button class="btn big" data-act="go" aria-label="Start climbing">▶${nr ? "" : " Climb!"}</button></div>`;
@@ -2793,19 +3015,19 @@ function checkpointResume(n) { advanceMid(n); arriveFloor(); placeHeroAtStep(pla
 const HOP_HINT = "Tap the big button, or the glowing platform, to hop up!";
 const START_HINT = "Pick your climber, then tap play!";
 const ACT_SAY = { go: "Let's climb!", again: "Climb again!", back: "Back to my adventure!", home: "Going home.", tostart: "Back.",
-  keepgoing: "Keep climbing!", info: "This part is for grown-ups.", closeov: "Okay.", showme: "Let's ask Hoot!", showmeok: "Okay!", wrongok: "Okay!" };
+  keepgoing: "Keep climbing!", homelink: "Going home.", info: "This part is for grown-ups.", closeov: "Okay.", showme: "Let's ask Hoot!", showmeok: "Okay!", wrongok: "Okay!" };
 const COLOR_SAY = { purple: "purple", pink: "pink", blue: "blue", sky: "sky blue", orange: "orange", green: "green", red: "red", yellow: "yellow" };
 function pickSay(kind, v) {
   const A = EA();
   if (kind === "color") return `A ${COLOR_SAY[v] || (A && A.describeColor ? A.describeColor(v) : v)} shirt!`;
-  if (kind === "hat") return v === "none" || !v ? "No hat!" : ((A && A.describeItem ? A.describeItem(v) : "") || "A hat") + "!";
+  if (kind === "hair") { const d = (A && A.describeItem ? A.describeItem(v) : "") || "this hair"; return d.charAt(0).toUpperCase() + d.slice(1) + "!"; }
   return "This skin color!";
 }
 /* ---------- input ---------- */
 document.addEventListener("click", e => {
-  const b = e.target.closest("[data-act],[data-pick-color],[data-pick-hat],[data-pick-skin]"); if (!b) return;
+  const b = e.target.closest("[data-act],[data-pick-color],[data-pick-hair],[data-pick-skin]"); if (!b) return;
   if (b.dataset.pickColor) { if (autoRead()) Speech.say(pickSay("color", b.dataset.pickColor)); return setPick("color", b.dataset.pickColor); }
-  if (b.dataset.pickHat) { if (autoRead()) Speech.say(pickSay("hat", b.dataset.pickHat)); return setPick("hat", b.dataset.pickHat); }
+  if (b.dataset.pickHair) { if (autoRead()) Speech.say(pickSay("hair", b.dataset.pickHair)); return setPick("hair", b.dataset.pickHair); }
   if (b.dataset.pickSkin) { if (autoRead()) Speech.say(pickSay("skin", b.dataset.pickSkin)); return setPick("skin", b.dataset.pickSkin); }
   const a = b.dataset.act; Sound.tap();
   if (autoRead() && ACT_SAY[a]) Speech.say(ACT_SAY[a]);          // read-aloud: every button says what it does
@@ -2916,7 +3138,7 @@ function boot() {
   else showStart();
   requestAnimationFrame(tick);
 }
-window.__climb = { get play() { return play; }, get view() { return view; }, kid, LAY, URLP, GAME, ECON, TOWER, AvatarAdapter, noRead, autoRead, youngerMode, GENTLE, get me() { return me; }, get spoken() { return Speech.log.slice(); }, get audioState() { return Sound.ctx ? Sound.ctx.state : null; } };   // test hook (read only)
+window.__climb = { get play() { return play; }, get view() { return view; }, kid, LAY, URLP, GAME, ECON, TOWER, AvatarAdapter, noRead, autoRead, youngerMode, GENTLE, get me() { return me; }, get spoken() { return Speech.log.slice(); }, get speech() { return { unlocked: Speech.unlocked, pending: Speech.pending, voice: Speech.voice ? Speech.voice.name : null }; }, get pack() { return play ? play.pack : null; }, get audioState() { return Sound.ctx ? Sound.ctx.state : null; } };   // test hook (read only)
 boot();
 </script>
 </body>
