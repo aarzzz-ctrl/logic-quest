@@ -13,10 +13,10 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="app-version" content="1.2.0">
 <style>
+/* Fredoka (SIL Open Font License, see OFL-Fredoka.txt), self-hosted so the app never waits on a third-party server */
+@font-face{font-family:"Fredoka";font-style:normal;font-weight:300 700;font-display:swap;src:url("fredoka-latin.woff2") format("woff2")}
 :root{
   --bg:#fff8e7; --ink:#2d2a4a; --muted:#7a7699; --card:#ffffff; --line:#e7e2f5;
   --brand:#7c4dff; --brand-d:#5a2fd6;
@@ -73,7 +73,7 @@ h1,h2,h3{margin:0;font-weight:700}
   display:flex;flex-direction:column;align-items:center;gap:6px;min-height:200px;justify-content:center}
 .playercard:active{transform:translateY(4px);box-shadow:0 2px 0 var(--line)}
 .playercard .av{font-size:80px;line-height:1}
-.playercard .nm{font-size:26px;font-weight:700}
+.playercard .nm{font-size:26px;font-weight:700;max-width:100%;overflow-wrap:anywhere;line-height:1.15}
 .playercard .meta{font-size:17px;color:var(--muted)}
 .playercard.add{border:3px dashed #cfc8ea;box-shadow:none;background:transparent;color:var(--brand)}
 .form{background:#fff;border-radius:var(--radius);padding:24px;box-shadow:0 6px 0 var(--line)}
@@ -93,7 +93,7 @@ h1,h2,h3{margin:0;font-weight:700}
 .hello{display:flex;align-items:center;gap:12px;margin:4px 0 14px}
 .mascot{font-size:64px;line-height:1;animation:bob 2.4s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-6px)}}
-.bubble{background:#fff;border-radius:20px;padding:12px 18px;box-shadow:0 4px 0 var(--line);font-size:21px;position:relative}
+.bubble{overflow-wrap:anywhere;background:#fff;border-radius:20px;padding:12px 18px;box-shadow:0 4px 0 var(--line);font-size:21px;position:relative}
 .tabs{display:flex;gap:10px;margin:0 0 16px}
 .tab{flex:1;border:3px solid var(--line);background:#fff;border-radius:18px;min-height:58px;font-size:20px;font-weight:600}
 .tab.on{border-color:var(--brand);background:var(--brand);color:#fff}
@@ -102,19 +102,27 @@ h1,h2,h3{margin:0;font-weight:700}
 .trackhead .te{font-size:42px}
 .trackhead h2{font-size:26px}
 .trackhead p{margin:2px 0 0;font-size:17px;opacity:.95}
-.path{display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:16px}
-.stop{display:flex;flex-direction:column;align-items:center;position:relative}
-.node{width:96px;height:96px;border-radius:50%;border:none;font-size:38px;font-weight:700;color:#fff;
+.path{display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:20px}
+.stop{display:flex;flex-direction:column;align-items:center;position:relative;background:none;border:none;padding:8px 22px;
+  min-width:170px;border-radius:24px;font:inherit;color:inherit}
+.stop .node{display:flex;align-items:center;justify-content:center}
+.stop:active .node{transform:translateY(5px);box-shadow:0 2px 0 var(--cd)}
+.stop:active .node.done{box-shadow:0 2px 0 var(--gold-d)} .stop:active .node.locked{box-shadow:0 2px 0 #bdb9cf}
+.stop:active .node::after,.stop:hover .node::after,.stop.touched .node::after{animation-play-state:paused;opacity:0}
+.node{position:relative;width:104px;height:104px;border-radius:50%;border:none;font-size:40px;font-weight:700;color:#fff;
   background:var(--c);box-shadow:0 7px 0 var(--cd)}
-.node:active{transform:translateY(5px);box-shadow:0 2px 0 var(--cd)}
+.node::before{content:"";position:absolute;inset:-18px;border-radius:50%} /* invisible, enlarges the tap target */
+.node.next::after{content:"";position:absolute;inset:-10px;border-radius:50%;border:5px solid var(--c);opacity:.5;
+  animation:ring 1.6s ease-out infinite;pointer-events:none}
+@keyframes ring{0%{transform:scale(.92);opacity:.6}100%{transform:scale(1.18);opacity:0}}
 .node.done{background:var(--gold);box-shadow:0 7px 0 var(--gold-d)}
 .node.locked{background:#d9d6e6;box-shadow:0 7px 0 #bdb9cf;font-size:32px}
-.node.next{animation:pulse 1.6s ease-in-out infinite}
-@keyframes pulse{50%{transform:scale(1.07)}}
-.nlabel{font-weight:600;font-size:18px;margin-top:8px}
+
+.nlabel{font-weight:600;font-size:18px;margin-top:10px}
+.stars{display:block}
 .nostar{filter:grayscale(1);opacity:.35}
 .stars{font-size:18px;letter-spacing:2px;min-height:22px}
-.startTag{position:absolute;top:-12px;right:-46px;background:#fff;color:var(--c);font-weight:700;font-size:15px;
+.startTag{pointer-events:none;position:absolute;top:-12px;right:-46px;background:#fff;color:var(--c);font-weight:700;font-size:15px;
   padding:4px 10px;border-radius:10px;box-shadow:0 3px 0 var(--line)}
 
 /* ---------- lesson ---------- */
@@ -150,6 +158,12 @@ h1,h2,h3{margin:0;font-weight:700}
 .sheet.good h3{color:var(--good-d)} .sheet.oops h3{color:var(--oops-d)}
 .sheet p{margin:4px 0 0;font-size:21px}
 .sheet .row{display:flex;gap:10px;align-items:center}
+@media (max-width:640px){
+  .sheet .inner{grid-template-columns:1fr}
+  .sheet h3{font-size:22px} .sheet p{font-size:18px}
+  .sheet .row .btn{flex:1}
+  .qtext{font-size:22px} .ask{font-size:23px} .choice{font-size:20px;min-height:58px;padding:12px 16px}
+}
 @media (orientation:landscape) and (min-width:1000px){
   .lbody{grid-template-columns:1.05fr 1fr;align-items:start}
   #app.wide{max-width:1120px}
@@ -251,7 +265,7 @@ const PATHS = [
         c: ["🐥 Baby Duck", "🦆 Big Duck", "🦢 Swan"], why: "Right behind first is second. That's Baby Duck!" },
       { pic: "🪑 🪑 🪑", q: "Sam, Pam, and Tam sit on a bench. Pam sits in the middle. Sam sits on the left.", ask: "Where does Tam sit?",
         c: ["On the right", "On the left", "In the middle"], why: "Sam has the left and Pam has the middle. Tam gets the right!" },
-      { pic: "📘 📕 📗", q: "Three books are in a stack. The blue book is on top. The red book is on the bottom.", ask: "Where is the green book?",
+      { pic: "📘 📗 📕", q: "Three books are in a stack. The blue book is on top. The red book is on the bottom.", ask: "Where is the green book?",
         c: ["In the middle", "On top", "On the bottom"], why: "Top and bottom are taken, so the green book is in the middle!" },
       { pic: "🎈 🎉 🎂", q: "Lily got to the party before Max. Max got there before Zoe.", ask: "Who got there first?",
         c: ["Lily", "Max", "Zoe"], why: "Lily came before Max, and Max came before Zoe. Lily was first!" },
@@ -263,7 +277,7 @@ const PATHS = [
         c: ["Cy", "Bea", "Al", "Di"], why: "Al and Di are on the ends. Bea can't be second, so Cy is second!" },
       { pic: "👩 👧 👶", q: "Mom is older than Jen. Jen is older than Baby Tim.", ask: "Who is the youngest?",
         c: ["👶 Baby Tim", "👧 Jen", "👩 Mom"], why: "Mom is oldest, then Jen, then Baby Tim. Tim is youngest!" },
-      { pic: "🚂 🚃 🚃", q: "The yellow train is behind the red train. The blue train is in front of the red train.", ask: "Which train is at the front?",
+      { pic: "🚂 🚂 🚂", q: "Three trains wait in a line: a red train, a blue train, and a yellow train. The yellow train is behind the red train. The blue train is in front of the red train.", ask: "Which train is at the front of the line?",
         c: ["Blue", "Red", "Yellow"], why: "Blue is in front of Red, and Red is in front of Yellow. Blue leads!" },
       { pic: "🏠 🏠 🏠 🏠", q: "Four houses are in a row. The pink house is first. The green house is right next to the pink house.", ask: "Which house is second?",
         c: ["Green", "Pink", "Blue"], why: "The pink house is first, and green is right next to it. So green is second!" },
@@ -282,13 +296,13 @@ const PATHS = [
       { pic: "🌧️ 👢", q: "When it rains, Jo wears boots. It is raining today.", ask: "What is Jo wearing?",
         c: ["👢 Boots", "🩴 Flip-flops", "🧦 Just socks"], why: "Rain means boots for Jo. It's raining, so: boots!" },
       { pic: "🏖️ 🧥", q: "Nobody at the beach has a coat. Kai is at the beach.", ask: "Does Kai have a coat?",
-        c: ["No", "Yes", "Two coats"], why: "NOBODY at the beach has a coat, and Kai is at the beach. So no coat!" },
+        c: ["No", "Yes", "We can't tell"], why: "NOBODY at the beach has a coat, and Kai is at the beach. So no coat!" },
       { pic: "🍪 🍪 🍪", q: "All the cookies on the plate have chocolate chips. Ella eats a cookie from the plate.", ask: "What is in Ella's cookie?",
         c: ["🍫 Chocolate chips", "🍇 Raisins", "🥕 Carrots"], why: "ALL the cookies have chocolate chips, so hers does too. Yum!" }
     ]},
     { name: "Sure Things", qs: [
-      { pic: "🍎🍎🍎  🍎🍎🍎🍎🍎", q: "Pip has 3 apples. Pop has 5 apples.", ask: "Who has more apples?",
-        c: ["Pop", "Pip", "They have the same"], why: "5 is more than 3, so Pop has more!" },
+      { pic: "🍎🍎🍎  🍎🍎🍎🍎🍎", q: "Sam has 3 apples. Lulu has 5 apples.", ask: "Who has more apples?",
+        c: ["Lulu", "Sam", "They have the same"], why: "5 is more than 3, so Lulu has more!" },
       { pic: "🌳 🏠 🐦", q: "Only birds live in the tree house. Something is living in the tree house.", ask: "What must it be?",
         c: ["🐦 A bird", "🐶 A dog", "🐠 A fish"], why: "ONLY birds live there, so whatever lives there is a bird!" },
       { pic: "🐸 💧", q: "Every frog in the pond is green. Hoppy is a frog in the pond.", ask: "What color is Hoppy?",
@@ -306,7 +320,7 @@ const PATHS = [
       { pic: "🌹 🌼", q: "All of Grandma's flowers are red or yellow. This flower is Grandma's. It is NOT red.", ask: "What color is it?",
         c: ["🟡 Yellow", "🔴 Red", "🔵 Blue"], why: "Red or yellow, but not red. So it's yellow!" },
       { pic: "🔔 🐕", q: "Every time the doorbell rings, Spot barks. Right now, Spot is NOT barking.", ask: "Is the doorbell ringing?",
-        c: ["No", "Yes", "It rings and rings"], why: "If the bell were ringing, Spot would bark. Spot is quiet, so the bell isn't ringing!" },
+        c: ["No, it isn't ringing", "Yes, it is ringing", "We can't tell"], why: "If the bell were ringing, Spot would bark. Spot is quiet, so the bell isn't ringing!" },
       { pic: "🐻 🍯", q: "All the bears in the story love honey. Bruno loves honey.", ask: "Is Bruno a bear?",
         c: ["We can't tell", "Yes, for sure", "No, for sure"], why: "Bears love honey, but other animals might love honey too. Bruno could be a bee! We can't tell." }
     ]}
@@ -328,27 +342,27 @@ const PATHS = [
     ]},
     { name: "Why So Silly?", qs: [
       { pic: "🍬 🦷", q: "Jen says: “Lots of kids like candy. So candy is good for your teeth!”", ask: "Why is that silly?",
-        c: ["Liking something doesn't make it healthy", "Candy is not sweet", "Kids don't like candy"], why: "Lots of kids liking candy doesn't make it good for teeth!" },
+        c: ["Liking something doesn't make it healthy", "Candy is sweet, so kids like it", "Kids don't like candy"], why: "Lots of kids liking candy doesn't make it good for teeth!" },
       { pic: "🏃 🦖", q: "Rob says: “My big brother runs super fast. So he knows everything about dinosaurs!”", ask: "Why is that silly?",
-        c: ["Running fast has nothing to do with dinosaurs", "Dinosaurs are slow", "Brothers can't run"], why: "Being fast doesn't make you a dinosaur expert!" },
-      { pic: "🌳 🛋️", q: "Pia says: “We can play outside, OR we sit and do nothing all day.”", ask: "Why is that silly?",
-        c: ["There are lots of other things to do", "Outside is too sunny", "Sitting is fun"], why: "We could read, draw, build, bake… there are way more than two choices!" },
+        c: ["Running fast has nothing to do with dinosaurs", "Big brothers always know more than little brothers", "Dinosaurs are slow"], why: "Being fast doesn't make you a dinosaur expert!" },
+      { pic: "🌳 🛋️", q: "Pia says: “We can play outside, OR we can sit and do nothing all day.”", ask: "Why is that silly?",
+        c: ["There are lots of other things to do", "Playing outside is more fun", "Sitting is fun"], why: "We could read, draw, build, bake… there are way more than two choices!" },
       { pic: "🐓 🌅", q: "Leo says: “The rooster crows, then the sun comes up. So the rooster makes the sun rise!”", ask: "Why is that silly?",
-        c: ["Coming first doesn't mean it made it happen", "Roosters can't crow", "The sun comes up at night"], why: "The sun would rise even if the rooster slept in!" },
+        c: ["Coming first doesn't mean it made it happen", "The sun comes up at night, and roosters crow at bedtime", "Roosters can't crow"], why: "The sun would rise even if the rooster slept in!" },
       { pic: "🐕 🐈", q: "Dan says: “All dogs have tails. My cat has a tail. So my cat is a dog!”", ask: "Why is that silly?",
-        c: ["Lots of animals have tails, not just dogs", "Cats don't have tails", "Dogs don't have tails"], why: "Having a tail doesn't make you a dog. Cats, mice, and monkeys have tails too!" }
+        c: ["Lots of animals have tails, not just dogs", "Dogs have short tails, but cats have long fluffy ones", "Cats don't have tails"], why: "Having a tail doesn't make you a dog. Cats, mice, and monkeys have tails too!" }
     ]},
     { name: "Think-o-Meter", qs: [
       { pic: "⚽ 🙋 🙋 🙋", q: "Amy asked 3 friends who LOVE soccer: “Is soccer the best?” They all said yes. Amy says: “Everybody thinks soccer is the best!”", ask: "What went wrong?",
-        c: ["She only asked kids who already love soccer", "She asked too many kids", "Soccer is not a sport"], why: "To know what everybody thinks, you have to ask all kinds of kids!" },
+        c: ["She only asked kids who already love soccer", "She should have asked her friends a harder question", "Soccer is not a sport"], why: "To know what everybody thinks, you have to ask all kinds of kids!" },
       { pic: "🧩 🧩 🧩", q: "Kim says: “Every piece of my puzzle is tiny. So my whole puzzle is tiny!”", ask: "Why is that silly?",
-        c: ["Lots of tiny pieces can make a big puzzle", "Puzzles have no pieces", "Tiny things are cute"], why: "Put lots of tiny pieces together and you can get something BIG!" },
+        c: ["Lots of tiny pieces can make a big puzzle", "Tiny pieces are easy to lose", "Puzzles have no pieces"], why: "Put lots of tiny pieces together and you can get something BIG!" },
       { pic: "🐾 🐕", q: "Sid says: “There are muddy paw prints, and our dog is muddy. Our dog probably made the prints.”", ask: "Is that smart or silly?",
-        c: ["🧠 Smart — the clues fit together", "🤪 Silly — dogs don't have paws"], why: "Smart! The paw prints and the muddy dog are two clues that point the same way." },
+        c: ["🧠 Smart — the clues fit together", "🤪 Silly — mud can't stick to a dog's paws"], why: "Smart! The paw prints and the muddy dog are two clues that point the same way." },
       { pic: "🍦 😋", q: "Gus says: “Ice cream is the yummiest because it tastes the best.”", ask: "Why is that silly?",
-        c: ["He said the same thing twice — that's not a reason", "Ice cream is cold", "He doesn't like ice cream"], why: "“Yummiest” and “tastes the best” mean the same thing. He didn't give a real reason!" },
+        c: ["He said the same thing twice — that's not a reason", "Ice cream is cold, and cold food can't be the yummiest", "He doesn't like ice cream"], why: "“Yummiest” and “tastes the best” mean the same thing. He didn't give a real reason!" },
       { pic: "🥕 🤢", q: "Nora says: “I ate one carrot once and it was yucky. So ALL vegetables are yucky!”", ask: "Why is that silly?",
-        c: ["One carrot can't tell you about ALL vegetables", "Carrots are orange", "She ate too many carrots"], why: "One carrot is just one veggie. There are tons more to try!" }
+        c: ["One carrot can't tell you about ALL vegetables", "Carrots are orange, but most other vegetables are green", "She ate too many carrots"], why: "One carrot is just one veggie. There are tons more to try!" }
     ]}
   ]}
   ]
@@ -375,7 +389,7 @@ const PATHS = [
     { name: "Four in a Row", qs: [
       { q: "Ava, Ben, Cara, and Dan line up for the slide. Ava is first. Dan is last. Ben is right before Dan.", ask: "Who is second?",
         c: ["Cara", "Ben", "Ava", "Dan"], why: "Ava 1st, Ben 3rd (right before Dan), Dan 4th. Cara fills spot 2!" },
-      { q: "Four houses are in a row, numbered 1 to 4. The red house is #1. The blue house is right next to the red house. The green house is not #4.", ask: "Which number is the yellow house?",
+      { q: "Four houses (red, blue, green, and yellow) are in a row, numbered 1 to 4. The red house is #1. The blue house is right next to the red house. The green house is not #4.", ask: "Which number is the yellow house?",
         c: ["#4", "#1", "#2", "#3"], why: "Red is #1, so blue (next to it) is #2. Green can't be #4, so it's #3. Yellow gets #4." },
       { q: "Five kids run a race. Sam beat Tia. Tia beat Uma. Uma beat Vic. Vic beat Wes.", ask: "Who came in third?",
         c: ["Uma", "Tia", "Vic", "Sam"], why: "The finish order is Sam, Tia, Uma, Vic, Wes. Uma is 3rd." },
@@ -413,7 +427,7 @@ const PATHS = [
         c: ["Max has more stickers than Finn", "Finn has the most stickers", "Ella has the fewest stickers", "Max has 10 stickers"], why: "Max > Ella > Finn, so Max has more than Finn." }
     ]},
     { name: "Some & If", qs: [
-      { q: "SOME of the kids in Art Club like painting. Nora is in Art Club.", ask: "What must be true?",
+      { q: "SOME of the kids in Art Club like painting. Nora is in Art Club.", ask: "What do we know about Nora?",
         c: ["We can't tell if Nora likes painting", "Nora likes painting", "Nora does not like painting", "Nobody in Art Club likes painting"], why: "“Some” means not necessarily all. Nora might like painting, or might not." },
       { q: "If Bella finishes her homework, she gets to play outside. Bella did NOT get to play outside.", ask: "What must be true?",
         c: ["Bella did not finish her homework", "Bella finished her homework", "Bella doesn't like playing outside", "It was raining"], why: "If she HAD finished, she would have played outside. She didn't play, so she didn't finish." },
@@ -425,7 +439,7 @@ const PATHS = [
         c: ["Beep is silver", "Beep is blue", "Beep is both blue and silver", "Silver robots cannot dance"], why: "Blue robots can't dance, but Beep can. So Beep isn't blue — Beep must be silver." }
     ]},
     { name: "Detective", qs: [
-      { q: "Only kids wearing helmets may ride the bikes. Omar is riding a bike.", ask: "What must be true?",
+      { q: "Only kids wearing helmets ride the bikes. Omar is riding a bike.", ask: "What must be true?",
         c: ["Omar is wearing a helmet", "Every kid with a helmet is riding", "Omar's helmet is red", "Omar is the fastest rider"], why: "ONLY helmet-wearers may ride. Omar is riding, so he has a helmet on." },
       { q: "Everyone on the soccer team is also in the band. Some people in the band play drums.", ask: "What must be true?",
         c: ["Anyone not in the band is not on the soccer team", "Everyone in the band is on the soccer team", "Some soccer players play drums", "No soccer players play drums"], why: "All soccer players are in the band. So if you're NOT in the band, you can't be on the team. The drummers might not be soccer players at all!" },
@@ -442,39 +456,39 @@ const PATHS = [
     levels: [
     { name: "Silly or Smart?", qs: [
       { q: "Jake says: “My dog is brown. So all dogs must be brown!”", ask: "What's silly about Jake's thinking?",
-        c: ["He used just one dog to decide about ALL dogs", "Brown is not a real color", "Dogs can't be brown", "Jake doesn't have a dog"], why: "One example can't prove something about every dog in the world!" },
+        c: ["He used just one dog to decide about ALL dogs", "Brown dogs are the cutest dogs", "Dogs can't be brown", "Jake doesn't have a dog"], why: "One example can't prove something about every dog in the world!" },
       { q: "Ruby says: “I wore my green socks and we won the game. My green socks make us win!”", ask: "What's silly about Ruby's thinking?",
-        c: ["Wearing the socks while winning doesn't mean the socks caused the win", "Socks should be blue", "They didn't really win", "Green is an unlucky color"], why: "Two things happening together doesn't mean one caused the other. Maybe the team just played well!" },
+        c: ["Winning in the socks doesn't prove the socks caused it", "Green socks are only lucky if you wear them on both feet", "They didn't really win", "Green is an unlucky color"], why: "Two things happening together doesn't mean one caused the other. Maybe the team just played well!" },
       { q: "Noah says: “Mia's drawing can't be good, because Mia is shorter than me.”", ask: "What's silly about Noah's thinking?",
-        c: ["Being short has nothing to do with drawing", "Tall people can't draw", "Mia is actually taller", "Drawings are always good"], why: "He's talking about Mia instead of her drawing. Height has nothing to do with art!" },
+        c: ["Being short has nothing to do with drawing", "Mia's drawing must be good because she is Noah's friend", "Tall people can't draw", "Mia is actually taller"], why: "He's talking about Mia instead of her drawing. Height has nothing to do with art!" },
       { q: "Lucy says: “I've never seen a purple frog, so purple frogs don't exist anywhere.”", ask: "What's silly about Lucy's thinking?",
-        c: ["Not seeing something doesn't mean it isn't real", "Frogs are always green", "Lucy needs glasses", "Purple is her favorite color"], why: "Fun fact: there really IS a purple frog in India! Not seeing it doesn't make it fake." },
+        c: ["Not seeing something doesn't mean it isn't real", "Frogs can only be green, so she is right about purple frogs", "Lucy needs glasses", "Purple is her favorite color"], why: "Fun fact: there really IS a purple frog in India! Not seeing it doesn't make it fake." },
       { q: "Owen says: “My big brother says ghosts are real, and he's great at basketball. So ghosts must be real!”", ask: "What's silly about Owen's thinking?",
-        c: ["Being good at basketball doesn't make him a ghost expert", "Basketball is hard", "Owen doesn't have a brother", "Ghosts play basketball"], why: "Being great at one thing doesn't make you an expert on everything." }
+        c: ["Being good at basketball doesn't make him a ghost expert", "Big brothers are older, so they always know what is true", "Basketball is hard", "Ghosts play basketball"], why: "Being great at one thing doesn't make you an expert on everything." }
     ]},
     { name: "Tricky Talk", qs: [
       { q: "Theo says: “Broccoli is good for you because it's healthy.”", ask: "What's the problem with Theo's reason?",
-        c: ["He said the same thing twice instead of giving a real reason", "Broccoli is not healthy", "Broccoli is green", "Nobody eats broccoli"], why: "“Good for you” and “healthy” mean the same thing. That's going in a circle, not giving a reason!" },
+        c: ["He said the same thing twice instead of giving a real reason", "Broccoli is green, and green foods are never very tasty to kids", "Broccoli is not healthy", "Nobody eats broccoli"], why: "“Good for you” and “healthy” mean the same thing. That's going in a circle, not giving a reason!" },
       { q: "Ivy says: “Either we play tag, or we sit inside all day doing nothing.”", ask: "What's silly about Ivy's thinking?",
-        c: ["There are lots of other things they could do", "Tag is boring", "Inside is too cold", "Ivy doesn't like tag"], why: "She makes it sound like there are only two choices. They could read, build a fort, play a game…" },
+        c: ["There are lots of other things they could do", "Tag is better than staying inside", "Tag is boring", "Ivy doesn't like tag"], why: "She makes it sound like there are only two choices. They could read, build a fort, play a game…" },
       { q: "Leo says: “Everybody at school says the cafeteria is haunted, so it must be true!”", ask: "What's silly about Leo's thinking?",
-        c: ["Lots of people believing something doesn't make it true", "Leo doesn't go to school", "Cafeterias are big", "Not everybody eats lunch"], why: "Even if many people believe it, that's not proof. Facts need evidence!" },
+        c: ["Lots of people believing something doesn't make it true", "Cafeterias are noisy at lunch, so it's hard to hear any ghosts", "Leo doesn't go to school", "Cafeterias are big"], why: "Even if many people believe it, that's not proof. Facts need evidence!" },
       { q: "Kai says: “If I don't get a cookie now, I'll be hungry. Then I'll be grumpy. Then I'll fail school. Then I'll never get a job!”", ask: "What's silly about Kai's thinking?",
-        c: ["Each step doesn't really lead to the next — it's way too big a jump", "Cookies are bad", "Kai doesn't like jobs", "He's already grumpy"], why: "Missing one cookie won't wreck his whole life! Each step is a big, unlikely leap." },
+        c: ["Each step is a huge, unlikely jump from the one before", "Cookies are a snack, and snacks should only come after dinner", "Kai doesn't like jobs", "He's already grumpy"], why: "Missing one cookie won't wreck his whole life! Each step is a big, unlikely leap." },
       { q: "Ava says: “All cats have whiskers. My hamster has whiskers. So my hamster is a cat!”", ask: "What's silly about Ava's thinking?",
-        c: ["Other animals have whiskers too, so whiskers don't make something a cat", "Hamsters don't have whiskers", "Cats don't have whiskers", "Ava doesn't have a hamster"], why: "All cats have whiskers, but not everything with whiskers is a cat!" }
+        c: ["Lots of animals have whiskers, not just cats", "Hamsters are much smaller than cats, so they need fewer whiskers", "Cats don't have whiskers", "Ava doesn't have a hamster"], why: "All cats have whiskers, but not everything with whiskers is a cat!" }
     ]},
     { name: "Argument Ace", qs: [
       { q: "Coach says: “Our team scored more goals this year because we got new shoes.”", ask: "Which fact, if true, makes Coach's reason WEAKER?",
-        c: ["This year the team also practiced twice as much", "The new shoes are red", "The players like the new shoes", "Last year they had old shoes"], why: "If they practiced way more, maybe the practice — not the shoes — caused the extra goals." },
+        c: ["This year the team also practiced twice as much", "Last year the team wore old shoes that were a different color", "The new shoes are red", "The players like the new shoes"], why: "If they practiced way more, maybe the practice — not the shoes — caused the extra goals." },
       { q: "Zoe asked 5 kids at Chess Club if chess is the best game. All 5 said yes. Zoe says: “Most kids at school think chess is the best game!”", ask: "What's the problem?",
-        c: ["She only asked kids who already love chess", "Five is too many kids to ask", "Chess isn't a game", "Zoe doesn't like chess"], why: "Chess Club kids love chess! To learn what most kids think, ask all kinds of kids." },
+        c: ["She only asked kids who already love chess", "Chess takes a long time, so most kids never finish a game", "Five is too many kids to ask", "Zoe doesn't like chess"], why: "Chess Club kids love chess! To learn what most kids think, ask all kinds of kids." },
       { q: "Max says: “Whenever the ice cream truck comes, more people are wearing shorts. So the ice cream truck makes people wear shorts!”", ask: "What's the best reason Max could be wrong?",
-        c: ["Hot weather could cause both the truck and the shorts", "Ice cream trucks are loud", "Shorts are comfy", "Max doesn't like ice cream"], why: "On hot days, the truck comes out AND people wear shorts. The heat causes both!" },
+        c: ["Hot weather could cause both the truck and the shorts", "Ice cream trucks play loud music", "Shorts are comfy", "Max doesn't like ice cream"], why: "On hot days, the truck comes out AND people wear shorts. The heat causes both!" },
       { q: "Lena says: “Every piece of this puzzle is small. So the whole puzzle must be small.”", ask: "What's silly about Lena's thinking?",
-        c: ["Lots of small pieces can add up to something big", "The pieces are actually big", "Puzzles are always small", "She lost a piece"], why: "Something made of small parts can still be big, like a huge puzzle made of tiny pieces!" },
+        c: ["Lots of small pieces can add up to something big", "Small pieces get lost easily", "Puzzles are always small", "She lost a piece"], why: "Something made of small parts can still be big, like a huge puzzle made of tiny pieces!" },
       { q: "Dev says: “Our cat Nugget ate the cake, because there are cat paw prints in the frosting.”", ask: "Which fact, if true, makes Dev's argument STRONGER?",
-        c: ["Nugget is the only cat that was in the house", "The cake was chocolate", "Nugget likes to nap", "Dev also has a dog"], why: "If Nugget is the only cat around, those cat paw prints almost have to be Nugget's!" }
+        c: ["Nugget is the only cat that was in the house", "The cake had pink frosting", "The cake was chocolate", "Nugget likes to nap"], why: "If Nugget is the only cat around, those cat paw prints almost have to be Nugget's!" }
     ]}
   ]}
   ]
@@ -490,6 +504,7 @@ const APP = {
   mascot: "🦉",
   mascotName: "Professor Hoot",
   pinLength: 4,
+  version: "1.2.0",
 };
 const AVATARS = ["🦊","🐼","🦄","🐯","🐸","🐙","🦖","🐰","🐨","🦁","🐧","🐝","🐬","🦋","🐱","🐶"];
 const REWARDS = {
@@ -498,8 +513,9 @@ const REWARDS = {
   comboEvery: 3,        // every N first-try answers in a row...
   comboBonus: 1,        // ...earns this extra
   lessonFirstClear: 10, // first time finishing a lesson
-  lessonReplay: 5,      // replaying a finished lesson
-  perfect: 5,           // no mistakes
+  lessonReplay: 2,      // replaying a finished lesson (no per-question tokens on replays)
+  replaysPaidPerDay: 3, // replay bonus is paid at most this many times per player per day
+  perfect: 5,           // first time a lesson reaches 3 stars
   streakPerDay: 3,      // daily bonus = streakPerDay * min(streak, streakCap)
   streakCap: 5,
 };
@@ -508,6 +524,12 @@ const DEFAULT_PRIZES = [
   { emoji: "🍦", name: "Ice cream treat", cost: 60 },
   { emoji: "🌙", name: "15 extra minutes before bed", cost: 100 },
 ];
+const GATE = {
+  pinTriesBeforeLock: 3,   // wrong PINs in a row before a lockout
+  lockBaseMs: 30000,       // first lockout; doubles each further miss
+  lockMaxMs: 15 * 60000,
+  checkLockMs: 60000,      // after a wrong grown-up math answer; doubles each further miss
+};
 const PRAISE = ["Great thinking!", "You got it!", "Brainy!", "Super sleuth!", "Hoot hoot, correct!", "Nailed it!", "Logic legend!"];
 const GENTLE = ["Not quite — good try!", "Ooh, a tricky one!", "Almost! Here's the secret:", "Good thinking, but not this time!"];
 
@@ -526,6 +548,39 @@ function yesterdayStr() { const d = new Date(); d.setDate(d.getDate() - 1); retu
 function fmtDate(ts) { return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" }); }
 const starStr = n => "⭐".repeat(n) + `<span class="nostar">${"⭐".repeat(3 - n)}</span>`;
 
+function sha256(text) {
+  const rr = (v, n) => (v >>> n) | (v << (32 - n));
+  const K = [], H = [];
+  for (let p = 2, c = 0; c < 64; p++) {
+    let prime = true; for (let i = 2; i * i <= p; i++) if (p % i === 0) { prime = false; break; }
+    if (!prime) continue;
+    if (c < 8) H[c] = (Math.pow(p, 1 / 2) * 4294967296) | 0;
+    K[c++] = (Math.pow(p, 1 / 3) * 4294967296) | 0;
+  }
+  const bytes = Array.from(new TextEncoder().encode(String(text)));
+  const bitLen = bytes.length * 8;
+  bytes.push(0x80); while (bytes.length % 64 !== 56) bytes.push(0);
+  for (let i = 7; i >= 0; i--) bytes.push(i >= 4 ? 0 : (bitLen >>> (i * 8)) & 255);
+  const w = new Array(64);
+  for (let j = 0; j < bytes.length; j += 64) {
+    for (let i = 0; i < 16; i++) w[i] = (bytes[j + 4 * i] << 24) | (bytes[j + 4 * i + 1] << 16) | (bytes[j + 4 * i + 2] << 8) | bytes[j + 4 * i + 3];
+    for (let i = 16; i < 64; i++) {
+      const s0 = rr(w[i - 15], 7) ^ rr(w[i - 15], 18) ^ (w[i - 15] >>> 3), s1 = rr(w[i - 2], 17) ^ rr(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+      w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+    }
+    let [a, b, c, d, e, f, g, h] = H;
+    for (let i = 0; i < 64; i++) {
+      const t1 = (h + (rr(e, 6) ^ rr(e, 11) ^ rr(e, 25)) + ((e & f) ^ (~e & g)) + K[i] + w[i]) | 0;
+      const t2 = ((rr(a, 2) ^ rr(a, 13) ^ rr(a, 22)) + ((a & b) ^ (a & c) ^ (b & c))) | 0;
+      h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+    }
+    H[0] = (H[0] + a) | 0; H[1] = (H[1] + b) | 0; H[2] = (H[2] + c) | 0; H[3] = (H[3] + d) | 0;
+    H[4] = (H[4] + e) | 0; H[5] = (H[5] + f) | 0; H[6] = (H[6] + g) | 0; H[7] = (H[7] + h) | 0;
+  }
+  return H.map(x => (x >>> 0).toString(16).padStart(8, "0")).join("");
+}
+const hashPin = (salt, pin) => sha256(`${APP.storageKey}:${salt}:${pin}`);
+
 /* ==========================================================================
    STORE (localStorage)
    ========================================================================== */
@@ -538,16 +593,59 @@ const Store = {
       activeId: null,
       prizes: DEFAULT_PRIZES.map(p => ({ id: uid(), ...p })),
       log: [],            // redemptions: {ts, profileId, who, avatar, emoji, name, cost}
-      pin: null,
+      pinHash: null, pinSalt: null,   // PIN is stored only as a salted hash
+      pinFails: 0, pinLockUntil: 0,   // lockout after repeated wrong PINs
+      checkFails: 0, checkLockUntil: 0, // rate limit for the grown-up math check
       sound: true,
     };
   },
   load() {
-    try {
-      const raw = JSON.parse(localStorage.getItem(APP.storageKey));
-      if (raw && typeof raw === "object") { this.data = Object.assign(this.defaults(), raw); return; }
-    } catch (e) { /* fall through */ }
-    this.data = this.defaults();
+    let raw = null;
+    try { raw = JSON.parse(localStorage.getItem(APP.storageKey)); } catch (e) { raw = null; }
+    this.data = this.sanitize(raw);
+    if (raw && typeof raw === "object" && "pin" in raw) this.save(); // finish migrating an old plain-text PIN
+  },
+  // Repairs missing / wrong-typed fields so old or damaged saves never crash the app.
+  sanitize(raw) {
+    const d = this.defaults();
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return d;
+    const num = (v, def = 0) => (typeof v === "number" && isFinite(v) ? Math.max(0, Math.round(v)) : def);
+    const str = (v, def, max) => (typeof v === "string" && v.trim() ? v.slice(0, max) : def);
+    const obj = v => (v && typeof v === "object" && !Array.isArray(v) ? v : {});
+    const pathIds = PATHS.map(x => x.id);
+    d.profiles = (Array.isArray(raw.profiles) ? raw.profiles : []).filter(p => p && typeof p === "object").map(p => {
+      const pathId = pathIds.includes(p.pathId) ? p.pathId : "big";
+      const progress = {};
+      for (const [k, v] of Object.entries(obj(p.progress))) {
+        if (v && typeof v === "object") progress[k] = { done: !!v.done, stars: Math.min(3, num(v.stars)), plays: num(v.plays), last: num(v.last) };
+      }
+      return {
+        id: str(p.id, uid(), 40), name: str(p.name, "Player", 40), avatar: str(p.avatar, "🦊", 16), pathId,
+        tokens: num(p.tokens), totalEarned: num(p.totalEarned), streak: num(p.streak),
+        lastPlay: typeof p.lastPlay === "string" && /^\d{4}-\d{2}-\d{2}$/.test(p.lastPlay) ? p.lastPlay : null,
+        progress, lessonsDone: num(p.lessonsDone),
+        replayDay: typeof p.replayDay === "string" ? p.replayDay : null, replayCount: num(p.replayCount),
+        readAloud: typeof p.readAloud === "boolean" ? p.readAloud : getPath(pathId).readAloudDefault,
+        created: num(p.created, Date.now()),
+      };
+    });
+    const seen = new Set(); d.profiles = d.profiles.filter(p => !seen.has(p.id) && seen.add(p.id));
+    d.activeId = d.profiles.some(p => p.id === raw.activeId) ? raw.activeId : null;
+    if (Array.isArray(raw.prizes)) {
+      d.prizes = raw.prizes.filter(p => p && typeof p === "object").map(p => ({
+        id: str(p.id, uid(), 40), emoji: str(p.emoji, "🎁", 16), name: str(p.name, "Prize", 60), cost: Math.max(1, Math.min(9999, num(p.cost, 10))) }));
+    }
+    d.log = (Array.isArray(raw.log) ? raw.log : []).filter(l => l && typeof l === "object").slice(0, 500).map(l => ({
+      ts: num(l.ts, Date.now()), profileId: String(l.profileId ?? ""), who: str(l.who, "?", 40), avatar: str(l.avatar, "🙂", 16),
+      emoji: str(l.emoji, "🎁", 16), name: str(l.name, "Prize", 60), cost: num(l.cost) }));
+    if (typeof raw.pinHash === "string" && /^[0-9a-f]{64}$/.test(raw.pinHash) && typeof raw.pinSalt === "string" && raw.pinSalt) {
+      d.pinHash = raw.pinHash; d.pinSalt = raw.pinSalt;
+    } else if (typeof raw.pin === "string" && /^\d{4}$/.test(raw.pin)) { // v1.0/1.1 stored the PIN in plain text
+      d.pinSalt = uid(); d.pinHash = hashPin(d.pinSalt, raw.pin);
+    }
+    for (const k of ["pinFails", "pinLockUntil", "checkFails", "checkLockUntil"]) d[k] = num(raw[k]);
+    d.sound = typeof raw.sound === "boolean" ? raw.sound : true;
+    return d;
   },
   save() { try { localStorage.setItem(APP.storageKey, JSON.stringify(this.data)); } catch (e) { /* storage full / private mode */ } },
 };
@@ -557,9 +655,9 @@ const getPath = id => PATHS.find(p => p.id === id) || PATHS[0];
 
 function newProfile(name, avatar, pathId) {
   return { id: uid(), name, avatar, pathId, tokens: 0, totalEarned: 0, streak: 0, lastPlay: null,
-           progress: {}, lessonsDone: 0, readAloud: getPath(pathId).readAloudDefault, created: Date.now() };
+           progress: {}, lessonsDone: 0, replayDay: null, replayCount: 0, readAloud: getPath(pathId).readAloudDefault, created: Date.now() };
 }
-const progKey = (pathId, ti, li) => `${pathId}/${PATHS.find(p => p.id === pathId).tracks[ti].id}/${li}`;
+const progKey = (pathId, ti, li) => `${getPath(pathId).id}/${getPath(pathId).tracks[ti].id}/${li}`;
 const progOf = (pl, pathId, ti, li) => pl.progress[progKey(pathId, ti, li)] || {};
 const isUnlocked = (pl, pathId, ti, li) => li === 0 || !!progOf(pl, pathId, ti, li - 1).done;
 const liveStreak = pl => (pl.lastPlay === todayStr() || pl.lastPlay === yesterdayStr()) ? pl.streak : 0;
@@ -573,7 +671,10 @@ const Sound = {
   play(notes) {
     if (!state().sound) return;
     try {
-      this.ctx = this.ctx || new (window.AudioContext || window.webkitAudioContext)();
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      this.ctx = this.ctx || new AC();
+      if (this.ctx.state === "suspended" && this.ctx.resume) this.ctx.resume().catch(() => {});
       let t = this.ctx.currentTime;
       for (const [freq, dur] of notes) {
         const o = this.ctx.createOscillator(), g = this.ctx.createGain();
@@ -596,11 +697,15 @@ const Sound = {
 const Speech = {
   supported: "speechSynthesis" in window,
   voice: null,
+  current: null,
   pickVoice() {
     if (!this.supported) return;
-    const vs = speechSynthesis.getVoices();
-    this.voice = vs.find(v => /^en[-_]US/i.test(v.lang) && /Samantha|Karen|Ava|Allison|Google US/i.test(v.name))
-      || vs.find(v => /^en[-_]US/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null;
+    let vs = [];
+    try { vs = speechSynthesis.getVoices() || []; } catch (e) { return; }
+    // Prefer voices that run on the device (localService) so spoken text never leaves the iPad.
+    const local = vs.filter(v => v.localService !== false);
+    this.voice = local.find(v => /^en[-_]US/i.test(v.lang) && /Samantha|Karen|Ava|Allison/i.test(v.name))
+      || local.find(v => /^en[-_]US/i.test(v.lang)) || local.find(v => /^en/i.test(v.lang)) || null;
   },
   clean(text) {
     return String(text).replace(/\p{Extended_Pictographic}|\uFE0F|\u200D|[❔☆]/gu, " ").replace(/[“”]/g, "").replace(/\s+/g, " ").trim();
@@ -608,18 +713,23 @@ const Speech = {
   say(text) {
     if (!this.supported) return;
     try {
-      speechSynthesis.cancel();
+      if (typeof SpeechSynthesisUtterance !== "function") return;
+      const busy = speechSynthesis.speaking || speechSynthesis.pending;
+      if (busy) speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(this.clean(text));
+      this.current = u; // keep a reference so the utterance isn't garbage-collected mid-speech
       if (!this.voice) this.pickVoice();
       if (this.voice) u.voice = this.voice;
       u.lang = (this.voice && this.voice.lang) || "en-US";
       u.rate = 0.88; u.pitch = 1.1;
-      speechSynthesis.speak(u);
+      u.onerror = () => {};
+      if (busy) setTimeout(() => { try { speechSynthesis.speak(u); } catch (e) {} }, 80); // Safari drops speak() right after cancel()
+      else speechSynthesis.speak(u);
     } catch (e) { /* ignore */ }
   },
   stop() { if (this.supported) try { speechSynthesis.cancel(); } catch (e) {} },
 };
-if (Speech.supported) speechSynthesis.onvoiceschanged = () => Speech.pickVoice();
+if (Speech.supported) { try { speechSynthesis.onvoiceschanged = () => Speech.pickVoice(); } catch (e) { Speech.supported = false; } }
 
 /* ==========================================================================
    UI HELPERS: toast, modal, confetti, floating text
@@ -683,36 +793,71 @@ function pinPad({ title, msg = "", length = APP.pinLength, forgot = false, onSub
     const k = e.target.closest("[data-k]"); if (!k) return;
     const key = k.dataset.k;
     if (key === "cancel") return closeModal();
-    if (key === "forgot") return forgotPin(api._onRecovered);
+    if (key === "forgot") return forgotPin();
     if (key === "back") { value = value.slice(0, -1); paint(); return; }
     if (value.length >= length) return;
     value += key; err.textContent = ""; paint();
-    if (value.length === length) setTimeout(() => onSubmit(value, api), 120);
+    if (value.length === length) { const v = value; setTimeout(() => { if (m.isConnected) onSubmit(v, api); }, 120); }
   });
   return api;
 }
-function createPin(onOk) {
+const hasPin = () => !!state().pinHash;
+const checkPin = v => hasPin() && hashPin(state().pinSalt, v) === state().pinHash;
+const secondsLeft = until => Math.max(1, Math.ceil((until - Date.now()) / 1000));
+function waitText(until) { const s = secondsLeft(until); return s > 90 ? `${Math.ceil(s / 60)} minutes` : `${s} seconds`; }
+
+/** Harder grown-up check (2-digit × 2-digit), one try per question, with an escalating wait after a miss. */
+function grownUpCheck(title, onPass) {
+  const st = state();
+  if (st.checkLockUntil > Date.now()) { toast(`Please wait ${waitText(st.checkLockUntil)} and try again.`, 2600); return; }
+  const a = randInt(24, 49), b = randInt(13, 29);
+  pinPad({ title, msg: `Grown-ups only: what is ${a} × ${b}?`, length: String(a * b).length, onSubmit(v, api) {
+    api.close();
+    if (Number(v) === a * b) { st.checkFails = 0; st.checkLockUntil = 0; Store.save(); onPass(); return; }
+    st.checkFails += 1;
+    st.checkLockUntil = Date.now() + Math.min(GATE.lockMaxMs, GATE.checkLockMs * 2 ** (st.checkFails - 1));
+    Store.save(); toast(`That's not right. Please wait ${waitText(st.checkLockUntil)} before trying again.`, 2600);
+  }});
+}
+function createPin(onDone) {
   pinPad({ title: "Grown-ups: make a PIN", msg: "Pick a 4-digit PIN to approve prizes and change settings. Keep it secret from the kids!",
     onSubmit(first) {
       pinPad({ title: "Type it again", onSubmit(second, api) {
-        if (second !== first) { api.error("Those didn't match — let's start over."); setTimeout(() => createPin(onOk), 900); return; }
-        state().pin = first; Store.save(); api.close(); toast("PIN saved ✓"); onOk && onOk();
+        if (second !== first) { api.error("Those didn't match — let's start over."); setTimeout(() => createPin(onDone), 900); return; }
+        const st = state();
+        st.pinSalt = uid(); st.pinHash = hashPin(st.pinSalt, first); st.pinFails = 0; st.pinLockUntil = 0;
+        Store.save(); api.close(); toast("PIN saved ✓"); onDone && onDone();
       }});
     }});
 }
+/** One-time parent setup: grown-up check first, then PIN. Never offered as a side effect of a kid-facing gate. */
+function startGrownUpSetup(onDone) { grownUpCheck("Grown-up setup 🔒", () => createPin(onDone)); }
+
 function requireGrownUp(reason, onOk) {
-  if (!state().pin) return createPin(onOk);
-  const api = pinPad({ title: "Grown-up check 🔒", msg: reason, forgot: true, onSubmit(v, a) {
-    if (v === state().pin) { a.close(); onOk(); } else a.error("Hmm, that's not the PIN.");
+  const st = state();
+  if (!hasPin()) {
+    const m = openModal(`<div class="bigicon">🔒</div><h3>Ask a grown-up</h3><p>A grown-up needs to set up a parent PIN first.</p>
+      <div class="acts"><button class="btn brand block" data-m="setup">I'm a grown-up: set it up</button>
+      <button class="btn ghost block" data-m="cancel">Not now</button></div>`);
+    m.querySelector('[data-m="setup"]').onclick = () => { closeModal(); startGrownUpSetup(() => toast("All set! Tap the button again to continue.", 2600)); };
+    m.querySelector('[data-m="cancel"]').onclick = closeModal;
+    return;
+  }
+  if (st.pinLockUntil > Date.now()) { toast(`Too many tries. Please wait ${waitText(st.pinLockUntil)}.`, 2600); return; }
+  pinPad({ title: "Grown-up check 🔒", msg: reason, forgot: true, onSubmit(v, a) {
+    if (checkPin(v)) { st.pinFails = 0; st.pinLockUntil = 0; Store.save(); a.close(); onOk(); return; }
+    st.pinFails += 1;
+    if (st.pinFails >= GATE.pinTriesBeforeLock) {
+      st.pinLockUntil = Date.now() + Math.min(GATE.lockMaxMs, GATE.lockBaseMs * 2 ** (st.pinFails - GATE.pinTriesBeforeLock));
+      Store.save(); a.close(); toast(`Too many tries. Please wait ${waitText(st.pinLockUntil)}.`, 2600); return;
+    }
+    Store.save(); a.error(`Hmm, that's not the PIN. ${GATE.pinTriesBeforeLock - st.pinFails} more ${GATE.pinTriesBeforeLock - st.pinFails === 1 ? "try" : "tries"}.`);
   }});
-  api._onRecovered = onOk;
 }
-function forgotPin(onOk) {
-  const a = randInt(13, 29), b = randInt(12, 19);
-  pinPad({ title: "Grown-up question", msg: `What is ${a} × ${b}?`, length: String(a * b).length, onSubmit(v, api) {
-    if (Number(v) === a * b) { api.close(); state().pin = null; Store.save(); toast("Okay! Make a new PIN."); createPin(onOk); }
-    else api.error("Not quite. Try again!");
-  }});
+/** Reset a forgotten PIN. Passing the check only lets you set a new PIN; it never approves the action that was waiting. */
+function forgotPin() {
+  closeModal();
+  grownUpCheck("Reset the parent PIN", () => createPin(() => toast("New PIN saved! Now try again.", 2600)));
 }
 
 /* ==========================================================================
@@ -721,13 +866,19 @@ function forgotPin(onOk) {
 let view = { name: "picker" };   // current screen + its local state
 let lesson = null;               // active lesson state
 
+const NEEDS_PLAYER = ["home", "lesson", "results", "shop"];
 function render() {
   Speech.stop();
+  if (NEEDS_PLAYER.includes(view.name) && !player()) view = { name: "picker" };
+  if (view.name === "lesson" && !lesson) view = { name: player() ? "home" : "picker" };
+  if (view.name === "results" && !view.result) view = { name: "home" };
   $app.classList.toggle("wide", view.name === "lesson");
   ({ picker: renderPicker, addPlayer: renderAddPlayer, home: renderHome, lesson: renderQuestion,
      results: renderResults, shop: renderShop, parent: renderParent })[view.name]();
 }
+let lastNavAt = 0; // used to swallow stray double-taps that land on the next screen
 function go(name, extra = {}) {
+  lastNavAt = Date.now();
   document.querySelectorAll(".confetti, .float").forEach(el => el.remove());
   view = { name, ...extra }; render(); window.scrollTo(0, 0);
 }
@@ -750,12 +901,15 @@ function renderPicker() {
   const ps = state().profiles;
   $app.innerHTML = `<div class="hello" style="justify-content:center;margin-top:20px"><div class="mascot">${APP.mascot}</div></div>
     <h1 class="title">${esc(APP.name)}</h1>
-    <p class="subtitle">${ps.length ? "Who's playing today?" : `Hi! I'm ${APP.mascotName}. Let's make your player!`}</p>
+    <p class="subtitle">${!hasPin() && !ps.length ? `Hi! I'm ${APP.mascotName}. A grown-up needs to set things up first.` : ps.length ? "Who's playing today?" : `Hi! I'm ${APP.mascotName}. Let's make your player!`}</p>
+    ${!hasPin() ? `<div class="card" style="text-align:center"><h3>👋 Grown-ups: quick setup</h3>
+      <p class="muted" style="margin-top:0">Set a parent PIN so prizes and settings need your OK. Takes 30 seconds.</p>
+      <button class="btn brand" data-act="setup">Set up parent PIN</button></div>` : ""}
     <div class="players">
       ${ps.map(p => `<button class="playercard" data-act="choosePlayer" data-id="${p.id}">
         <span class="av">${p.avatar}</span><span class="nm">${esc(p.name)}</span>
         <span class="meta">🪙 ${p.tokens} · 🔥 ${liveStreak(p)}</span></button>`).join("")}
-      <button class="playercard add" data-act="addPlayer"><span class="av">➕</span><span class="nm">Add player</span></button>
+      ${hasPin() || ps.length ? `<button class="playercard add" data-act="addPlayer"><span class="av">➕</span><span class="nm">Add player</span></button>` : ""}
     </div>`;
 }
 
@@ -764,8 +918,8 @@ function renderAddPlayer() {
   const f = view.form || (view.form = { name: "", avatar: pickOne(AVATARS), pathId: "big" });
   $app.innerHTML = `<div class="top"><button class="iconbtn" data-act="picker" aria-label="Back">⬅️</button><h2>New player</h2></div>
     <div class="form">
-      <label for="pname">What's your name?</label>
-      <input id="pname" class="text" maxlength="16" autocomplete="off" placeholder="Type your name" value="${esc(f.name)}">
+      <label for="pname">Nickname</label>
+      <input id="pname" class="text" maxlength="16" autocomplete="off" autocorrect="off" placeholder="Type a nickname" value="${esc(f.name)}">
       <label>Pick your buddy</label>
       <div class="avgrid">${AVATARS.map(a => `<button class="avopt ${a === f.avatar ? "on" : ""}" data-act="pickAvatar" data-v="${a}">${a}</button>`).join("")}</div>
       <label>Which path?</label>
@@ -780,7 +934,7 @@ function renderAddPlayer() {
 /* ---------- Home / map ---------- */
 function greeting(pl) {
   const s = liveStreak(pl);
-  if (pl.lessonsDone === 0) return `Hi ${esc(pl.name)}! Tap the bouncing circle to start your first puzzle!`;
+  if (pl.lessonsDone === 0) return `Hi ${esc(pl.name)}! Tap the glowing circle to start your first puzzle!`;
   if (pl.lastPlay === todayStr()) return `Nice work today, ${esc(pl.name)}! 🔥 ${s}-day streak!`;
   if (s > 0) return `Welcome back, ${esc(pl.name)}! Play a lesson to keep your 🔥 ${s}-day streak!`;
   return `Welcome back, ${esc(pl.name)}! Ready to think?`;
@@ -798,19 +952,54 @@ function renderHome() {
         <div class="trackhead"><span class="te">${t.emoji}</span><div><h2>${esc(t.title)}</h2><p>${esc(t.blurb)}</p></div></div>
         <div class="path">${t.levels.map((lv, li) => {
           const p = progOf(pl, pathId, ti, li), un = isUnlocked(pl, pathId, ti, li), next = un && !p.done;
-          return `<div class="stop" style="transform:translateX(${offsets[li % offsets.length]}px)">
-            <button class="node ${p.done ? "done" : ""} ${un ? "" : "locked"} ${next ? "next" : ""}" data-act="startLesson"
-              data-path="${pathId}" data-t="${ti}" data-l="${li}" aria-label="${esc(lv.name)}">${un ? (p.done ? "⭐" : li + 1) : "🔒"}</button>
-            <div class="nlabel">${esc(lv.name)}</div><div class="stars">${p.done ? starStr(p.stars || 0) : ""}</div>
-            ${next ? `<div class="startTag">START</div>` : ""}</div>`;
+          const attrs = `data-path="${pathId}" data-t="${ti}" data-l="${li}"`;
+          return `<button class="stop" style="transform:translateX(${offsets[li % offsets.length]}px)" data-act="startLesson" ${attrs}
+              aria-label="${esc(lv.name)}${un ? "" : " (locked)"}">
+            <span class="node ${p.done ? "done" : ""} ${un ? "" : "locked"} ${next ? "next" : ""}" ${attrs}>${un ? (p.done ? "⭐" : li + 1) : "🔒"}</span>
+            <span class="nlabel">${esc(lv.name)}</span><span class="stars">${p.done ? starStr(p.stars || 0) : ""}</span>
+            ${next ? `<span class="startTag">START</span>` : ""}</button>`;
         }).join("")}</div>
       </section>`).join("")}`;
 }
 
 /* ---------- Lesson ---------- */
+const LessonSave = {
+  key: APP.storageKey + ".lesson",
+  maxAgeMs: 12 * 3600000,
+  save() {
+    if (!lesson) return this.clear();
+    try {
+      localStorage.setItem(this.key, JSON.stringify({ ...lesson, mastered: [...lesson.mastered], missed: [...lesson.missed],
+        profileId: state().activeId, savedAt: Date.now() }));
+    } catch (e) { /* ignore */ }
+  },
+  clear() { try { localStorage.removeItem(this.key); } catch (e) {} },
+  /** Returns a validated lesson object or null. */
+  load() {
+    let d = null;
+    try { d = JSON.parse(localStorage.getItem(this.key)); } catch (e) { d = null; }
+    if (!d || typeof d !== "object") return null;
+    const path = PATHS.find(x => x.id === d.pathId), track = path && path.tracks[d.ti], level = track && track.levels[d.li];
+    const n = level ? level.qs.length : 0, okIdx = i => Number.isInteger(i) && i >= 0 && i < n;
+    const valid = level && state().profiles.some(p => p.id === d.profileId) && Array.isArray(d.queue) && d.queue.every(okIdx)
+      && Array.isArray(d.mastered) && d.mastered.every(okIdx) && Array.isArray(d.missed) && d.missed.every(okIdx)
+      && (d.cur === null || okIdx(d.cur)) && typeof d.savedAt === "number" && Date.now() - d.savedAt < this.maxAgeMs;
+    if (!valid) { this.clear(); return null; }
+    if (d.cur === null && !d.queue.length) return (this.clear(), null);
+    const nChoices = d.cur !== null ? level.qs[d.cur].c.length : 0;
+    const order = Array.isArray(d.order) && d.order.length === nChoices && [...d.order].sort().every((v, i) => v === i) ? d.order : null;
+    const fb = d.feedback && typeof d.feedback === "object" && Number.isInteger(d.feedback.picked) && d.feedback.picked >= 0 && d.feedback.picked < nChoices
+      ? { picked: d.feedback.picked, ok: d.feedback.picked === 0, gained: Math.max(0, d.feedback.gained | 0), comboNote: String(d.feedback.comboNote || "") } : null;
+    return { profileId: d.profileId, lesson: { pathId: d.pathId, ti: d.ti, li: d.li, replay: !!d.replay, total: n, queue: d.queue.slice(),
+      mastered: new Set(d.mastered), missed: new Set(d.missed), mistakes: Math.max(0, d.mistakes | 0), earned: Math.max(0, d.earned | 0),
+      combo: Math.max(0, d.combo | 0), cur: d.cur, order: order || (d.cur !== null ? shuffle(level.qs[d.cur].c.map((_, i) => i)) : null),
+      answered: !!(d.answered && fb && order), feedback: d.answered && fb && order ? fb : null } };
+  },
+};
 function startLesson(pathId, ti, li) {
   const level = getPath(pathId).tracks[ti].levels[li];
-  lesson = { pathId, ti, li, total: level.qs.length, queue: level.qs.map((_, i) => i), mastered: new Set(),
+  const replay = !!progOf(player(), pathId, ti, li).done;
+  lesson = { pathId, ti, li, replay, total: level.qs.length, queue: level.qs.map((_, i) => i), mastered: new Set(),
              missed: new Set(), mistakes: 0, earned: 0, combo: 0, cur: null, order: null, answered: false };
   nextQuestion();
 }
@@ -822,7 +1011,8 @@ function nextQuestion() {
   if (!lesson.queue.length) return finishLesson();
   lesson.cur = lesson.queue.shift();
   lesson.order = shuffle(lessonTrack().levels[lesson.li].qs[lesson.cur].c.map((_, i) => i));
-  lesson.answered = false;
+  lesson.answered = false; lesson.feedback = null;
+  LessonSave.save();
   go("lesson");
   if (player().readAloud) Speech.say(questionSpeech(lessonQ()));
 }
@@ -832,7 +1022,7 @@ function renderQuestion() {
   $app.innerHTML = `<div style="--c:${t.color};--cd:${t.dark}">
     <div class="lhead"><button class="iconbtn" data-act="quitLesson" aria-label="Quit lesson">✕</button>
       <div class="bar"><div class="fill" style="width:${lesson.mastered.size / lesson.total * 100}%"></div></div>
-      <div class="pill tok">🪙 <b data-tokens>${pl.tokens}</b></div></div>
+      ${lesson.replay ? `<div class="pill" title="Practice round">🔁 Practice</div>` : `<div class="pill tok" title="Tokens you'll get when you finish">🪙 <b data-pot>+${lesson.earned}</b></div>`}</div>
     <div class="lbody">
       <div class="qcard ${Speech.supported ? "hasSpeak" : ""}">
         ${Speech.supported ? `<button class="iconbtn speak" data-act="speakQ" aria-label="Read aloud">🔊</button>` : ""}
@@ -849,46 +1039,73 @@ function answer(btn) {
   if (lesson.answered) return;
   lesson.answered = true;
   const pl = player(), q = lessonQ(), picked = Number(btn.dataset.i), ok = picked === 0;
+  let gained = 0, comboNote = "";
+  if (ok) {
+    const first = !lesson.missed.has(lesson.cur);
+    lesson.combo = first ? lesson.combo + 1 : 0;
+    if (!lesson.replay) { // per-question tokens only the first time through a lesson; paid out when the lesson is finished
+      gained = first ? REWARDS.firstTry : REWARDS.retry;
+      if (first && lesson.combo % REWARDS.comboEvery === 0) { gained += REWARDS.comboBonus; comboNote = ` · ${lesson.combo} in a row! 🔥`; }
+    } else if (first && lesson.combo % REWARDS.comboEvery === 0) comboNote = ` · ${lesson.combo} in a row! 🔥`;
+    lesson.mastered.add(lesson.cur); lesson.earned += gained;
+    Sound.good(); if (gained) floatText(btn, `+${gained} 🪙`);
+  } else {
+    lesson.mistakes++; lesson.combo = 0; lesson.missed.add(lesson.cur); lesson.queue.push(lesson.cur); Sound.oops();
+  }
+  lesson.feedback = { picked, ok, gained, comboNote };
+  LessonSave.save(); // save the scored answer before anything else can happen
+  showFeedback(lesson.feedback);
+  if (pl.readAloud) Speech.say((ok ? "Correct! " : "Not quite. ") + q.why);
+}
+/** Draws the answered state + feedback sheet. Pure display: safe to call again after a reload. */
+function showFeedback({ picked, ok, gained, comboNote }) {
+  const q = lessonQ();
   document.querySelectorAll(".choice").forEach(b => {
     const i = Number(b.dataset.i); b.disabled = true;
     b.classList.add(i === 0 ? "correct" : i === picked ? "wrong" : "dim");
   });
-  let gained = 0, comboNote = "";
-  if (ok) {
-    const first = !lesson.missed.has(lesson.cur);
-    gained = first ? REWARDS.firstTry : REWARDS.retry;
-    lesson.combo = first ? lesson.combo + 1 : 0;
-    if (first && lesson.combo % REWARDS.comboEvery === 0) { gained += REWARDS.comboBonus; comboNote = ` · ${lesson.combo} in a row! 🔥`; }
-    lesson.mastered.add(lesson.cur); lesson.earned += gained;
-    addTokens(pl, gained); Sound.good(); floatText(btn, `+${gained} 🪙`);
-    document.querySelectorAll("[data-tokens]").forEach(el => el.textContent = pl.tokens);
-    document.querySelector(".bar .fill").style.width = (lesson.mastered.size / lesson.total * 100) + "%";
-  } else {
-    lesson.mistakes++; lesson.combo = 0; lesson.missed.add(lesson.cur); lesson.queue.push(lesson.cur); Sound.oops();
-  }
+  document.querySelectorAll("[data-pot]").forEach(el => el.textContent = "+" + lesson.earned);
+  document.querySelector(".bar .fill").style.width = (lesson.mastered.size / lesson.total * 100) + "%";
   const sheet = document.getElementById("sheet");
   sheet.className = "sheet " + (ok ? "good" : "oops");
   sheet.innerHTML = `<div class="inner">
       <div><h3>${ok ? "🎉 " + pickOne(PRAISE) : "💛 " + pickOne(GENTLE)}</h3>
-        <p>${esc(q.why)}</p>${ok ? `<p class="muted">+${gained} tokens${comboNote}</p>` : `<p class="muted">We'll try this one again in a bit 👍</p>`}</div>
+        <p>${esc(q.why)}</p>${ok ? `<p class="muted">${lesson.replay ? "Practice round 💪" : `+${gained} tokens`}${comboNote}</p>` : `<p class="muted">We'll try this one again in a bit 👍</p>`}</div>
       <div class="row">${Speech.supported ? `<button class="iconbtn" data-act="speakWhy" aria-label="Read aloud">🔊</button>` : ""}
         <button class="btn ${ok ? "" : "oops"}" data-act="continue">Continue</button></div></div>`;
   requestAnimationFrame(() => {
     sheet.classList.add("show");
     document.querySelector(".sheetpad").style.height = (sheet.offsetHeight + 10) + "px";
+    keepAnswerVisible(sheet);
   });
-  if (pl.readAloud) Speech.say((ok ? "Correct! " : "Not quite. ") + q.why);
+}
+/** If the feedback sheet would cover the right answer, scroll just enough to show it, never past the question card. */
+function keepAnswerVisible(sheet) {
+  const target = document.querySelector(".choice.correct"), card = document.querySelector(".qcard");
+  if (!target || !card) return;
+  const sheetTop = window.innerHeight - sheet.offsetHeight;
+  const hiddenBy = target.getBoundingClientRect().bottom - (sheetTop - 12);
+  if (hiddenBy <= 0) return;
+  const maxScroll = Math.max(0, card.getBoundingClientRect().top - 8); // keep the top of the question on screen
+  window.scrollBy({ top: Math.min(hiddenBy, maxScroll || hiddenBy) });
 }
 function finishLesson() {
+  LessonSave.clear();
   const pl = player(), key = progKey(lesson.pathId, lesson.ti, lesson.li);
   const prev = pl.progress[key] || {};
   const stars = lesson.mistakes === 0 ? 3 : lesson.mistakes <= 2 ? 2 : 1;
-  const lines = [["Correct answers", lesson.earned]];
-  const finish = prev.done ? REWARDS.lessonReplay : REWARDS.lessonFirstClear;
-  lines.push([prev.done ? "Lesson replay" : "Finished a new lesson!", finish]);
-  if (lesson.mistakes === 0) lines.push(["Perfect lesson!", REWARDS.perfect]);
-  // daily streak
   const today = todayStr();
+  const lines = [];
+  if (!prev.done) {
+    lines.push(["Correct answers", lesson.earned], ["Finished a new lesson!", REWARDS.lessonFirstClear]);
+  } else {
+    if (pl.replayDay !== today) { pl.replayDay = today; pl.replayCount = 0; }
+    const paid = pl.replayCount < REWARDS.replaysPaidPerDay;
+    pl.replayCount += 1;
+    lines.push([paid ? "Practice replay" : "Practice replay (daily bonus used up)", paid ? REWARDS.lessonReplay : 0]);
+  }
+  if (stars === 3 && (prev.stars || 0) < 3) lines.push([prev.done ? "New best: 3 stars!" : "Perfect lesson!", REWARDS.perfect]);
+  // daily streak
   let streakBonus = 0;
   if (pl.lastPlay !== today) {
     pl.streak = pl.lastPlay === yesterdayStr() ? pl.streak + 1 : 1;
@@ -896,16 +1113,16 @@ function finishLesson() {
     streakBonus = REWARDS.streakPerDay * Math.min(pl.streak, REWARDS.streakCap);
     lines.push([`🔥 ${pl.streak}-day streak bonus`, streakBonus]);
   }
-  const bonus = lines.slice(1).reduce((s, l) => s + l[1], 0);
-  addTokens(pl, bonus);
+  const total = lines.reduce((s, l) => s + l[1], 0);
+  addTokens(pl, total);
   pl.progress[key] = { done: true, stars: Math.max(stars, prev.stars || 0), plays: (prev.plays || 0) + 1, last: Date.now() };
   pl.lessonsDone++;
   Store.save();
-  const result = { stars, lines, total: lesson.earned + bonus, pathId: lesson.pathId };
+  const result = { stars, lines, total, pathId: lesson.pathId };
   lesson = null;
   go("results", { result });
   Sound.win(); confetti();
-  if (pl.readAloud) Speech.say(`Lesson complete! You earned ${result.total} tokens!`);
+  if (pl.readAloud) Speech.say(result.total ? `Lesson complete! You earned ${result.total} tokens!` : "Lesson complete! Great practice!");
 }
 function renderResults() {
   const r = view.result, pl = player();
@@ -943,6 +1160,7 @@ function redeem(id) {
   const pl = player(), prize = state().prizes.find(p => p.id === id);
   if (!prize || pl.tokens < prize.cost) return;
   requireGrownUp(`${pl.name} wants “${prize.name}” for ${prize.cost} tokens. Grown-up, enter your PIN to say yes.`, () => {
+    if (player() !== pl || pl.tokens < prize.cost) { toast("Not enough tokens for that one yet!"); render(); return; }
     pl.tokens -= prize.cost;
     state().log.unshift({ ts: Date.now(), profileId: pl.id, who: pl.name, avatar: pl.avatar, emoji: prize.emoji, name: prize.name, cost: prize.cost });
     Store.save(); render(); Sound.win(); confetti(120);
@@ -977,7 +1195,7 @@ function renderParent() {
     <div class="card"><h3>Prizes (shared by all players)</h3>
       <p class="muted" style="margin-top:0">Changes save automatically. Each kid spends their own tokens.</p>
       ${st.prizes.map(p => `<div class="prow">
-        <input class="text emo" maxlength="4" value="${esc(p.emoji)}" data-field="emoji" data-kind="prize" data-id="${p.id}" aria-label="Emoji">
+        <input class="text emo" maxlength="16" value="${esc(p.emoji)}" data-field="emoji" data-kind="prize" data-id="${p.id}" aria-label="Emoji">
         <input class="text" maxlength="60" value="${esc(p.name)}" data-field="name" data-kind="prize" data-id="${p.id}" aria-label="Prize name">
         <input class="text" type="number" inputmode="numeric" min="1" max="9999" value="${p.cost}" data-field="cost" data-kind="prize" data-id="${p.id}" aria-label="Cost">
         <button class="iconbtn" data-act="deletePrize" data-id="${p.id}" aria-label="Delete prize">🗑️</button></div>`).join("")}
@@ -993,6 +1211,7 @@ function renderParent() {
         <label class="toggle"><input type="checkbox" ${st.sound ? "checked" : ""} data-field="sound" data-kind="app"> Sound effects</label>
         <button class="btn small ghost" data-act="changePin">Change PIN</button></div>
       <p class="muted">Tip: on iPad, tap Share → “Add to Home Screen” to use ${esc(APP.name)} like an app. Progress is saved on this device.</p>
+      <p class="muted" style="font-size:15px">Version ${APP.version}</p>
     </div>`;
 }
 function onParentFieldChange(el) {
@@ -1018,42 +1237,45 @@ function onParentFieldChange(el) {
 const actions = {
   picker() { Speech.stop(); go("picker"); },
   addPlayer() { go("addPlayer"); },
-  pickAvatar(el) { view.form.avatar = el.dataset.v; render(); },
-  pickPath(el) { view.form.pathId = el.dataset.v; render(); },
+  setup() { if (hasPin()) return render(); startGrownUpSetup(() => go(state().profiles.length ? "picker" : "addPlayer")); },
+  pickAvatar(el) { if (!view.form) return; view.form.avatar = el.dataset.v; render(); },
+  pickPath(el) { if (!view.form) return; view.form.pathId = el.dataset.v; render(); },
   savePlayer() {
-    const f = view.form, name = f.name.trim();
-    if (!name) { toast("Type your name first! ✏️"); document.getElementById("pname").focus(); return; }
+    const f = view.form; if (!f) return;
+    const name = f.name.trim();
+    if (!name) { toast("Type a nickname first! ✏️"); document.getElementById("pname").focus(); return; }
     const p = newProfile(name.slice(0, 16), f.avatar, f.pathId);
     state().profiles.push(p); state().activeId = p.id; Store.save(); Sound.win(); go("home");
   },
-  choosePlayer(el) { state().activeId = el.dataset.id; Store.save(); Sound.tap(); go("home"); },
+  choosePlayer(el) { LessonSave.clear(); lesson = null; if (!state().profiles.some(p => p.id === el.dataset.id)) return go("picker"); state().activeId = el.dataset.id; Store.save(); Sound.tap(); go("home"); },
   home() { go("home"); },
   viewPath(el) { view.pathId = el.dataset.v; render(); },
   startLesson(el) {
+    if (!player()) return go("picker");
     const pathId = el.dataset.path, ti = Number(el.dataset.t), li = Number(el.dataset.l);
     if (!isUnlocked(player(), pathId, ti, li)) { toast("🔒 Finish the level before this one to unlock it!"); return; }
     Sound.tap(); startLesson(pathId, ti, li);
   },
-  answer(el) { answer(el); },
-  continue() { nextQuestion(); },
-  speakQ() { Speech.say(questionSpeech(lessonQ())); },
-  speakWhy() { Speech.say(lessonQ().why); },
-  quitLesson() { confirmBox("Leave this lesson?", "Tokens you already earned are saved.", "Leave", () => { lesson = null; go("home"); }); },
+  answer(el) { if (lesson && !lesson.answered) answer(el); },
+  continue() { if (lesson && lesson.answered) nextQuestion(); },
+  speakQ() { if (lesson) Speech.say(questionSpeech(lessonQ())); },
+  speakWhy() { if (lesson) Speech.say(lessonQ().why); },
+  quitLesson() { confirmBox("Leave this lesson?", lesson && !lesson.replay ? "Tokens are saved when you finish the lesson. If you leave now, this lesson's tokens won't count." : "You can come back any time!", "Leave", () => { lesson = null; LessonSave.clear(); go("home"); }); },
   shop() { go("shop"); },
   redeem(el) { redeem(el.dataset.id); },
   parent() { requireGrownUp("This area is for grown-ups.", () => go("parent")); },
   leaveParent() { go(player() ? "home" : "picker"); },
-  adjTokens(el) { const p = state().profiles.find(x => x.id === el.dataset.id); p.tokens = Math.max(0, p.tokens + Number(el.dataset.v)); Store.save(); render(); },
+  adjTokens(el) { const p = state().profiles.find(x => x.id === el.dataset.id); if (!p) return; p.tokens = Math.max(0, p.tokens + Number(el.dataset.v)); Store.save(); render(); },
   resetPlayer(el) {
     const p = state().profiles.find(x => x.id === el.dataset.id);
     confirmBox(`Reset ${p.name}?`, "This clears their lessons, stars, streak, and tokens.", "Reset", () => {
-      Object.assign(p, { tokens: 0, totalEarned: 0, streak: 0, lastPlay: null, progress: {}, lessonsDone: 0 }); Store.save(); render();
+      Object.assign(p, { tokens: 0, totalEarned: 0, streak: 0, lastPlay: null, progress: {}, lessonsDone: 0, replayDay: null, replayCount: 0 }); LessonSave.clear(); Store.save(); render();
     }, true);
   },
   deletePlayer(el) {
     const st = state(), p = st.profiles.find(x => x.id === el.dataset.id);
     confirmBox(`Delete ${p.name}?`, "This removes the player and all their progress.", "Delete", () => {
-      st.profiles = st.profiles.filter(x => x.id !== p.id); if (st.activeId === p.id) st.activeId = null; Store.save(); render();
+      st.profiles = st.profiles.filter(x => x.id !== p.id); if (st.activeId === p.id) st.activeId = null; LessonSave.clear(); Store.save(); render();
     }, true);
   },
   addPrize() { state().prizes.push({ id: uid(), emoji: "🎁", name: "New prize", cost: 20 }); Store.save(); render(); },
@@ -1063,21 +1285,46 @@ const actions = {
   },
   changePin() { createPin(() => {}); },
 };
+const NAV_GUARD_MS = 350;
+function recover(err) {
+  console.error("[recovered]", err);
+  try { closeModal(); lesson = null; go(player() ? "home" : "picker"); toast("Oops! Let's go back to the map. 🗺️"); }
+  catch (e2) { $app.innerHTML = `<div class="card" style="text-align:center"><h3>Oops!</h3><p>Something went wrong.</p><button class="btn" onclick="location.reload()">Start again</button></div>`; }
+}
 document.addEventListener("click", e => {
   const el = e.target.closest("[data-act]");
-  if (!el || el.disabled) return;
+  if (!el || el.disabled || el.getAttribute("aria-disabled") === "true") return;
+  if (Date.now() - lastNavAt < NAV_GUARD_MS && !el.closest(".overlay")) return; // stray tap from the previous screen
   const fn = actions[el.dataset.act];
-  if (fn) fn(el, e);
+  if (!fn) return;
+  try { fn(el, e); } catch (err) { recover(err); }
 });
-document.addEventListener("change", e => { if (e.target.matches("[data-kind]")) onParentFieldChange(e.target); });
+document.addEventListener("change", e => { if (e.target.matches("[data-kind]")) { try { onParentFieldChange(e.target); } catch (err) { recover(err); } } });
+document.addEventListener("touchstart", e => { // enables :active press styles on iOS; pauses the level ring while touched
+  const stop = e.target.closest && e.target.closest(".stop"); if (stop) stop.classList.add("touched");
+}, { passive: true });
+document.addEventListener("touchend", () => document.querySelectorAll(".stop.touched").forEach(el => el.classList.remove("touched")), { passive: true });
+window.addEventListener("resize", () => {
+  const sheet = document.querySelector(".sheet.show"), pad = document.querySelector(".sheetpad");
+  if (sheet && pad) pad.style.height = (sheet.offsetHeight + 10) + "px";
+});
 
 /* ==========================================================================
    INIT
    ========================================================================== */
 Store.load();
 Speech.pickVoice();
-go("picker"); // always start on the "Who's playing?" screen
-window.__app = { PATHS, Store, get lesson() { return lesson; } }; // for automated tests
+const resumed = LessonSave.load();
+if (resumed) {
+  // A reload or crash mid-lesson: pick up where the kid left off. Tokens are only paid at the end, so nothing is re-earned.
+  state().activeId = resumed.profileId; Store.save(); lesson = resumed.lesson;
+  if (lesson.cur === null) nextQuestion();      // between questions
+  else { go("lesson"); if (lesson.feedback) showFeedback(lesson.feedback); } // same puzzle, same answer order; never re-scored
+  toast("Welcome back! Let's keep going. 🦉");
+} else go("picker"); // otherwise always start on the "Who's playing?" screen
+lastNavAt = 0; // nothing to guard against on first load
+if (/[?&]test=1\b/.test(location.search)) window.__app = { PATHS, Store, get lesson() { return lesson; } }; // automated tests only
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch (e) {}
 </script>
 </body>
 </html>
