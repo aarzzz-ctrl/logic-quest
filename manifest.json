@@ -1,7 +1,7 @@
 {
-  "name": "Logic Quest",
-  "short_name": "Logic Quest",
-  "description": "Bite-size logic and reasoning puzzles for kids.",
+  "name": "Elzee",
+  "short_name": "Elzee",
+  "description": "Bite-size puzzles that build reasoning skills for kids.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
