@@ -676,7 +676,7 @@ const Store = {
       d.pinSalt = uid(); d.pinHash = hashPin(d.pinSalt, raw.pin);
     }
     for (const k of ["pinFails", "pinLockUntil", "checkFails", "checkLockUntil"]) d[k] = num(raw[k]);
-    if (!d.pinHash) { d.pinFails = 0; d.pinLockUntil = 0; d.checkFails = 0; d.checkLockUntil = 0; } // no PIN yet: nothing to lock
+    if (!d.pinHash) { d.pinFails = 0; d.pinLockUntil = 0; } // no PIN yet: nothing to lock
     d.checkLockUntil = Math.min(d.checkLockUntil, Date.now() + GATE.checkLockMs); // older builds could lock the math check for longer
     d.sound = typeof raw.sound === "boolean" ? raw.sound : true;
     return d;
