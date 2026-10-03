@@ -15,7 +15,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="app-version" content="1.3.6">
+<meta name="app-version" content="1.3.7">
 <style>
 /* Fredoka (SIL Open Font License, see OFL-Fredoka.txt), self-hosted so the app never waits on a third-party server */
 @font-face{font-family:"Fredoka";font-style:normal;font-weight:300 700;font-display:swap;src:url("fredoka-latin.woff2") format("woff2")}
@@ -380,6 +380,136 @@ const PATHS = [
         c: ["One carrot can't tell you about ALL vegetables", "Carrots are orange, but most other vegetables are green", "She ate too many carrots"], why: "One carrot is just one veggie. There are tons more to try!" }
     ]}
   ]}
+  ,
+  // ---- 1.3.7: new Little Thinkers worlds (picture-first; every choice has an emoji + a word so read-aloud works) ----
+  { id: "patterns", title: "What Comes Next?", emoji: "🌈", color: "#e84393", dark: "#b8256f", light: "#ffe6f2",
+    blurb: "Find the pattern and keep it going!",
+    levels: [
+    { name: "Color Beads", qs: [
+      { pic: "🔴 🔵 🔴 🔵 ❔", q: "Red, blue, red, blue…", ask: "What comes next?",
+        c: ["🔴 Red", "🔵 Blue", "🟢 Green"], why: "The beads go red, blue, red, blue. After blue comes red again!" },
+      { pic: "🐶 🐱 🐶 🐱 ❔", q: "Dog, cat, dog, cat…", ask: "Who comes next?",
+        c: ["🐶 Dog", "🐱 Cat", "🐭 Mouse"], why: "Dog, cat, dog, cat. After cat comes dog!" },
+      { pic: "⭐ ⭐ 🌙 ⭐ ⭐ 🌙 ❔", q: "Star, star, moon. Star, star, moon…", ask: "What comes next?",
+        c: ["⭐ Star", "🌙 Moon", "☀️ Sun"], why: "Two stars, then a moon. A new group starts with a star!" },
+      { pic: "🍎 🍌 🍎 ❔ 🍎 🍌", q: "Apple, banana, apple, a missing spot, apple, banana.", ask: "What is missing?",
+        c: ["🍌 Banana", "🍎 Apple", "🍇 Grapes"], why: "Apple and banana take turns. The missing spot comes right after an apple, so it's banana!" },
+      { pic: "🟢 🟡 🟢 🟡 🟢 ❔", q: "Green, yellow, green, yellow, green…", ask: "What comes next?",
+        c: ["🟡 Yellow", "🟢 Green", "🔴 Red"], why: "Green and yellow take turns. After green comes yellow!" }
+    ]},
+    { name: "Pattern Train", qs: [
+      { pic: "🐸 🐰 🐻 🐸 🐰 ❔", q: "Frog, bunny, bear. Frog, bunny…", ask: "Who comes next?",
+        c: ["🐻 Bear", "🐸 Frog", "🐰 Bunny"], why: "The train goes frog, bunny, bear, over and over. After bunny comes bear!" },
+      { pic: "👏 👏 🦶 👏 👏 🦶 ❔", q: "Clap, clap, stomp. Clap, clap, stomp…", ask: "What comes next?",
+        c: ["👏 Clap", "🦶 Stomp", "👋 Wave"], why: "Clap, clap, stomp is done, so it starts over. The new group begins with a clap!" },
+      { pic: "🔺 🟦 🟦 🔺 🟦 🟦 ❔", q: "Triangle, square, square. Triangle, square, square…", ask: "What comes next?",
+        c: ["🔺 Triangle", "🟦 Square", "⚪ Circle"], why: "One triangle, two squares, then it starts again with a triangle!" },
+      { pic: "☀️ 🌧️ ☀️ 🌧️ ❔ 🌧️", q: "Sun, rain, sun, rain, a missing spot, rain.", ask: "What is missing?",
+        c: ["☀️ Sun", "🌧️ Rain", "❄️ Snow"], why: "Sun and rain take turns. The spot right before rain is sun!" },
+      { pic: "🍓 🍓 🍋 🍓 🍓 🍋 🍓 ❔", q: "Strawberry, strawberry, lemon. Strawberry, strawberry, lemon. Strawberry…", ask: "What comes next?",
+        c: ["🍓 Strawberry", "🍋 Lemon", "🍊 Orange"], why: "Two strawberries come before each lemon. We only have one so far, so next is another strawberry!" }
+    ]},
+    { name: "Growing Patterns", qs: [
+      { pic: "🟣 · 🟣🟣 · 🟣🟣🟣 · ❔", q: "One dot, then two dots, then three dots…", ask: "How many dots come next?",
+        c: ["4️⃣ Four dots", "3️⃣ Three dots", "1️⃣ One dot"], why: "Each group gets one more dot: one, two, three… then four!" },
+      { pic: "🌱 ❔ 🌳", q: "A tiny sprout grows bigger and bigger until it is a tall tree.", ask: "What goes in the middle?",
+        c: ["🌿 A small plant", "🌰 A seed", "🍂 A dry leaf"], why: "Sprout, then a small plant, then a tree. It grows a little at a time! The seed comes before the sprout." },
+      { pic: "🐣 ❔ 🐔", q: "A baby chick hatches. Later it is a big hen.", ask: "What goes in the middle?",
+        c: ["🐥 A bigger chick", "🥚 An egg", "🍳 A fried egg"], why: "The egg comes BEFORE the chick hatches. In the middle, the chick is growing bigger!" },
+      { pic: "1️⃣ 2️⃣ 3️⃣ ❔ 5️⃣", q: "One, two, three, a missing spot, five.", ask: "What number is missing?",
+        c: ["4️⃣ Four", "6️⃣ Six", "2️⃣ Two"], why: "Counting goes one, two, three, four, five. Four is missing!" },
+      { pic: "2️⃣ 4️⃣ 6️⃣ ❔", q: "Two, four, six… jumping by twos!", ask: "What comes next?",
+        c: ["8️⃣ Eight", "7️⃣ Seven", "9️⃣ Nine"], why: "Jump by twos: two, four, six, eight! Seven is only one more, not two." }
+    ]},
+    { name: "Fix the Pattern", qs: [
+      { pic: "🐶 🐱 🐶 🐱 🐱", q: "The pattern is dog, cat, dog, cat. But the last one is wrong!", ask: "What should the last one be?",
+        c: ["🐶 Dog", "🐱 Cat", "🐰 Bunny"], why: "After cat comes dog. The last one should be a dog!" },
+      { pic: "⬆️ ⬇️ ⬆️ ⬇️ ❔", q: "Up, down, up, down…", ask: "Which way is next?",
+        c: ["⬆️ Up", "⬇️ Down", "➡️ Sideways"], why: "Up and down take turns. After down comes up!" },
+      { pic: "🍪 🥛 🍪 🥛 🍪 🥛", q: "Cookie, milk, cookie, milk, cookie, milk.", ask: "How many cookies are there?",
+        c: ["3️⃣ Three", "2️⃣ Two", "6️⃣ Six"], why: "Count only the cookies: one, two, three! The other three are milk." },
+      { pic: "🔵 🟡 🟡 🔵 🟡 🟡 🔵 ❔ ❔", q: "Blue, yellow, yellow. Blue, yellow, yellow. Blue…", ask: "What are the next TWO?",
+        c: ["🟡🟡 Yellow, yellow", "🔵🔵 Blue, blue", "🔵🟡 Blue, yellow"], why: "After every blue come two yellows!" },
+      { pic: "🎵 🎵 🥁 🎵 🎵 🥁", q: "La, la, BOOM! La, la, BOOM!", ask: "What is the rule?",
+        c: ["🎵🎵🥁 Two la's, then a boom", "🎵🥁 One la, then a boom", "🥁🥁🎵 Two booms, then a la"], why: "Listen: la, la, BOOM. It's two la's and then one boom!" }
+    ]},
+    { name: "Pattern Pro", qs: [
+      { pic: "🌞 🌜 🌞 🌜 ❔", q: "Morning, night, morning, night…", ask: "After the night, what comes next?",
+        c: ["🌞 Morning", "🌜 Night again", "🌧️ Rain"], why: "Day and night take turns, every single day! After night comes morning." },
+      { pic: "🐥🐥🐥 · 🐥🐥 · 🐥 · ❔", q: "Three chicks, then two chicks, then one chick…", ask: "How many chicks come next?",
+        c: ["0️⃣ None", "4️⃣ Four", "1️⃣ One"], why: "Each group has one less: three, two, one… then zero. All gone!" },
+      { pic: "🟥 🟧 🟨 🟩 ❔", q: "Red, orange, yellow, green… just like a rainbow!", ask: "What comes next?",
+        c: ["🟦 Blue", "🟥 Red", "🟫 Brown"], why: "Rainbow colors go red, orange, yellow, green, BLUE, and then purple!" },
+      { pic: "👟 👟 🧦 👟 👟 🧦 ❔ ❔ ❔", q: "Shoe, shoe, sock. Shoe, shoe, sock…", ask: "What are the next THREE?",
+        c: ["👟👟🧦 Shoe, shoe, sock", "🧦👟👟 Sock, shoe, shoe", "👟🧦🧦 Shoe, sock, sock"], why: "The whole group repeats: shoe, shoe, sock!" },
+      { pic: "🐞 · 🐞🐞 · 🐞 · 🐞🐞 · ❔", q: "One bug, two bugs, one bug, two bugs…", ask: "How many bugs come next?",
+        c: ["1️⃣ One bug", "2️⃣ Two bugs", "3️⃣ Three bugs"], why: "It goes one, two, one, two. After two comes one!" }
+    ]}
+  ]},
+  { id: "sort", title: "Odd One Out", emoji: "🧺", color: "#2f80ed", dark: "#1b5fbf", light: "#e6f0ff",
+    blurb: "Which one doesn't belong? Sort it out!",
+    levels: [
+    { name: "Not Like the Others", qs: [
+      { pic: "🍎 🍌 🍇 🚗", q: "Apple, banana, grapes, and a car.", ask: "Which one does NOT belong?",
+        c: ["🚗 Car", "🍎 Apple", "🍌 Banana"], why: "Apple, banana, and grapes are all fruits. A car is not a fruit!" },
+      { pic: "🐶 🐱 🐰 🌳", q: "Dog, cat, bunny, and a tree.", ask: "Which one does NOT belong?",
+        c: ["🌳 Tree", "🐶 Dog", "🐰 Bunny"], why: "Dog, cat, and bunny are animals. A tree is a plant!" },
+      { pic: "⚽ 🏀 🎾 🍕", q: "Soccer ball, basketball, tennis ball, and pizza.", ask: "Which one does NOT belong?",
+        c: ["🍕 Pizza", "⚽ Soccer ball", "🎾 Tennis ball"], why: "You play with balls. You EAT pizza!" },
+      { pic: "🚗 🚌 🚲 🐟", q: "Car, bus, bike, and a fish.", ask: "Which one does NOT belong?",
+        c: ["🐟 Fish", "🚌 Bus", "🚲 Bike"], why: "A car, a bus, and a bike take you places. A fish swims!" },
+      { pic: "☀️ 🌙 ⭐ 🧦", q: "Sun, moon, star, and a sock.", ask: "Which one does NOT belong?",
+        c: ["🧦 Sock", "🌙 Moon", "⭐ Star"], why: "The sun, moon, and stars are up in the sky. A sock goes on your foot!" }
+    ]},
+    { name: "Sorting Baskets", qs: [
+      { pic: "🧺 🍓 🍊", q: "This basket is only for fruit.", ask: "Which one can go in?",
+        c: ["🍐 Pear", "🥾 Boot", "🧸 Teddy bear"], why: "A pear is a fruit, so it goes in the fruit basket!" },
+      { pic: "❄️ ⛄ 🎒", q: "Mia packs her bag for a cold, snowy day.", ask: "What should she pack?",
+        c: ["🧥 A warm coat", "🩱 A swimsuit", "🩴 Flip-flops"], why: "Snow is cold! A warm coat keeps Mia toasty." },
+      { pic: "🌊 🐠 🐙", q: "Fish and octopuses live in the sea.", ask: "Who else lives in the sea?",
+        c: ["🦀 Crab", "🐄 Cow", "🐿️ Squirrel"], why: "Crabs live in the sea with the fish and octopuses. Cows and squirrels live on land!" },
+      { pic: "🍓 🚒", q: "Strawberries and fire trucks are both red.", ask: "Which one is red too?",
+        c: ["🍅 Tomato", "🍌 Banana", "🥦 Broccoli"], why: "Tomatoes are red, just like strawberries and fire trucks! Bananas are yellow and broccoli is green." },
+      { pic: "🦅 🦋 🐝", q: "An eagle, a butterfly, and a bee all have wings.", ask: "What can they all do?",
+        c: ["🕊️ Fly", "🏊 Swim underwater", "🗣️ Talk"], why: "Eagles, butterflies, and bees all have wings. They can fly!" }
+    ]},
+    { name: "Tricky Odd One", qs: [
+      { pic: "🐔 🦆 🦉 🐕", q: "Chicken, duck, owl, and dog.", ask: "Which one does NOT belong?",
+        c: ["🐕 Dog", "🦆 Duck", "🦉 Owl"], why: "The chicken, duck, and owl are birds with feathers. A dog has fur!" },
+      { pic: "🥕 🥦 🌽 🍩", q: "Carrot, broccoli, corn, and a donut.", ask: "Which one does NOT belong?",
+        c: ["🍩 Donut", "🥕 Carrot", "🌽 Corn"], why: "Carrots, broccoli, and corn are veggies. A donut is a sweet treat!" },
+      { pic: "🐘 🦒 🦁 🐜", q: "Elephant, giraffe, lion, and ant.", ask: "Which one is the odd one out?",
+        c: ["🐜 Ant", "🦒 Giraffe", "🦁 Lion"], why: "The elephant, giraffe, and lion are BIG animals. The ant is teeny tiny!" },
+      { pic: "✏️ 🖍️ 🖌️ 🥄", q: "Pencil, crayon, paintbrush, and spoon.", ask: "Which one does NOT belong?",
+        c: ["🥄 Spoon", "🖍️ Crayon", "✏️ Pencil"], why: "You draw with a pencil, a crayon, and a paintbrush. A spoon is for eating!" },
+      { pic: "🧊 ⛄ ❄️ 🔥", q: "Ice, snowman, snowflake, and fire.", ask: "Which one does NOT belong?",
+        c: ["🔥 Fire", "⛄ Snowman", "🧊 Ice"], why: "Ice, snowmen, and snowflakes are cold. Fire is HOT!" }
+    ]},
+    { name: "Look Closer", qs: [
+      { pic: "🐟 🐳 🐬 🐕", q: "Fish, whale, dolphin, and dog.", ask: "Which one does NOT live in the sea?",
+        c: ["🐕 Dog", "🐳 Whale", "🐬 Dolphin"], why: "Fish, whales, and dolphins live in the sea. A dog lives on land, even if it likes to splash!" },
+      { pic: "🍎 🍒 🍓 🍌", q: "Apple, cherries, strawberry, and banana. They are ALL fruit!", ask: "So which one is the odd one out?",
+        c: ["🍌 Banana", "🍒 Cherries", "🍓 Strawberry"], why: "They're all fruit, so look at the colors! The apple, cherries, and strawberry are red. The banana is yellow." },
+      { pic: "🚗 🚕 🚙 ✈️", q: "Car, taxi, jeep, and airplane. They ALL take you places!", ask: "So which one is the odd one out?",
+        c: ["✈️ Airplane", "🚕 Taxi", "🚙 Jeep"], why: "They all go places, but cars, taxis, and jeeps drive on the road. An airplane flies in the sky!" },
+      { pic: "🌷 🌻 🌹 🌲", q: "Tulip, sunflower, rose, and pine tree. They are ALL plants!", ask: "So which one is the odd one out?",
+        c: ["🌲 Pine tree", "🌻 Sunflower", "🌹 Rose"], why: "They're all plants, but tulips, sunflowers, and roses are flowers. A pine tree is a tree!" },
+      { pic: "😀 😃 😄 😢", q: "Three faces and one more face.", ask: "Which face is different?",
+        c: ["😢 The sad face", "😃 A happy face", "😄 A smiley face"], why: "Three faces are happy. One face is sad, so it's the odd one out!" }
+    ]},
+    { name: "Sorting Star", qs: [
+      { pic: "🐧 🌊", q: "Penny is a penguin. Penguins are birds, but they can't fly. They swim!", ask: "What can Penny do?",
+        c: ["🏊 Swim", "🕊️ Fly", "🐒 Climb trees"], why: "Penguins can't fly, but they are super swimmers!" },
+      { pic: "🍎🍌 · 🚗🚂 · 🚌", q: "One basket has fruit. One basket has things that go. Where does the bus go?", ask: "Which basket gets the bus?",
+        c: ["🚂 The things-that-go basket", "🍎 The fruit basket", "🗑️ The trash can"], why: "A bus is a thing that goes, like the car and the train!" },
+      { pic: "🍦 🧊 ☕", q: "Ice cream is cold. Ice is cold. Hot cocoa is hot.", ask: "Which one is NOT cold?",
+        c: ["☕ Hot cocoa", "🍦 Ice cream", "🧊 Ice"], why: "Ice cream and ice are cold. Hot cocoa is warm and toasty!" },
+      { pic: "🐄 🐑 🐖 🦁", q: "Cow, sheep, pig, and lion.", ask: "Which one does NOT live on a farm?",
+        c: ["🦁 Lion", "🐑 Sheep", "🐖 Pig"], why: "Cows, sheep, and pigs live on a farm. Lions live in the wild!" },
+      { pic: "👕 👖 🧦 🍌", q: "Shirt, pants, socks, and a banana.", ask: "Which one can you NOT wear?",
+        c: ["🍌 Banana", "👕 Shirt", "🧦 Socks"], why: "You wear shirts, pants, and socks. You eat a banana. Silly!" }
+    ]}
+  ]}
   ]
 },
 {
@@ -506,6 +636,160 @@ const PATHS = [
         c: ["Nugget is the only cat that was in the house", "The cake had pink frosting", "The cake was chocolate", "Nugget likes to nap"], why: "If Nugget is the only cat around, those cat paw prints almost have to be Nugget's!" }
     ]}
   ]}
+  ,
+  // ---- 1.3.7: new Big Thinkers worlds ----
+  { id: "codes", title: "Code Cave", emoji: "🔐", color: "#e84393", dark: "#b8256f", light: "#ffe6f2",
+    blurb: "Crack patterns, rules, and secret codes.",
+    levels: [
+    { name: "Number Trails", qs: [
+      { q: "Pip hops along the number trail: 3, 6, 9, 12, …", ask: "What number comes next?",
+        c: ["15", "13", "14", "18"], why: "Each hop adds 3: 3, 6, 9, 12, 15!" },
+      { q: "A tower has 2 blocks, then 4, then 8, then 16.", ask: "How many blocks come next?",
+        c: ["32", "18", "20", "24"], why: "The tower doubles each time: 16 + 16 = 32. Adding 2 would only give 18." },
+      { q: "Count down the trail: 50, 45, 40, 35, …", ask: "What number comes next?",
+        c: ["30", "25", "34", "45"], why: "Each step takes away 5. 35 − 5 = 30." },
+      { q: "A trail goes 1, 2, 4, 7, 11, … The jumps keep growing: +1, +2, +3, +4.", ask: "What number comes next?",
+        c: ["16", "15", "14", "22"], why: "The next jump is +5. 11 + 5 = 16!" },
+      { q: "A trail goes 1, 3, 5, 7, ?, 11.", ask: "Which number is missing?",
+        c: ["9", "8", "10", "6"], why: "Each number is 2 more than the one before: 7 + 2 = 9, and 9 + 2 = 11." }
+    ]},
+    { name: "Shape Codes", qs: [
+      { pic: "🔺 ⚪ ⚪ 🔺 ⚪ ⚪ 🔺 ⚪ ⚪", q: "The shapes go triangle, circle, circle, over and over.", ask: "What is the 10th shape?",
+        c: ["🔺 Triangle", "⚪ Circle", "🟦 Square"], why: "The pattern repeats every 3 shapes. Shapes 1, 4, 7, and 10 all start a group, so the 10th is a triangle!" },
+      { pic: "🟥 🟦 🟨 🟥 🟦 🟨", q: "Mia lays tiles: red, blue, yellow, over and over. She keeps going until she has 14 tiles.", ask: "What color is tile 14?",
+        c: ["🟦 Blue", "🟥 Red", "🟨 Yellow"], why: "Every 3 tiles the pattern starts again. Tile 12 is yellow (the end of a group), so tile 13 is red and tile 14 is blue." },
+      { pic: "🌑 🌓 🌕 🌗 🌑 🌓 ❔", q: "The moon shapes go: dark moon, half moon, full moon, other half moon, then dark again…", ask: "What comes next?",
+        c: ["🌕 Full moon", "🌑 Dark moon", "🌗 The other half moon"], why: "The group is dark, half, full, other half. After the first half moon comes the full moon!" },
+      { q: "Leo writes a letter pattern: A, B, B, C, C, C, D, D, D, D, …", ask: "How many E's will there be?",
+        c: ["5", "4", "6", "1"], why: "A shows up once, B twice, C three times, D four times. So E shows up 5 times!" },
+      { pic: "⬆️ ➡️ ⬇️ ⬅️ ⬆️ ➡️ ❔", q: "An arrow makes a quarter turn every step, like a clock hand: up, right, down, left, up, right…", ask: "Which way does it point next?",
+        c: ["⬇️ Down", "⬅️ Left", "⬆️ Up"], why: "Up, right, down, left, turning like a clock. After right comes down!" }
+    ]},
+    { name: "Secret Codes", qs: [
+      { q: "In Owl Code, every letter moves 1 forward in the alphabet: A→B, B→C, C→D. So CAT becomes DBU.", ask: "What does DOG become?",
+        c: ["EPH", "CNF", "EPG", "DOH"], why: "Move each letter 1 forward: D→E, O→P, G→H. EPH!" },
+      { q: "In Owl Code (each letter moves 1 forward), Hoot sends a secret word: IBU.", ask: "What is the real word?",
+        c: ["HAT", "JCV", "HIT", "BAT"], why: "To decode, move each letter 1 BACK: I→H, B→A, U→T. HAT!" },
+      { q: "In Number Code, A = 1, B = 2, C = 3, D = 4, and so on.", ask: "What word is 2-1-4?",
+        c: ["BAD", "CAB", "DAB", "ADD"], why: "2 is B, 1 is A, 4 is D. BAD!" },
+      { q: "In Number Code (A = 1, B = 2, C = 3…), Zoe adds up the letters of a word. ACE is 1 + 3 + 5.", ask: "What does ACE add up to?",
+        c: ["9", "8", "135", "15"], why: "1 + 3 + 5 = 9. (135 is just the numbers squished together, not added!)" },
+      { q: "In Flip Code, words are written backward. Max sends: TAOB.", ask: "What is the word?",
+        c: ["BOAT", "TABO", "BATO", "OATB"], why: "Read it from right to left: B-O-A-T. BOAT!" }
+    ]},
+    { name: "Rule Finders", qs: [
+      { q: "A number machine does this: 2 → 5, 4 → 7, 10 → 13.", ask: "What does 6 turn into?",
+        c: ["9", "12", "8", "3"], why: "The machine adds 3 every time. 6 + 3 = 9." },
+      { q: "Another machine: 1 → 2, 3 → 6, 5 → 10.", ask: "What does 7 turn into?",
+        c: ["14", "9", "12", "8"], why: "This machine doubles! 7 + 7 = 14. (It isn't +1 or +2, because 5 → 10 adds 5.)" },
+      { q: "Tia builds squares: 1 block, then 2 rows of 2 blocks, then 3 rows of 3 blocks.", ask: "How many blocks in the 4th square?",
+        c: ["16", "12", "8", "10"], why: "The 4th square is 4 rows of 4 blocks: 4 + 4 + 4 + 4 = 16." },
+      { q: "Robot Rex has a secret rule. He says YES to 4, 10, and 22. He says NO to 5, 9, and 15.", ask: "Which number will Rex say YES to?",
+        c: ["8", "7", "13", "21"], why: "Every YES number is even. Every NO number is odd. 8 is the only even choice!" },
+      { q: "Gina's rule picks words. APPLE: yes. EGG: yes. IGLOO: yes. BALL: no. TREE: no.", ask: "Which word does Gina's rule pick?",
+        c: ["OWL", "DOG", "CAT", "SUN"], why: "Every YES word starts with a vowel (A, E, I, O, U). OWL starts with O!" }
+    ]},
+    { name: "Grid Puzzles", qs: [
+      { pic: "🐱 🐶 🐭 · 🐶 🐭 🐱 · 🐭 🐱 ❔", q: "A 3-by-3 grid. Row 1: cat, dog, mouse. Row 2: dog, mouse, cat. Row 3: mouse, cat, and an empty spot. Every row and every column has each animal once.", ask: "What goes in the empty spot?",
+        c: ["🐶 Dog", "🐱 Cat", "🐭 Mouse"], why: "Row 3 already has a mouse and a cat, so it needs the dog! (The last column has mouse and cat too.)" },
+      { q: "Mini Sudoku! Each row uses 1, 2, and 3 exactly once. One row reads: 3, ?, 1.", ask: "Which number is missing?",
+        c: ["2", "3", "1", "4"], why: "The row already has 3 and 1. The only number left is 2." },
+      { q: "Big Sudoku! Each row and each column uses 1, 2, 3, and 4 once. Row B already has a 2 and a 4. One of its empty spots is in Column 1, and Column 1 already has a 1 in it.", ask: "What number goes in Row B, Column 1?",
+        c: ["3", "1", "2", "4"], why: "Row B still needs a 1 and a 3. Column 1 already has a 1, so this spot must be 3!" },
+      { q: "Handshakes: 2 kids shake hands 1 time. 3 kids shake 3 times. 4 kids shake 6 times. Everyone shakes hands with everyone once.", ask: "How many handshakes for 5 kids?",
+        c: ["10", "8", "9", "12"], why: "The jumps go +2, +3, then +4. 6 + 4 = 10! The new kid shakes hands with the 4 already there." },
+      { q: "On Day 1 there is 1 magic tile. Every day, each tile splits into 2 tiles.", ask: "How many tiles are there on Day 5?",
+        c: ["16", "10", "32", "8"], why: "Day 1: 1, Day 2: 2, Day 3: 4, Day 4: 8, Day 5: 16. It doubles every day!" }
+    ]},
+    { name: "Code Master", qs: [
+      { q: "In Super Owl Code, letters move 2 forward: A→C, B→D, C→E. Hoot writes: FQI.", ask: "What is the real word?",
+        c: ["DOG", "HSK", "EPH", "DIG"], why: "Move each letter 2 BACK: F→D, Q→O, I→G. DOG!" },
+      { q: "Bea's trail is supposed to add 4 each time, but one number is wrong: 4, 8, 12, 15, 20, 24.", ask: "Which number is wrong?",
+        c: ["15", "12", "20", "24"], why: "Adding 4 gives 4, 8, 12, 16, 20, 24. The 15 should be 16!" },
+      { q: "A letter pattern: A, C, E, G, …", ask: "What letter comes next?",
+        c: ["I", "H", "J", "F"], why: "Skip one letter each time: A (skip B) C (skip D) E (skip F) G (skip H) I!" },
+      { q: "Sam stacks cups in a triangle. The bottom row has 4 cups, the next row has 3, then 2, then 1 on top.", ask: "How many cups in all?",
+        c: ["10", "8", "9", "12"], why: "4 + 3 + 2 + 1 = 10 cups!" },
+      { q: "A light flashes every 3 seconds. A bell beeps every 4 seconds. They both start together at 0.", ask: "When do they next happen together?",
+        c: ["At 12 seconds", "At 7 seconds", "At 6 seconds", "At 8 seconds"], why: "Flashes: 3, 6, 9, 12. Beeps: 4, 8, 12. The first number in both lists is 12!" }
+    ]}
+  ]},
+  { id: "truth", title: "Truth Island", emoji: "🏝️", color: "#2f80ed", dark: "#1b5fbf", light: "#e6f0ff",
+    blurb: "Truth-Tellers, Fibbers, and who-has-what mysteries.",
+    levels: [
+    { name: "Truth or Fib?", qs: [
+      { q: "On Truth Island, Truth-Tellers ALWAYS tell the truth. Tilly is a Truth-Teller. Tilly says: “I have a pet parrot.”", ask: "What must be true?",
+        c: ["Tilly has a pet parrot", "Tilly does not have a parrot", "Tilly is fibbing", "We can't tell"], why: "Truth-Tellers always tell the truth, so Tilly really has a parrot!" },
+      { q: "Fibbers ALWAYS fib, so everything they say is false. Fergus the Fibber says: “It is sunny today.”", ask: "What must be true?",
+        c: ["It is not sunny", "It is sunny", "It is snowing for sure", "We can't tell anything"], why: "Fergus's words are false, so it is NOT sunny. It could be cloudy or rainy. We can't be sure it's snowing!" },
+      { q: "Fergus the Fibber says: “I am NOT hungry.”", ask: "What must be true?",
+        c: ["Fergus is hungry", "Fergus is not hungry", "Fergus just ate lunch", "We can't tell"], why: "Fergus always fibs, so the opposite is true: he IS hungry!" },
+      { q: "Tess is a Truth-Teller. Tess says: “Fergus took the last cookie.”", ask: "What must be true?",
+        c: ["Fergus took the last cookie", "Tess took the last cookie", "Nobody took the cookie", "We can't tell"], why: "Tess always tells the truth, so Fergus really did take it!" },
+      { q: "Fiona is a Fibber. She says: “My hat is blue.” Her hat is either blue or red.", ask: "What color is Fiona's hat?",
+        c: ["Red", "Blue", "Green", "We can't tell"], why: "Fiona fibs, so her hat is NOT blue. The only other choice is red!" }
+    ]},
+    { name: "Who Said It?", qs: [
+      { q: "One of these two is a Truth-Teller and one is a Fibber. Ana says: “2 + 2 = 4.” Bo says: “2 + 2 = 5.”", ask: "Who is the Fibber?",
+        c: ["Bo", "Ana", "Both of them", "Neither of them"], why: "2 + 2 really is 4, so Ana told the truth. Bo said something false, so Bo is the Fibber." },
+      { q: "Cleo lives on Truth Island. Cleo says: “Fish live in trees.”", ask: "What is Cleo?",
+        c: ["A Fibber", "A Truth-Teller", "We can't tell"], why: "Fish live in water, not trees. That's false, so Cleo is a Fibber!" },
+      { q: "Dex lives on Truth Island. Dex says: “I am a Truth-Teller.”", ask: "What do we know about Dex?",
+        c: ["We can't tell yet", "Dex is a Truth-Teller", "Dex is a Fibber"], why: "A Truth-Teller would say “I'm a Truth-Teller”… and a Fibber would fib and say it too! So this doesn't tell us anything." },
+      { q: "Eli says: “The sky is green AND grass is green.”", ask: "What is Eli?",
+        c: ["A Fibber", "A Truth-Teller", "We can't tell"], why: "An AND sentence is only true if BOTH parts are true. The sky isn't green, so the whole sentence is false. Eli fibbed!" },
+      { q: "Hana lives on Truth Island. Hana says: “Kids have two legs.”", ask: "What is Hana?",
+        c: ["A Truth-Teller", "A Fibber", "We can't tell"], why: "That's true! Fibbers never say true things, so Hana must be a Truth-Teller." }
+    ]},
+    { name: "Who Has What?", qs: [
+      { q: "Amy, Ben, and Cora each have one pet: a dog, a cat, or a fish. Amy has the fish. Ben does not have the dog.", ask: "Who has the dog?",
+        c: ["Cora", "Ben", "Amy", "We can't tell"], why: "Amy has the fish. Ben can't have the dog, so Ben has the cat. That leaves the dog for Cora!" },
+      { q: "Dan, Eve, and Fay each pick one ice cream: chocolate, vanilla, or strawberry. Eve picks vanilla. Fay does not pick chocolate.", ask: "What does Dan pick?",
+        c: ["Chocolate", "Vanilla", "Strawberry", "We can't tell"], why: "Eve has vanilla. Fay can't have chocolate, so Fay has strawberry. Dan gets chocolate!" },
+      { q: "Gil, Hope, and Ivy each play one instrument: a drum, a flute, or a piano. Gil's instrument has black and white keys. Hope does not blow into hers.", ask: "What does Ivy play?",
+        c: ["The flute", "The drum", "The piano", "We can't tell"], why: "Black and white keys means Gil plays piano. Hope doesn't blow, so she plays the drum. Ivy plays the flute!" },
+      { q: "Jo, Kip, and Liv live in a red, a blue, and a green house. Jo's house is not red or blue. Kip's house is not red.", ask: "Who lives in the red house?",
+        c: ["Liv", "Kip", "Jo", "We can't tell"], why: "Jo's house must be green. Kip's can't be red, so it's blue. Liv lives in the red house!" },
+      { q: "Max, Nell, and Ozzy came 1st, 2nd, and 3rd in a race. Max beat Nell. Ozzy did not come 1st. Nell did not come last.", ask: "Who came 3rd?",
+        c: ["Ozzy", "Nell", "Max", "We can't tell"], why: "Nell isn't last, and she can't be 1st because Max beat her. So Nell is 2nd, Max is 1st, and Ozzy is 3rd." }
+    ]},
+    { name: "Island Mysteries", qs: [
+      { q: "Pia and Quin: one is a Truth-Teller and one is a Fibber. Pia says: “Quin is the Fibber.”", ask: "What must be true?",
+        c: ["We can't tell who is who", "Pia is the Truth-Teller", "Quin is the Truth-Teller", "They are both Fibbers"], why: "If Pia tells the truth, Quin is the Fibber. If Pia is fibbing, Quin is the Truth-Teller. Both stories work, so we can't tell!" },
+      { q: "Rae says: “Sid is a Truth-Teller.” Sid says: “The moon is made of cheese.”", ask: "What is Rae?",
+        c: ["A Fibber", "A Truth-Teller", "We can't tell"], why: "The moon isn't cheese, so Sid is a Fibber. Rae called Sid a Truth-Teller, which is false. Rae is a Fibber too!" },
+      { q: "Tom says: “Uma and I are both Truth-Tellers.” Uma says: “Tom is a Fibber.”", ask: "What must be true?",
+        c: ["Tom is a Fibber and Uma is a Truth-Teller", "Tom and Uma are both Truth-Tellers", "Tom and Uma are both Fibbers", "Tom is a Truth-Teller and Uma is a Fibber"], why: "If Tom told the truth, Uma would be a Truth-Teller… but then she calls Tom a Fibber! That can't work. So Tom fibs, and Uma told the truth about him." },
+      { q: "A shell is hidden under the red rock or the blue rock. Vic is a Fibber. Vic says: “It's under the red rock.”", ask: "Where is the shell?",
+        c: ["Under the blue rock", "Under the red rock", "Under both rocks", "We can't tell"], why: "Vic fibs, so it's NOT under the red rock. The only other place is the blue rock!" },
+      { q: "Yara is a Truth-Teller. Yara says: “Xan always fibs.” Xan says: “Today is Monday.”", ask: "What must be true?",
+        c: ["Today is not Monday", "Today is Monday", "Today is Tuesday", "Yara is fibbing"], why: "Yara tells the truth, so Xan is a Fibber. That makes “Today is Monday” false. It isn't Monday! (It might not be Tuesday either.)" }
+    ]},
+    { name: "Grid Masters", qs: [
+      { q: "Abe, Bree, Cal, and Dina each bring one snack: apples, chips, grapes, or popcorn. Abe brings grapes. Bree's snack is not a fruit. Cal's snack is a fruit. Dina doesn't bring chips.", ask: "Who brings the popcorn?",
+        c: ["Dina", "Bree", "Cal", "Abe"], why: "Abe has grapes, so Cal (fruit) has apples. Dina can't have chips, so Dina has popcorn and Bree has chips!" },
+      { q: "Gus says: “I am a Fibber.” Everyone on Truth Island is a Truth-Teller or a Fibber.", ask: "What does this tell us?",
+        c: ["Gus can't be from Truth Island", "Gus is a Truth-Teller", "Gus is a Fibber", "Gus only fibs on Mondays"], why: "A Truth-Teller can't say “I'm a Fibber” (that's false). A Fibber can't say it either (that would be true!). So Gus must be a visitor!" },
+      { q: "Ike says: “At least one of us is a Fibber.” He means himself and Jay.", ask: "What must be true?",
+        c: ["Ike is a Truth-Teller and Jay is a Fibber", "Both are Fibbers", "Both are Truth-Tellers", "Ike is a Fibber and Jay is a Truth-Teller"], why: "If Ike were a Fibber, his words would be TRUE, and Fibbers can't say true things! So Ike tells the truth, and one of them really is a Fibber: Jay." },
+      { q: "Three boxes are labeled APPLES, BANANAS, and MIXED. Every label is WRONG. Zed reaches into the box labeled MIXED and pulls out a banana.", ask: "What is really in the box labeled APPLES?",
+        c: ["Both fruits mixed", "Only apples", "Only bananas", "We can't tell"], why: "The MIXED box can't really be mixed, so it's all bananas. The APPLES box can't be apples, and the bananas are taken, so it's the mixed box!" },
+      { q: "Ella, Theo, and Gia sit in seats 1, 2, and 3 and wear red, blue, and green. Ella sits in seat 1. The kid in green sits in seat 3. Theo wears blue. Gia does not sit next to Ella.", ask: "What color is Ella wearing?",
+        c: ["Red", "Blue", "Green", "We can't tell"], why: "Gia can't be in seat 2 (next to Ella), so Gia is in seat 3 and wears green. Theo wears blue. Ella gets red!" }
+    ]},
+    { name: "Truth Champion", qs: [
+      { q: "Hal, Ida, and Jen: exactly ONE is a Truth-Teller. Hal says: “Ida is a Fibber.” Ida says: “Jen is a Fibber.” Jen says: “Hal and Ida are both Fibbers.”", ask: "Who is the Truth-Teller?",
+        c: ["Ida", "Hal", "Jen", "We can't tell"], why: "Try each one! If Hal were truthful, Ida fibs, so Jen would be truthful too: two Truth-Tellers. If Jen were, Hal's “Ida is a Fibber” would be true, but Hal must fib. Only Ida works!" },
+      { q: "Kai, Lee, Mo, and Nan each fly one kite: red, yellow, green, or purple. Kai's kite is yellow. Lee's kite is not red or green. Mo's kite is not red.", ask: "Whose kite is red?",
+        c: ["Nan", "Mo", "Lee", "Kai"], why: "Lee can't have red, green, or yellow, so Lee has purple. Mo can't have red, so Mo has green. Nan has the red kite!" },
+      { q: "Fergus the Fibber says: “EVERY kid at the party wore a hat.”", ask: "What must be true?",
+        c: ["At least one kid did not wear a hat", "No kid at the party wore a hat", "Every kid wore a hat", "Fergus wore a hat"], why: "The opposite of “EVERY kid wore a hat” isn't “NO kid did.” It just means at least one kid didn't!" },
+      { q: "Tess the Truth-Teller says: “If it rains, I bring my umbrella.” Today Tess did NOT bring her umbrella.", ask: "What must be true?",
+        c: ["It did not rain today", "It rained today", "Tess lost her umbrella", "Tess is a Fibber"], why: "If it had rained, Tess would have her umbrella. She doesn't, so it didn't rain!" },
+      { q: "Two guards stand by two doors: one hides treasure, one hides a mud pit. One guard is a Truth-Teller, one is a Fibber, but you don't know which. You ask Guard A: “Would Guard B say the LEFT door has the treasure?” Guard A says: “Yes.”", ask: "Which door has the treasure?",
+        c: ["The right door", "The left door", "We can't tell"], why: "Whoever you ask, exactly one fib sneaks into the answer: the Truth-Teller honestly reports the Fibber's fib, or the Fibber fibs about the Truth-Teller's answer. So “yes, left” means the treasure is on the RIGHT!" }
+    ]}
+  ]}
   ]
 }
 ];
@@ -519,7 +803,7 @@ const APP = {
   mascot: "🦉",
   mascotName: "Professor Hoot",
   pinLength: 4,
-  version: "1.3.6",
+  version: "1.3.7",
 };
 const AVATARS = ["🦊","🐼","🦄","🐯","🐸","🐙","🦖","🐰","🐨","🦁","🐧","🐝","🐬","🦋","🐱","🐶"];
 const REWARDS = {
@@ -891,7 +1175,7 @@ const Speech = {
       || local.find(v => /^en[-_]US/i.test(v.lang)) || local.find(v => /^en/i.test(v.lang)) || null;
   },
   clean(text) {
-    return String(text).replace(/\p{Extended_Pictographic}|\uFE0F|\u200D|[❔☆]/gu, " ").replace(/[“”]/g, "").replace(/\s+/g, " ").trim();
+    return String(text).replace(/[0-9#*]\uFE0F?\u20E3/gu, " ").replace(/\p{Extended_Pictographic}|\uFE0F|\u200D|[❔☆]/gu, " ").replace(/[“”]/g, "").replace(/\s+/g, " ").trim();
   },
   say(text) {
     if (!this.supported) return;
@@ -1163,6 +1447,11 @@ function renderAddPlayer() {
 function greeting(pl) {
   const s = liveStreak(pl);
   if (pl.lessonsDone === 0) return `Hi ${esc(pl.name)}! Tap the glowing circle to start your first puzzle!`;
+  // 1.3.7: a kid who has finished a whole world but not started a newer one gets pointed at it (new worlds sit at the bottom of the map)
+  const path = getPath(pl.pathId);
+  const fresh = path.tracks.filter((t, ti) => !progOf(pl, path.id, ti, 0).done);
+  const finishedOne = path.tracks.some((t, ti) => t.levels.every((_, li) => progOf(pl, path.id, ti, li).done));
+  if (fresh.length && finishedOne) return `New worlds to explore, ${esc(pl.name)}! Scroll down to ${fresh.map(t => `${t.emoji} ${esc(t.title)}`).join(" and ")}! 🗺️`;
   if (pl.lastPlay === todayStr()) return `Nice work today, ${esc(pl.name)}! 🔥 ${s}-day streak!`;
   if (s > 0) return `Welcome back, ${esc(pl.name)}! Play a lesson to keep your 🔥 ${s}-day streak!`;
   return `Welcome back, ${esc(pl.name)}! Ready to think?`;
