@@ -15,7 +15,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="app-version" content="1.2.3">
+<meta name="app-version" content="1.3.3">
 <style>
 /* Fredoka (SIL Open Font License, see OFL-Fredoka.txt), self-hosted so the app never waits on a third-party server */
 @font-face{font-family:"Fredoka";font-style:normal;font-weight:300 700;font-display:swap;src:url("fredoka-latin.woff2") format("woff2")}
@@ -234,6 +234,14 @@ h1,h2,h3{margin:0;font-weight:700}
 @keyframes floatUp{to{transform:translateY(-90px);opacity:0}}
 .confetti{position:fixed;top:-20px;width:12px;height:18px;z-index:70;pointer-events:none;border-radius:3px;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+/* ---------- mini-games ---------- */
+.gamecard{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--ink);background:#fff;border-radius:var(--radius);
+  padding:14px 18px;margin:0 0 18px;box-shadow:0 6px 0 var(--line);min-height:76px}
+.gamecard:active{transform:translateY(4px);box-shadow:0 2px 0 var(--line)}
+.gamecard .ge{font-size:46px;line-height:1}
+.gamecard b{display:block;font-size:24px}
+.gamecard small{color:var(--muted);font-size:17px}
+.gamecard .go{margin-left:auto;font-size:30px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -511,7 +519,7 @@ const APP = {
   mascot: "🦉",
   mascotName: "Professor Hoot",
   pinLength: 4,
-  version: "1.2.3",
+  version: "1.3.3",
 };
 const AVATARS = ["🦊","🐼","🦄","🐯","🐸","🐙","🦖","🐰","🐨","🦁","🐧","🐝","🐬","🦋","🐱","🐶"];
 const REWARDS = {
@@ -696,6 +704,85 @@ const progOf = (pl, pathId, ti, li) => pl.progress[progKey(pathId, ti, li)] || {
 const isUnlocked = (pl, pathId, ti, li) => li === 0 || !!progOf(pl, pathId, ti, li - 1).done;
 const liveStreak = pl => (pl.lastPlay === todayStr() || pl.lastPlay === yesterdayStr()) ? pl.streak : 0;
 function addTokens(pl, n) { pl.tokens += n; pl.totalEarned += n; Store.save(); }
+
+/* ==========================================================================
+   MINI-GAMES: games keep their own storage and never write the main save.
+   Tokens are claimed here with a ledger in a separate key, so a claim can never pay twice
+   (even if a stale game tab writes an old "pending" value back) and never exceeds the cap.
+   ========================================================================== */
+const MINIGAMES = [
+  { id: "squishseats", name: "Squish Seats", emoji: "🪑", blurb: "Seat the squishy buddies!", href: "games/squish-seats.html",
+    key: "logicquest.minigame.squishseats.v1" },
+  { id: "jellyjars", name: "Jelly Jars", emoji: "🫙", blurb: "Sort the wobbly jellies!", href: "games/jelly-jars.html",
+    key: "logicquest.minigame.jellyjars.v1" },
+  { id: "sprouttrail", name: "Sprout Trail", emoji: "🌱", blurb: "Grow a garden trail!", href: "games/sprout-trail.html",
+    key: "logicquest.minigame.sprouttrail.v1" },
+  { id: "sillystories", name: "Silly Stories", emoji: "📖", blurb: "Fill in the silly story!", href: "games/silly-stories.html",
+    key: "logicquest.minigame.sillystories.v1",
+    interlude: true, role: "interlude", roundLabel: "1 story", minutes: 3, enabled: true },
+];
+const CLAIM_KEY = "logicquest.minigame.claims.v1"; // { [gameId]: { [profileId]: { claimed, day, today } } }
+function readJSON(key) { try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; } }
+function writeJSON(key, value) {
+  try { const text = JSON.stringify(value); localStorage.setItem(key, text); return localStorage.getItem(key) === text; } catch (e) { return false; }
+}
+const isObj = v => !!v && typeof v === "object" && !Array.isArray(v);
+const nonNeg = v => (typeof v === "number" && isFinite(v) ? Math.max(0, Math.floor(v)) : 0);
+/** Moves a kid's unclaimed mini-game tokens into their wallet. Returns [{game, n}] for what was paid. */
+function claimMiniGameTokens(pl) {
+  if (!pl) return [];
+  const paid = [], today = todayStr();
+  let rawLedger = null; try { rawLedger = localStorage.getItem(CLAIM_KEY); } catch (e) { return []; }
+  const parsed = readJSON(CLAIM_KEY);
+  const claims = isObj(parsed) ? parsed : {};
+  // An unreadable ledger (or game section) must never re-pay old tokens: rebase EVERY kid to "all claimed" in one write.
+  let rebased = false;
+  for (const g of MINIGAMES) {
+    if ((rawLedger !== null && !isObj(parsed)) || (claims[g.id] !== undefined && !isObj(claims[g.id]))) {
+      const raw = readJSON(g.key), kids = isObj(raw) && isObj(raw.kids) ? raw.kids : {};
+      claims[g.id] = {};
+      for (const id of Object.keys(kids)) if (isObj(kids[id])) claims[g.id][id] = { claimed: nonNeg(kids[id].lifetime), day: today, today: 0 };
+      rebased = true;
+    }
+  }
+  if (rebased && !writeJSON(CLAIM_KEY, claims)) return [];
+  for (const g of MINIGAMES) {
+    const raw = readJSON(g.key);
+    const kidRec = isObj(raw) && isObj(raw.kids) && isObj(raw.kids[pl.id]) ? raw.kids[pl.id] : null;
+    if (!kidRec) continue;
+    const lifetime = nonNeg(kidRec.lifetime); // the game only ever increases this
+    const byKid = isObj(claims[g.id]) ? claims[g.id] : {};
+    const r0 = isObj(byKid[pl.id]) ? byKid[pl.id] : {};
+    const recBroken = (pl.id in byKid && !isObj(byKid[pl.id])) || (isObj(byKid[pl.id]) && typeof byKid[pl.id].claimed !== "number");
+    const rec = { claimed: recBroken ? lifetime : nonNeg(r0.claimed), day: typeof r0.day === "string" ? r0.day : null, today: nonNeg(r0.today) };
+    if (lifetime < rec.claimed) rec.claimed = lifetime; // game data was wiped/repaired: rebase, never pay twice
+    if (rec.day !== today) { rec.day = today; rec.today = 0; }
+    const owed = lifetime - rec.claimed;
+    const cap = typeof g.claimCapPerDay === "number" && isFinite(g.claimCapPerDay) ? g.claimCapPerDay : Infinity; // no cap = pay all owed
+    const n = Math.max(0, Math.min(owed, cap - rec.today));
+    if (n > 0) {
+      rec.claimed += n; rec.today += n;
+      claims[g.id] = { ...byKid, [pl.id]: rec };
+      if (!writeJSON(CLAIM_KEY, claims)) continue; // ledger first: if it can't be saved, don't pay
+      addTokens(pl, n);
+      paid.push({ game: g, n });
+    } else if (r0.day !== rec.day || r0.claimed !== rec.claimed || r0.today !== rec.today) {
+      claims[g.id] = { ...byKid, [pl.id]: rec }; writeJSON(CLAIM_KEY, claims);
+    }
+    // keep the game's own "waiting" number in sync (display only; not used for paying)
+    if (nonNeg(kidRec.pending) !== owed - n) { kidRec.pending = owed - n; writeJSON(g.key, raw); }
+  }
+  return paid;
+}
+function forgetMiniGameData(profileId) {
+  const claims = readJSON(CLAIM_KEY);
+  for (const g of MINIGAMES) {
+    const raw = readJSON(g.key);
+    if (isObj(raw) && isObj(raw.kids) && raw.kids[profileId]) { delete raw.kids[profileId]; writeJSON(g.key, raw); }
+    if (isObj(claims) && isObj(claims[g.id]) && claims[g.id][profileId]) delete claims[g.id][profileId];
+  }
+  if (isObj(claims)) writeJSON(CLAIM_KEY, claims);
+}
 
 /* ==========================================================================
    AUDIO + SPEECH
@@ -905,6 +992,10 @@ function render() {
   if (NEEDS_PLAYER.includes(view.name) && !player()) view = { name: "picker" };
   if (view.name === "lesson" && !lesson) view = { name: player() ? "home" : "picker" };
   if (view.name === "results" && !view.result) view = { name: "home" };
+  if (view.name === "home") {
+    const paid = claimMiniGameTokens(player());
+    if (paid.length) setTimeout(() => { toast(paid.map(p => `+${p.n} 🪙 from ${p.game.name}!`).join(" ")); Sound.good(); }, 250);
+  }
   $app.classList.toggle("wide", view.name === "lesson");
   ({ picker: renderPicker, addPlayer: renderAddPlayer, home: renderHome, lesson: renderQuestion,
      results: renderResults, shop: renderShop, parent: renderParent })[view.name]();
@@ -1021,6 +1112,8 @@ function renderHome() {
   const offsets = [0, 80, -80, 40, -40];
   $app.innerHTML = topBar(pl) + `
     <div class="hello"><div class="mascot">${APP.mascot}</div><div class="bubble">${greeting(pl)}</div></div>
+    ${MINIGAMES.map(g => `<a class="gamecard" href="${g.href}" data-game="${g.id}"><span class="ge">${g.emoji}</span>
+      <span><b>${esc(g.name)}</b><small>${esc(g.blurb)}</small></span><span class="go">▶</span></a>`).join("")}
     <div class="tabs">${PATHS.map(p => `<button class="tab ${p.id === pathId ? "on" : ""}" data-act="viewPath" data-v="${p.id}">${p.emoji} ${esc(p.title)}</button>`).join("")}</div>
     ${path.tracks.map((t, ti) => `
       <section class="track" style="--c:${t.color};--cd:${t.dark};--cl:${t.light}">
@@ -1398,7 +1491,7 @@ const actions = {
   deletePlayer(el) {
     const st = state(), p = st.profiles.find(x => x.id === el.dataset.id);
     confirmBox(`Delete ${p.name}?`, "This removes the player and all their progress.", "Delete", () => {
-      st.profiles = st.profiles.filter(x => x.id !== p.id); if (st.activeId === p.id) st.activeId = null; LessonSave.clear(); Store.save(); render();
+      st.profiles = st.profiles.filter(x => x.id !== p.id); if (st.activeId === p.id) st.activeId = null; LessonSave.clear(); forgetMiniGameData(p.id); Store.save(); render();
     }, true);
   },
   addPrize() { state().prizes.push({ id: uid(), emoji: "🎁", name: "New prize", cost: 20 }); Store.save(); render(); },
@@ -1469,13 +1562,16 @@ document.addEventListener("visibilitychange", () => {
 Store.load();
 Speech.pickVoice();
 const resumed = LessonSave.load();
+const wantHome = !resumed && location.hash === "#home" && !!player();
+if (location.hash) { try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {} }
 if (resumed) {
   // A reload or crash mid-lesson: pick up where the kid left off. Tokens are only paid at the end, so nothing is re-earned.
   state().activeId = resumed.profileId; Store.save(); lesson = resumed.lesson;
   if (lesson.cur === null) nextQuestion();      // between questions
   else { go("lesson"); if (lesson.feedback) showFeedback(lesson.feedback); } // same puzzle, same answer order; never re-scored
   toast("Welcome back! Let's keep going. 🦉");
-} else go("picker"); // otherwise always start on the "Who's playing?" screen
+} else if (wantHome) { go("home"); } // coming back from a mini-game
+else go("picker"); // otherwise always start on the "Who's playing?" screen
 lastNavAt = 0; // nothing to guard against on first load
 if (/[?&]test=1\b/.test(location.search)) window.__app = { PATHS, Store, APP, explain, get lesson() { return lesson; } }; // automated tests only
 try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch (e) {}

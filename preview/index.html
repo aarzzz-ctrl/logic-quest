@@ -715,11 +715,14 @@ function addTokens(pl, n) { pl.tokens += n; pl.totalEarned += n; Store.save(); }
    ========================================================================== */
 const MINIGAMES = [
   { id: "squishseats", name: "Squish Seats", emoji: "🪑", blurb: "Seat the squishy buddies!", href: "games/squish-seats.html",
-    key: "logicquest.minigame.squishseats.v1", claimCapPerDay: 15 },
+    key: "logicquest.minigame.squishseats.v1" },
   { id: "jellyjars", name: "Jelly Jars", emoji: "🫙", blurb: "Sort the wobbly jellies!", href: "games/jelly-jars.html",
-    key: "logicquest.minigame.jellyjars.v1", claimCapPerDay: 15 },
+    key: "logicquest.minigame.jellyjars.v1" },
   { id: "sprouttrail", name: "Sprout Trail", emoji: "🌱", blurb: "Grow a garden trail!", href: "games/sprout-trail.html",
-    key: "logicquest.minigame.sprouttrail.v1", claimCapPerDay: 15 },
+    key: "logicquest.minigame.sprouttrail.v1" },
+  { id: "sillystories", name: "Silly Stories", emoji: "📖", blurb: "Fill in the silly story!", href: "games/silly-stories.html",
+    key: "logicquest.minigame.sillystories.v1",
+    interlude: true, role: "interlude", roundLabel: "1 story", minutes: 3, enabled: true },
 ];
 const CLAIM_KEY = "logicquest.minigame.claims.v1"; // { [gameId]: { [profileId]: { claimed, day, today } } }
 function readJSON(key) { try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; } }
@@ -758,7 +761,8 @@ function claimMiniGameTokens(pl) {
     if (lifetime < rec.claimed) rec.claimed = lifetime; // game data was wiped/repaired: rebase, never pay twice
     if (rec.day !== today) { rec.day = today; rec.today = 0; }
     const owed = lifetime - rec.claimed;
-    const n = Math.max(0, Math.min(owed, g.claimCapPerDay - rec.today));
+    const cap = typeof g.claimCapPerDay === "number" && isFinite(g.claimCapPerDay) ? g.claimCapPerDay : Infinity; // no cap = pay all owed
+    const n = Math.max(0, Math.min(owed, cap - rec.today));
     if (n > 0) {
       rec.claimed += n; rec.today += n;
       claims[g.id] = { ...byKid, [pl.id]: rec };
