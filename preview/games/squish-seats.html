@@ -221,12 +221,12 @@ const GAME = {
   storageKey: "logicquest.minigame.squishseats.v1", // this game's own key
   mainKey: "logicquest.v1",                          // main app key: READ ONLY, never written here
 };
-const BUILD = "1.3.2-preview";
+const BUILD = "1.3.3";
 const ECON = {
   firstClear: 3,        // first time a level is solved
   firstThreeStars: 2,   // first time a level earns 3 stars
   replay: 1,            // solving an already-cleared level
-  replayPaidPerDay: 3,  // replay tokens paid at most this many times a day
+  replayPaidPerDay: Infinity, // no daily limit on replay tokens (Aaron, Oct 3)
 };
 
 /* ---------- buddies (inline SVG, no image files) ---------- */

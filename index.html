@@ -15,7 +15,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="app-version" content="1.3.4">
+<meta name="app-version" content="1.3.5">
 <style>
 /* Fredoka (SIL Open Font License, see OFL-Fredoka.txt), self-hosted so the app never waits on a third-party server */
 @font-face{font-family:"Fredoka";font-style:normal;font-weight:300 700;font-display:swap;src:url("fredoka-latin.woff2") format("woff2")}
@@ -519,7 +519,7 @@ const APP = {
   mascot: "🦉",
   mascotName: "Professor Hoot",
   pinLength: 4,
-  version: "1.3.4",
+  version: "1.3.5",
 };
 const AVATARS = ["🦊","🐼","🦄","🐯","🐸","🐙","🦖","🐰","🐨","🦁","🐧","🐝","🐬","🦋","🐱","🐶"];
 const REWARDS = {
@@ -529,7 +529,7 @@ const REWARDS = {
   comboBonus: 1,        // ...earns this extra
   lessonFirstClear: 10, // first time finishing a lesson
   lessonReplay: 2,      // replaying a finished lesson (no per-question tokens on replays)
-  replaysPaidPerDay: 3, // replay bonus is paid at most this many times per player per day
+  replaysPaidPerDay: Infinity, // no daily limit on replay bonus (Aaron, Oct 3)
   perfect: 5,           // first time a lesson reaches 3 stars
   streakPerDay: 3,      // daily bonus = streakPerDay * min(streak, streakCap)
   streakCap: 5,
@@ -618,7 +618,7 @@ const Store = {
       profiles: [],
       activeId: null,
       prizes: DEFAULT_PRIZES.map(p => ({ id: uid(), ...p })),
-      prizeCatalog: PRIZE_CATALOG, // new devices already have the added prizes, so the migration must not run again
+      prizeDedupe: 1, prizeCatalog: PRIZE_CATALOG, // new devices already have the added prizes, so the migration must not run again
       log: [],            // redemptions: {ts, profileId, who, avatar, emoji, name, cost}
       pinHash: null, pinSalt: null,   // PIN is stored only as a salted hash
       pinFails: 0, pinLockUntil: 0,   // lockout after repeated wrong PINs
@@ -675,6 +675,20 @@ const Store = {
       d._saveSoon = true;
     }
     d.prizeCatalog = PRIZE_CATALOG;
+    // One-time cleanup (1.3.5): drop an auto-added prize when the grown-up already made a near-identical one by hand
+    // (same cost and a shared word of 3+ letters, e.g. "Feastables bar" vs "Feastables chocolate bar after dinner").
+    if (raw.prizeDedupe !== 1) {
+      const words = n => new Set(n.toLowerCase().match(/[a-z0-9]{3,}/g) || []);
+      const auto = new Set(ADDED_PRIZES.map(p => p.name.trim().toLowerCase()));
+      const stop = new Set(["the", "and", "for", "get", "gets", "goes", "more", "min", "minutes", "after", "pick", "day"]);
+      d.prizes = d.prizes.filter(p => {
+        if (!auto.has(p.name.trim().toLowerCase())) return true;
+        const w = [...words(p.name)].filter(x => !stop.has(x));
+        return !d.prizes.some(q => q !== p && !auto.has(q.name.trim().toLowerCase()) && q.cost === p.cost &&
+          w.some(x => words(q.name).has(x)));
+      });
+      d.prizeDedupe = 1; d._saveSoon = true;
+    }
     d.log = (Array.isArray(raw.log) ? raw.log : []).filter(l => l && typeof l === "object").slice(0, 500).map(l => ({
       ts: num(l.ts, Date.now()), profileId: String(l.profileId ?? ""), who: str(l.who, "?", 40), avatar: str(l.avatar, "🙂", 16),
       emoji: str(l.emoji, "🎁", 16), name: str(l.name, "Prize", 60), cost: num(l.cost) }));

@@ -118,6 +118,12 @@ h1,h2,h3{margin:0}
 @keyframes fall{0%{transform:translateY(-40px)}100%{transform:translateY(110%)}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
 @keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(255,200,61,.0)}50%{box-shadow:0 0 0 10px rgba(255,200,61,.75)}}
+#app.young .tile{width:150px;height:150px;border-radius:28px}#app.young .tile .e{font-size:84px}
+#app.young .sline .pic{font-size:52px;min-width:70px}#app.young .sline .txt{font-size:clamp(22px,min(3vw,3.2vh),32px)}
+#app.young .blank{min-width:130px;height:110px}#app.young .blank .e{font-size:66px}#app.young .tray{gap:22px}
+#app.young .side{justify-content:center}
+@media (orientation:landscape) and (min-width:900px){#app.young .side{width:200px}#app.young .tray{flex-direction:column}}
+@media (max-width:600px){#app.young .tile{width:96px;height:96px}#app.young .tile .e{font-size:54px}#app.young .blank{min-width:96px;height:84px}#app.young .sline .pic{display:inline;font-size:36px;min-width:44px}}
 @media (max-width:600px){.top{gap:6px}.top .pill[aria-label=Player],[data-act=grown]{display:none!important}.pill{padding:6px 10px}#app{padding-left:calc(env(safe-area-inset-left) + 10px);padding-right:calc(env(safe-area-inset-right) + 10px)}.story{padding:10px}.sline{gap:6px}.tray{gap:10px}.side{flex-direction:row;align-items:center}.side .tray{flex:1;min-height:0;padding-top:8px;gap:8px}.tools{margin-top:0}.sline{padding:0 4px}.lines{gap:2px}.stitle .sh{font-size:38px}.tile{width:78px;height:78px}.tile .e{font-size:40px}.tile .w{font-size:14px}.drag{width:78px;height:78px}.blank{min-width:80px;height:66px}.blank .e{font-size:38px}.sline .pic{display:none}.levels{grid-template-columns:repeat(2,1fr)}}
 @media (max-height:900px){.recap .txt{font-size:17px}.recap .pic{font-size:22px}.parade{font-size:40px}.panel{gap:6px;padding:14px 20px}.bigstars{font-size:34px}}
 @media (max-height:700px){.tile{width:92px;height:92px}.tile .e{font-size:46px}.tray{min-height:110px;padding-top:8px}.blank{height:72px}}
@@ -245,9 +251,68 @@ const STORIES = [
       { id: "flashlight", e: "🔦", w: "flashlight" },
     ],
     why: { sun: "The sun isn't out at night!", shorts: "Shorts won't keep you warm.", batanimal: "This bat is an animal. It can't hit a ball!", batbaseball: "This bat is for hitting balls. It can't fly!" } },
+  /* ---- Little stories (young path: pathId "little"). Very short, 1-2 blanks, concrete nouns.
+     Each blank shows only its own 3 tiles (line.opts), one at a time. ---- */
+  { id: "y-puppy", young: true, name: "Puppy's Lunch", hero: "🐶", age: 5.5, bg: "linear-gradient(#ffe9c7,#fff8ec)",
+    decor: ["🦴", "✨", "🐾", "✨"],
+    lines: [
+      { t: "Puppy is hungry.", pic: "🐶😋" },
+      { t: "Puppy eats a big {}.", pic: "🍽️", a: "bone", opts: ["car", "bone", "moon"] },
+      { t: "Yum! Puppy wags his tail.", pic: "🐕💕" },
+    ],
+    tiles: [{ id: "bone", e: "🦴", w: "bone" }, { id: "car", e: "🚗", w: "car" }, { id: "moon", e: "🌙", w: "moon" }],
+    why: { car: "You can't eat a car!", moon: "You can't eat the moon!" } },
+  { id: "y-duck", young: true, name: "Bath Time", hero: "🐥", age: 5.5, bg: "linear-gradient(#cdeeff,#f2fbff)",
+    decor: ["💧", "💦", "💧", "✨"],
+    lines: [
+      { t: "It is bath time for Ducky.", pic: "🐥💧" },
+      { t: "Ducky jumps in the {}.", pic: "💦", a: "tub", opts: ["tub", "bus", "cake"] },
+      { t: "Ducky washes with {}.", pic: "🧽", a: "soap", opts: ["shoe", "banana", "soap"] },
+      { t: "Splish, splash! All clean!", pic: "✨" },
+    ],
+    tiles: [{ id: "tub", e: "🛁", w: "bathtub" }, { id: "bus", e: "🚌", w: "bus" }, { id: "cake", e: "🎂", w: "cake" },
+      { id: "soap", e: "🧼", w: "soap" }, { id: "shoe", e: "👟", w: "shoe" }, { id: "banana", e: "🍌", w: "banana" }],
+    why: { bus: "A bus has no water!", cake: "A cake has no water!", shoe: "A shoe won't make you clean!", banana: "A banana won't make you clean!" } },
+  { id: "y-snow", young: true, name: "Snow Day", hero: "🧒", age: 6, bg: "linear-gradient(#dfe9ff,#ffffff)",
+    decor: ["❄️", "❄️", "🌨️", "❄️"],
+    lines: [
+      { t: "It is snowing!", pic: "🌨️" },
+      { t: "Mia puts on her warm {}.", pic: "🥶", a: "mittens", opts: ["icecream", "mittens", "swimsuit"] },
+      { t: "Mia makes a big {} out of snow.", pic: "❄️", a: "snowman", opts: ["snowman", "pizza", "fish"] },
+      { t: "Brrr! What a fun day!", pic: "😄" },
+    ],
+    tiles: [{ id: "mittens", e: "🧤", w: "mittens" }, { id: "icecream", e: "🍦", w: "ice cream" }, { id: "swimsuit", e: "🩱", w: "swimsuit" },
+      { id: "snowman", e: "☃️", w: "snowman" }, { id: "pizza", e: "🍕", w: "pizza" }, { id: "fish", e: "🐟", w: "fish" }],
+    why: { icecream: "Ice cream is cold, not warm!", swimsuit: "A swimsuit is for hot days!", pizza: "You can't make pizza out of snow!", fish: "You can't make a fish out of snow!" } },
+  { id: "y-bear", young: true, name: "Sleepy Bear", hero: "🐻", age: 6, bg: "linear-gradient(#2f3a7a,#6a5fb5)",
+    decor: ["🌙", "⭐", "✨", "⭐"],
+    lines: [
+      { t: "Bear is very sleepy.", pic: "🥱" },
+      { t: "Bear gets into his {}.", pic: "😴", a: "bed", opts: ["bus", "bed", "apple"] },
+      { t: "Bear turns off the {}.", pic: "🌙", a: "light", opts: ["light", "ball", "carrot"] },
+      { t: "Night night, Bear!", pic: "💤" },
+    ],
+    tiles: [{ id: "bed", e: "🛏️", w: "bed" }, { id: "bus", e: "🚌", w: "bus" }, { id: "apple", e: "🍎", w: "apple" },
+      { id: "light", e: "💡", w: "light" }, { id: "ball", e: "⚽", w: "ball" }, { id: "carrot", e: "🥕", w: "carrot" }],
+    why: { bus: "You don't sleep in a bus!", apple: "You can't sleep in an apple!", ball: "A ball doesn't turn off!", carrot: "A carrot doesn't turn off!" } },
+  { id: "y-kitty", young: true, name: "Kitty's Party", hero: "🐱", age: 6, bg: "linear-gradient(#ffe0f0,#fff5fb)",
+    decor: ["🎈", "🎉", "🎈", "🎊"],
+    lines: [
+      { t: "It is Kitty's birthday!", pic: "🎉" },
+      { t: "Kitty blows out the {} on her cake.", pic: "🎂", a: "candles", opts: ["fish", "shoe", "candles"] },
+      { t: "Kitty opens a big {}.", pic: "🎀", a: "present", opts: ["present", "rock", "carrot"] },
+      { t: "Hooray for Kitty!", pic: "🥳" },
+    ],
+    tiles: [{ id: "candles", e: "🕯️", w: "candles" }, { id: "fish", e: "🐟", w: "fish" }, { id: "shoe", e: "👟", w: "shoe" },
+      { id: "present", e: "🎁", w: "present" }, { id: "rock", e: "🪨", w: "rock" }, { id: "carrot", e: "🥕", w: "carrot" }],
+    why: { fish: "You don't put fish on a cake!", shoe: "You don't put shoes on a cake!", rock: "A rock doesn't open!", carrot: "A carrot doesn't open!" } },
 ];
 /* A tile fits a blank only if it is that blank's answer. */
 function fits(si, line, tileId) { const L = STORIES[si].lines[line]; return !!L && L.a === tileId; }
+/* Tiles offered for a blank: young stories offer only that blank's 3 options; older stories share one tray. */
+function optionsFor(si, line) { const S = STORIES[si], L = S.lines[line]; return S.young ? L.opts.slice() : S.tiles.map(t => t.id); }
+const trackOf = si => (STORIES[si].young ? "young" : "big");
+const trackList = tr => STORIES.map((S, i) => i).filter(i => trackOf(i) === tr);
 /*STORIES-END*/
 const FINALE = "🏆";
 
@@ -311,6 +376,7 @@ const Store = {
           earnedToday: num(k.earnedToday), pending: num(k.pending), lifetime: num(k.lifetime),
           noRead: typeof k.noRead === "boolean" ? k.noRead : null, sound: typeof k.sound === "boolean" ? k.sound : null,
           cur: cleanCur(k.cur),
+          track: k.track === "young" || k.track === "big" ? k.track : null,
         };
       }
     }
@@ -321,15 +387,26 @@ const Store = {
 let me = readMainProfile();
 function kid() {
   const d = Store.data;
-  if (!d.kids[me.id]) d.kids[me.id] = { progress: {}, day: null, earnedToday: 0, pending: 0, lifetime: 0, noRead: null, sound: null, cur: null };
+  if (!d.kids[me.id]) d.kids[me.id] = { progress: {}, day: null, earnedToday: 0, pending: 0, lifetime: 0, noRead: null, sound: null, cur: null, track: null };
   const k = d.kids[me.id];
   if (k.day !== todayStr()) { k.day = todayStr(); k.earnedToday = 0; }
   return k;
 }
-const noRead = () => { const k = kid(); return k.noRead === null ? me.little : k.noRead; };
+/* Track: little path (pathId "little", same rule Jelly Jars uses for picture mode) gets the young stories by default.
+   A grown-up can flip it with the visible 🐣/🦁 button; the choice is stored per kid in this game's own key. */
+const curTrack = () => { const k = kid(); return k.track || (me.little ? "young" : "big"); };
+const noRead = () => { const k = kid(); return k.noRead === null ? (me.little || curTrack() === "young") : k.noRead; };
 const soundOn = () => { const k = kid(); return k.sound === null ? me.sound : k.sound; };
 const isCleared = si => !!(kid().progress[si] && kid().progress[si].clears);
-const isUnlocked = si => si === 0 || isCleared(si - 1);
+const isUnlocked = si => { const L = trackList(trackOf(si)), i = L.indexOf(si); return i <= 0 || isCleared(L[i - 1]); };
+const nextIn = si => { const L = trackList(trackOf(si)), i = L.indexOf(si); return i >= 0 && i < L.length - 1 ? L[i + 1] : -1; };
+const isFinal = si => nextIn(si) < 0;
+function pickStory(tr) { // interlude round: in-progress story of this track, else next unfinished, else lowest stars
+  const k = kid(), L = trackList(tr);
+  if (k.cur && trackOf(k.cur.si) === tr) return k.cur.si;
+  const n = L.find(i => !isCleared(i)); if (n !== undefined) return n;
+  let lo = L[0]; L.forEach(i => { if (((k.progress[i] || {}).stars || 0) < ((k.progress[lo] || {}).stars || 0)) lo = i; }); return lo;
+}
 
 /* Award tokens for a finished story. lifetime only ever increases. */
 function award(si, stars) {
@@ -427,7 +504,19 @@ function startStory(si, resume) {
   const c = resume && kid().cur && kid().cur.si === si ? kid().cur : null;
   play = { si, placed: c ? { ...c.placed } : {}, hints: c ? c.hints : 0, sel: null, done: false };
   view = "play"; $ov.innerHTML = ""; saveCur(); render();
-  if (!c && si === 0 && !isCleared(0)) setTimeout(demoHand, 700);
+  if (!c && trackList(trackOf(si))[0] === si && !isCleared(si)) setTimeout(demoHand, STORIES[si].young ? 2600 : 700);
+  if (STORIES[si].young) setTimeout(() => { if (play && play.si === si && !play.done) readLines(visibleUpTo(), 0, []); }, 300);
+}
+/* Young stories reveal lines one at a time: everything up to the first empty blank is shown (and auto-read). */
+function visibleUpTo() { const f = firstEmpty(); return f === undefined ? STORIES[play.si].lines.length - 1 : f; }
+function fillWord(si, li) { const id = play.placed[li] || null; return id ? tileSay(tileOf(si, id)).replace(/^a bat, .*/, "bat") : null; }
+/* Read lines [from..to] of the current story with each line highlighted as it's read; pre = extra chunks first. */
+function readLines(to, from, pre) {
+  const si = play.si, idx = []; for (let i = from; i <= to; i++) idx.push(i);
+  const chunks = pre.concat(idx.map(i => sentence(si, i, STORIES[si].lines[i].a ? fillWord(si, i) : null)));
+  const node = i => document.querySelector(`.lines .sline[data-l="${i}"]`);
+  Speech.seq(chunks, c => { document.querySelectorAll(".lines .sline.reading").forEach(n => n.classList.remove("reading")); const n = c >= pre.length ? node(idx[c - pre.length]) : null; if (n) n.classList.add("reading"); },
+    () => document.querySelectorAll(".lines .sline.reading").forEach(n => n.classList.remove("reading")));
 }
 
 /* ---------- screens ---------- */
@@ -442,6 +531,7 @@ function topBar(back) {
     <div class="pill" aria-label="Player"><span class="av">${esc(me.avatar)}</span>${nr ? "" : `<span class="nm">${esc(me.name)}</span>`}</div>
     <div class="pill" aria-label="Tokens earned today ${k.earnedToday}">🪙 <b>${k.earnedToday}</b></div>
     <div class="spacer"></div>
+    <button class="iconbtn trackbtn" data-act="toggleTrack" aria-label="${curTrack() === "young" ? "Little stories. Tap for big stories" : "Big stories. Tap for little stories"}" aria-pressed="${curTrack() === "young"}">${curTrack() === "young" ? "🐣" : "🦁"}</button>
     <button class="iconbtn ${nr ? "on" : ""}" data-act="toggleRead" aria-label="Picture mode (no reading)" aria-pressed="${nr}">${nr ? "🖼️" : "🔤"}</button>
     <button class="iconbtn" data-act="toggleSound" aria-label="Sound" aria-pressed="${soundOn()}">${soundOn() ? "🔊" : "🔇"}</button>
     ${back || INTERLUDE ? "" : `<button class="iconbtn" data-act="grown" aria-label="For grown-ups">ⓘ</button>`}
@@ -452,17 +542,18 @@ function bannerHTML() {
   return `<div class="banner" aria-label="Last story, then back to the trail">${noRead() ? "🕐 ➜ 🗺️" : "Last story, then back to the trail! 🗺️"}</div>`;
 }
 function renderMap() {
+  $app.classList.toggle("young", curTrack() === "young");
   const nr = noRead(), k = kid();
-  const next = STORIES.findIndex((_, i) => !isCleared(i));
+  const TL = trackList(curTrack()), next = TL.find(i => !isCleared(i));
   $app.innerHTML = `${topBar(false)}
     <div class="mapwrap">
     <div class="hero"><span class="big" aria-hidden="true">📖</span>
-      ${nr ? `<button class="iconbtn" data-act="sayIntro" aria-label="Hear how to play">🔈</button>` : `<div class="bubble"><b>Silly Stories!</b> Listen to the story. Drag the picture that makes sense into each blank. Tap a picture to hear it.</div>`}
+      ${nr ? `<button class="iconbtn" data-act="sayIntro" aria-label="Hear how to play">🔈</button>${curTrack() === "young" ? `<span class="big" aria-hidden="true">🐣</span>` : ""}` : `<div class="bubble"><b>Silly Stories!</b> Listen to the story. Drag the picture that makes sense into each blank. Tap a picture to hear it.</div>`}
     </div>
-    <div class="levels">${STORIES.map((S, i) => {
-      const un = isUnlocked(i), st = (k.progress[i] || {}).stars || 0;
-      return `<button class="lvl ${un ? "" : "locked"} ${i === next ? "next" : ""}" data-act="${un ? "start" : "locked"}" data-si="${i}" aria-label="Story ${i + 1}${un ? "" : ", locked"}">
-        <span class="num">${i + 1}</span><span class="scene">${un ? S.hero : "🔒"}</span>
+    <div class="levels ${curTrack()}">${TL.map((i, n) => {
+      const S = STORIES[i], un = isUnlocked(i), st = (k.progress[i] || {}).stars || 0;
+      return `<button class="lvl ${un ? "" : "locked"} ${i === next ? "next" : ""}" data-act="${un ? "start" : "locked"}" data-si="${i}" aria-label="Story ${n + 1}${un ? "" : ", locked"}">
+        <span class="num">${n + 1}</span><span class="scene">${un ? S.hero : "🔒"}</span>
         ${nr ? "" : `<b style="font-size:18px">${esc(S.name)}</b>`}<span class="stars">${un ? starStr(st) : ""}</span></button>`;
     }).join("")}</div></div>`;
 }
@@ -486,13 +577,16 @@ function lineHTML(si, li, recap) {
 function renderPlay() {
   const S = STORIES[play.si], nr = noRead();
   const used = new Set(Object.values(play.placed));
+  const fe = firstEmpty(), shownTo = S.young ? visibleUpTo() : S.lines.length - 1;
+  const trayIds = S.young ? (fe === undefined ? [] : optionsFor(play.si, fe)) : S.tiles.map(t => t.id);
+  $app.classList.toggle("young", !!S.young);
   $app.innerHTML = `${topBar(true)}${bannerHTML()}
     <div class="board"><div class="story" aria-label="Story">
       <div class="stitle"><span class="sh" aria-hidden="true">${S.hero}</span>${nr ? "" : `<h2>${esc(S.name)}</h2>`}<span class="spacer"></span>
         <button class="iconbtn" data-act="sayAll" aria-label="Read the whole story aloud">🔈</button></div>
-      <div class="lines">${S.lines.map((_, i) => lineHTML(play.si, i)).join("")}</div>
+      <div class="lines">${S.lines.map((_, i) => (i <= shownTo ? lineHTML(play.si, i) : "")).join("")}</div>
     </div>
-    <div class="side"><div class="tray" aria-label="Picture word tiles">${S.tiles.map(t => `<button class="tile ${used.has(t.id) ? "used" : ""} ${play.sel === t.id ? "sel" : ""}" data-tile="${t.id}" aria-label="${esc(tileSay(t))}"><span class="e">${t.e}</span>${nr ? "" : `<span class="w">${esc(t.w)}</span>`}<span class="spk" aria-hidden="true">🔈</span></button>`).join("")}</div>
+    <div class="side"><div class="tray" aria-label="Picture word tiles">${trayIds.map(id => tileOf(play.si, id)).map(t => `<button class="tile ${used.has(t.id) ? "used" : ""} ${play.sel === t.id ? "sel" : ""}" data-tile="${t.id}" aria-label="${esc(tileSay(t))}"><span class="e">${t.e}</span>${nr ? "" : `<span class="w">${esc(t.w)}</span>`}<span class="spk" aria-hidden="true">🔈</span></button>`).join("")}</div>
     <div class="tools"><button class="iconbtn" data-act="hint" aria-label="Hint">💡</button></div></div></div>`;
 }
 function render() {
@@ -520,7 +614,8 @@ function tryPlace(tileId, li, fromRect) {
     Sound.good(); clearGlow(); renderPlay(); fitStory();
     const b = document.querySelector(`.blank[data-line="${li}"]`);
     if (b && fromRect && !RM()) { const r = b.getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top + r.height / 2, 18, 0.8, 1); }
-    Speech.say(sentence(play.si, li, tileSay(t).replace(/^a bat, .*/, "bat")));
+    if (STORIES[play.si].young) { if (firstEmpty() !== undefined) readLines(visibleUpTo(), li, ["Yes!"]); else Speech.say("Yes! " + sentence(play.si, li, fillWord(play.si, li))); }
+    else Speech.say(sentence(play.si, li, tileSay(t).replace(/^a bat, .*/, "bat")));
     if (firstEmpty() === undefined) setTimeout(winStory, 650);
     return true;
   }
@@ -533,7 +628,8 @@ function tryPlace(tileId, li, fromRect) {
   play.sel = null; document.querySelectorAll(".tile.sel").forEach(e => e.classList.remove("sel"));
   const why = STORIES[play.si].why && STORIES[play.si].why[tileId];
   toast(noRead() ? "🤔 🔈" : `Hmm, does that make sense? ${why || "Try another picture!"}`);
-  Speech.say(sentence(play.si, li, t.w).replace(/[.!]$/, "") + "? Hmm. That's silly in the wrong way! Try another one.");
+  if (STORIES[play.si].young) Speech.say(sentence(play.si, li, t.w).replace(/[.!]$/, "") + "? No, silly! Try again.");
+  else Speech.say(sentence(play.si, li, t.w).replace(/[.!]$/, "") + "? Hmm. That's silly in the wrong way! Try another one.");
   play.wrongs = (play.wrongs || 0) + 1;
   return false;
 }
@@ -549,8 +645,8 @@ function hint() {
   Speech.say(sentence(play.si, li));
 }
 function demoHand() {
-  if (!play || view !== "play" || play.si !== 0 || Object.keys(play.placed).length) return;
-  const li = firstEmpty(), b = document.querySelector(`.blank[data-line="${li}"]`), t = document.querySelector(`.tile[data-tile="${STORIES[0].lines[li].a}"]`);
+  if (!play || view !== "play" || Object.keys(play.placed).length) return;
+  const li = firstEmpty(), b = document.querySelector(`.blank[data-line="${li}"]`), t = document.querySelector(`.tile[data-tile="${STORIES[play.si].lines[li].a}"]`);
   if (!b || !t) return;
   b.classList.add("glow"); t.classList.add("glow");
   if (RM()) return;
@@ -576,6 +672,7 @@ document.addEventListener("pointerdown", e => {
   const r = t.getBoundingClientRect();
   drag = { id: t.dataset.tile, el: t, x0: e.clientX, y0: e.clientY, ox: e.clientX - r.left, oy: e.clientY - r.top, r, moved: false, ghost: null, pid: e.pointerId, t0: Date.now(), lx: e.clientX, vx: 0, hot: null, spoke: false };
   try { t.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+  if (STORIES[play.si].young) { drag.spoke = true; Speech.say(tileSay(tileOf(play.si, drag.id))); }
   drag.lp = setTimeout(() => { if (drag && !drag.moved) { drag.spoke = true; Speech.say(tileSay(tileOf(play.si, drag.id))); t.animate([{ transform: "scale(1)" }, { transform: "scale(1.12)" }, { transform: "scale(1)" }], { duration: 350 }); } }, 450);
 });
 document.addEventListener("pointermove", e => {
@@ -649,20 +746,26 @@ document.addEventListener("click", e => {
   else if (act === "toggleRead") { const k = kid(); k.noRead = !noRead(); Store.save(); render(); }
   else if (act === "toggleSound") { const k = kid(); k.sound = !soundOn(); Store.save(); if (!k.sound) Speech.stop(); render(); }
   else if (act === "sayLine") { const li = +b.dataset.l; const L = STORIES[play.si].lines[li]; Speech.say(sentence(play.si, li, L.a && play.placed[li] ? tileSay(tileOf(play.si, play.placed[li])).replace(/^a bat, .*/, "bat") : null)); }
-  else if (act === "sayAll") readStory(document.querySelectorAll(".lines .sline"), false);
-  else if (act === "sayIntro") Speech.say("Silly Stories! Listen to the story. Drag the picture that makes sense into each blank. Tap a picture to hear it.");
+  else if (act === "sayAll") { if (STORIES[play.si].young) readLines(visibleUpTo(), 0, []); else readStory(document.querySelectorAll(".lines .sline"), false); }
+  else if (act === "sayIntro") Speech.say(curTrack() === "young" ? "Silly Stories! Listen. Then put the right picture in the story." : "Silly Stories! Listen to the story. Drag the picture that makes sense into each blank. Tap a picture to hear it.");
   else if (act === "hint") hint();
-  else if (act === "next") { const n = play.si + 1; $ov.innerHTML = ""; if (n < STORIES.length) startStory(n, true); else toMap(); }
+  else if (act === "next") { const n = nextIn(play.si); $ov.innerHTML = ""; if (n >= 0) startStory(n, true); else toMap(); }
+  else if (act === "toggleTrack") {
+    const k = kid(); k.track = curTrack() === "young" ? "big" : "young"; Store.save(); Sound.pick();
+    Speech.say(k.track === "young" ? "Little stories" : "Big stories");
+    if (view === "play") { if (play && !play.done) saveCur(); if (INTERLUDE) startStory(pickStory(k.track), true); else { $ov.innerHTML = ""; view = "map"; play = null; render(); } }
+    else render();
+  }
   else if (act === "replay") { $ov.innerHTML = ""; startStory(play.si, false); }
   else if (act === "again") readStory(document.querySelectorAll(".recap .sline"), true);
   else if (act === "keep") { $ov.innerHTML = ""; }
   else if (act === "grown") showGrown();
   else if (act === "closeOv") { $ov.innerHTML = ""; }
 });
-function readStory(nodes, filledOnly) {
+function readStory(nodes, filledOnly, pre = []) {
   const S = STORIES[play.si];
-  const chunks = S.lines.map((L, i) => sentence(play.si, i, L.a ? (play.placed[i] || filledOnly ? tileSay(tileOf(play.si, play.placed[i] || L.a)).replace(/^a bat, .*/, "bat") : null) : null));
-  Speech.seq(chunks, i => { nodes.forEach(n => n.classList.remove("reading")); if (nodes[i]) nodes[i].classList.add("reading"); },
+  const chunks = pre.concat(S.lines.map((L, i) => sentence(play.si, i, L.a ? (play.placed[i] || filledOnly ? tileSay(tileOf(play.si, play.placed[i] || L.a)).replace(/^a bat, .*/, "bat") : null) : null)));
+  Speech.seq(chunks, i => { nodes.forEach(n => n.classList.remove("reading")); const n = nodes[i - pre.length]; if (n) n.classList.add("reading"); },
     () => nodes.forEach(n => n.classList.remove("reading")));
 }
 
@@ -691,7 +794,7 @@ function exitGame(status) {
 function winStory() {
   if (!play || play.done) return;
   play.done = true; clearGlow();
-  const si = play.si, S = STORIES[si], stars = Math.max(1, 3 - play.hints), final = si === STORIES.length - 1;
+  const si = play.si, S = STORIES[si], stars = Math.max(1, 3 - play.hints), final = isFinal(si);
   const res = award(si, stars);
   session.solved++; session.tokens += res.got; saveSession();
   const pill = document.querySelector('.top .pill[aria-label^="Tokens"]'); if (pill) { pill.setAttribute("aria-label", "Tokens earned today " + kid().earnedToday); const b = pill.querySelector("b"); if (b) b.textContent = kid().earnedToday; }
@@ -711,7 +814,7 @@ function sceneHTML(si) {
 }
 function showWin(si, stars, res, final) {
   const nr = noRead(), S = STORIES[si];
-  const parade = final ? `<div class="parade" aria-hidden="true">${STORIES.map((s, i) => `<span style="animation-delay:${i * 0.12}s">${s.hero}</span>`).join("")}<span>${FINALE}</span></div>` : "";
+  const parade = final ? `<div class="parade" aria-hidden="true">${trackList(trackOf(si)).map((i, n) => `<span style="animation-delay:${n * 0.12}s">${STORIES[i].hero}</span>`).join("")}<span>${FINALE}</span></div>` : "";
   const buttons = INTERLUDE
     ? `<button class="btn" data-act="back" aria-label="Back to my adventure"><span class="ico">▶️</span>${nr ? "" : "Back to my adventure"}</button>`
     : `<button class="btn ghost" data-act="map" aria-label="All stories"><span class="ico">📚</span></button>
@@ -727,7 +830,7 @@ function showWin(si, stars, res, final) {
     <div class="row">${buttons}</div></div></div>`;
   if (!RM()) { FX.burst(innerWidth / 2, innerHeight * 0.35, final ? 120 : 70, 1.2, 1); if (final) for (let i = 1; i <= 6; i++) setTimeout(() => { if (!$ov.querySelector(".final")) return; FX.burst(innerWidth * (0.15 + 0.7 * ((i * 37) % 10) / 10), innerHeight * (0.15 + 0.1 * (i % 3)), 60, 1, 0); Sound.pop(); }, 500 + i * 450); }
   // The silly payoff: the whole finished story is read aloud while the scene dances and each line lights up.
-  setTimeout(() => { if ($ov.querySelector(".win")) readStory(document.querySelectorAll(".recap .sline"), true); }, 500);
+  setTimeout(() => { if ($ov.querySelector(".win")) readStory(document.querySelectorAll(".recap .sline"), true, S.young ? [final ? "Hooray! You finished all the little stories!" : "Hooray! You did it!"] : []); }, 500);
 }
 function showGrown() {
   const k = kid();
@@ -789,10 +892,7 @@ window.addEventListener("resize", () => { if (FX.on) FX.size(); if (view === "pl
   const k = kid(); Store.save();
   if (INTERLUDE) {
     try { history.replaceState({ ss: "base" }, ""); history.pushState({ ss: "game" }, ""); } catch (e) { /* ignore */ }
-    let si;
-    if (k.cur) si = k.cur.si;
-    else { si = STORIES.findIndex((_, i) => !isCleared(i)); if (si < 0) { let lo = 0; STORIES.forEach((_, i) => { if (((k.progress[i] || {}).stars || 0) < ((k.progress[lo] || {}).stars || 0)) lo = i; }); si = lo; } }
-    startStory(si, true);
+    startStory(pickStory(curTrack()), true);
   } else if (k.cur) { pushNav(); startStory(k.cur.si, true); }
   else render();
 })();
@@ -800,6 +900,7 @@ window.addEventListener("resize", () => { if (FX.on) FX.size(); if (view === "pl
 /* Read-only hooks for automated tests (cannot change game state). */
 window.SillyStories = Object.freeze({
   stories: STORIES,
+  track: () => curTrack(),
   state: () => JSON.parse(JSON.stringify({ view, play, session, kid: kid(), launch: LAUNCH })),
 });
 </script>
