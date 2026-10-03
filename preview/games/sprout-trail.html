@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Offline-only: the page may not load anything from anywhere (no fonts, images, scripts, or fetches). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; media-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#7c4dff">
+<title>Sprout Trail · Elzee</title>
+<style>
+/* Visual language matches Elzee (lq-site/index.html) and Squish Seats: cream background, purple brand, chunky 3D buttons. */
+:root{
+  --bg:#fff8e7; --ink:#2d2a4a; --muted:#7a7699; --card:#fff; --line:#e7e2f5;
+  --brand:#7c4dff; --brand-d:#5a2fd6; --brand-l:#efe9ff;
+  --good:#3ccf4e; --good-d:#2a9d38; --good-l:#e6fbe9;
+  --oops:#ff9f43; --oops-d:#e07b15; --oops-l:#fff3e3;
+  --gold:#ffc83d; --gold-d:#e0a400;
+  --grass:#bfe9a0; --grass-d:#94cf6f; --soil:#e9c99a; --soil-d:#c99c66; --water:#7fd0ff; --water-d:#3fa6e6;
+  --radius:22px;
+  --font:"Fredoka","Chalkboard SE","Comic Sans MS","Arial Rounded MT Bold",system-ui,sans-serif;
+  --cell:80px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:20px;line-height:1.3;overflow:hidden;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-text-size-adjust:100%;overscroll-behavior:none}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2,h3{margin:0}
+#app{max-width:1180px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 10px) calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 14px) calc(env(safe-area-inset-left) + 16px)}
+.hidden{display:none!important}
+
+/* buttons (same as Squish Seats) */
+.btn{border:none;border-radius:18px;padding:12px 24px;min-height:64px;min-width:64px;font-size:23px;font-weight:600;
+  background:var(--good);color:#fff;box-shadow:0 5px 0 var(--good-d);display:inline-flex;align-items:center;justify-content:center;gap:10px}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--good-d)}
+.btn.brand{background:var(--brand);box-shadow:0 5px 0 var(--brand-d)}
+.btn.ghost{background:#fff;color:var(--ink);box-shadow:0 5px 0 var(--line);border:2px solid var(--line)}
+.btn[disabled]{background:#d9d6e6;box-shadow:0 5px 0 #bdb9cf;color:#fff}
+.btn .ico{font-size:30px;line-height:1}
+.iconbtn{border:none;background:#fff;border-radius:18px;width:60px;height:60px;font-size:30px;flex:none;
+  box-shadow:0 4px 0 var(--line);display:inline-flex;align-items:center;justify-content:center;position:relative;text-decoration:none}
+.iconbtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.iconbtn.on{background:var(--brand-l);box-shadow:0 4px 0 #cbbcff}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex:none}
+.pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:6px 16px;min-height:56px;
+  font-size:22px;font-weight:700;box-shadow:0 4px 0 var(--line)}
+.pill .av{font-size:32px}
+.pill .nm{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jar{display:inline-flex;align-items:center;gap:8px}
+.jar b{color:var(--gold-d)}
+.jarbar{width:90px;height:16px;border-radius:99px;background:#f1edfa;overflow:hidden}
+.jarbar i{display:block;height:100%;background:var(--gold);border-radius:99px}
+.spacer{flex:1}
+.lvpill{font-size:26px}
+
+/* map */
+.mapwrap{flex:1;min-height:0;display:flex;flex-direction:column;gap:14px}
+.hero{display:flex;align-items:center;gap:14px;flex:none}
+.hero .buds{display:flex;gap:2px}
+.hero .buds svg{width:62px;height:62px;animation:bob 2.4s ease-in-out infinite}
+.hero .buds svg:nth-child(2){animation-delay:.3s}.hero .buds svg:nth-child(3){animation-delay:.6s}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.bubble{background:#fff;border-radius:20px;padding:12px 18px;box-shadow:0 4px 0 var(--line);font-size:21px;flex:1}
+.levels{flex:1;min-height:0;display:grid;grid-template-columns:repeat(5,1fr);grid-auto-rows:minmax(0,1fr);gap:16px;max-height:420px}
+@media (orientation:portrait){.levels{grid-template-columns:repeat(4,1fr);max-height:640px}}
+.lvl{position:relative;border:none;background:#fff;border-radius:24px;box-shadow:0 6px 0 var(--line);min-height:120px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px}
+.lvl:active{transform:translateY(4px);box-shadow:0 2px 0 var(--line)}
+.lvl .scene{font-size:54px;line-height:1}
+.lvl .num{position:absolute;top:8px;left:12px;font-weight:700;color:var(--muted);font-size:20px}
+.lvl .tw{position:absolute;top:6px;right:8px;font-size:15px;font-weight:700;background:var(--gold);color:var(--ink);border-radius:99px;padding:2px 8px}
+.lvl .gsize{font-size:14px;color:var(--muted)}
+.lvl .stars{font-size:22px;letter-spacing:2px}
+.lvl.locked{background:#eeebf6;box-shadow:0 6px 0 #d9d6e6}
+.lvl.locked .scene{filter:grayscale(1);opacity:.35}
+.lvl.next{outline:5px solid var(--brand);outline-offset:-5px;animation:glow 1.6s ease-in-out infinite}
+.lvl .scene.egg{display:inline-block;animation:eggidle 4.6s ease-in-out infinite}
+@keyframes glow{50%{outline-color:#b9a2ff}}
+.nostar{filter:grayscale(1);opacity:.3}
+
+/* play */
+.playwrap{flex:1;min-height:0;display:grid;gap:12px;grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"rules" "board" "ctrls"}
+@media (orientation:landscape){
+  .playwrap{grid-template-columns:minmax(250px,30%) 1fr;grid-template-rows:auto 1fr;grid-template-areas:"rules board" "ctrls board"}
+  .playwrap .ctrls{flex-wrap:wrap;align-content:flex-start}
+  .playwrap .rules{flex-direction:column;align-items:stretch}
+}
+.rules{grid-area:rules;display:flex;gap:10px;flex-wrap:wrap}
+.rule{background:#fff;border-radius:18px;box-shadow:0 4px 0 var(--line);padding:8px 12px;display:flex;align-items:center;gap:8px;min-height:60px;flex:1 1 auto}
+.rule .ric{display:flex;align-items:center;gap:4px;font-size:28px;flex:none}
+.rule .rtx{font-size:17px;line-height:1.2}
+.rule.newr{border:3px solid var(--gold)}
+.mt{width:30px;height:30px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;background:var(--grass);box-shadow:inset 0 -3px 0 var(--grass-d);font-size:20px;position:relative}
+.mt svg{width:100%;height:100%}
+.ar{font-size:22px;color:var(--brand-d);font-weight:700}
+.ctrls{grid-area:ctrls;display:flex;gap:12px}
+.ctrls .btn{flex:1}
+.boardbox{grid-area:board;min-height:0;min-width:0;display:flex;align-items:center;justify-content:center;position:relative}
+.cam{position:relative}
+.board{position:relative;width:calc(var(--cell) * var(--w));height:calc(var(--cell) * var(--h));background:#8bc96a;border-radius:calc(var(--cell) * .28);
+  box-shadow:0 8px 0 #6aa84c, 0 0 0 8px #8bc96a;touch-action:none}
+.cell{position:absolute;width:var(--cell);height:var(--cell);padding:calc(var(--cell) * .045)}
+.tile{width:100%;height:100%;border-radius:calc(var(--cell) * .2);background:var(--grass);box-shadow:inset 0 calc(var(--cell) * -.07) 0 var(--grass-d);
+  position:relative;display:flex;align-items:center;justify-content:center;font-size:calc(var(--cell) * .5);line-height:1;transition:background-color .2s}
+.cell.rock .tile{background:#a9b0bd;box-shadow:inset 0 calc(var(--cell) * -.07) 0 #858c99}
+/* streams: chevrons slide along forever */
+.cell.stream .tile{background:var(--water);box-shadow:inset 0 calc(var(--cell) * -.07) 0 var(--water-d);overflow:hidden}
+.chev{width:100%;height:100%}
+.flowg{animation:flow .9s linear infinite}
+@keyframes flow{from{transform:translateX(0)}to{transform:translateX(14px)}}
+.cell.burrow .tile svg{width:86%;height:86%;animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cell.stage .tile{box-shadow:inset 0 calc(var(--cell) * -.07) 0 var(--grass-d), inset 0 0 0 calc(var(--cell) * .05) var(--gold)}
+.stage .pips{position:absolute;left:7%;top:5%;font-size:calc(var(--cell) * .13);color:var(--brand-d);letter-spacing:1px}
+.sg{display:inline-block;transform-origin:50% 85%}
+/* the seed you need next wiggles: "pick me!" */
+.cell.want .sg{animation:seedwig 1.3s ease-in-out infinite}
+@keyframes seedwig{0%,50%,100%{transform:rotate(0) scale(1)}60%{transform:rotate(-12deg) scale(1.15)}70%{transform:rotate(10deg) scale(1.15)}80%{transform:rotate(-6deg) scale(1.08)}90%{transform:rotate(3deg) scale(1.02)}}
+.cell.want .tile{box-shadow:inset 0 calc(var(--cell) * -.07) 0 var(--grass-d), inset 0 0 0 calc(var(--cell) * .05) var(--gold), 0 0 calc(var(--cell) * .18) rgba(255,200,61,.9)}
+.cell.visited .tile{background:var(--soil);box-shadow:inset 0 calc(var(--cell) * -.07) 0 var(--soil-d)}
+.cell.visited.stream .tile{background:#9fd7f5}
+.cell.visited.stage .tile{box-shadow:inset 0 calc(var(--cell) * -.07) 0 var(--soil-d), inset 0 0 0 calc(var(--cell) * .05) var(--good)}
+/* buds sprout with a spring, then sway */
+.bud{position:absolute;width:44%;height:44%;left:28%;top:22%;pointer-events:none;transform:scale(0);transform-origin:50% 100%}
+.bud .budi{width:100%;height:100%;display:block;transform-origin:50% 100%}
+.visited .bud{transform:scale(1);animation:sprout .6s cubic-bezier(.2,1.9,.4,1) backwards}
+.visited .budi{animation:sway 2.6s ease-in-out .6s infinite alternate}
+@keyframes sprout{0%{transform:scale(0) rotate(-25deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes sway{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}
+.stage .bud,.burrow .bud,.stream .bud{left:54%;top:46%;width:38%;height:38%}
+.fl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:calc(var(--cell) * .6);transform:scale(0);pointer-events:none;z-index:4}
+.fli{display:inline-block;transform-origin:50% 90%;animation:sway 2.2s ease-in-out infinite alternate}
+.bloom .fl{animation:bloom .55s cubic-bezier(.2,1.8,.4,1) forwards}
+.bloom .bud{opacity:0}
+@keyframes bloom{0%{transform:scale(0) rotate(-50deg)}100%{transform:scale(1) rotate(0)}}
+.cell.next .tile::after{content:"";position:absolute;width:22%;height:22%;border-radius:50%;background:rgba(255,255,255,.85);box-shadow:0 0 0 4px rgba(124,77,255,.35);animation:dot 1.2s ease-in-out infinite}
+@keyframes dot{50%{transform:scale(1.3)}}
+.cell.hint .tile{outline:calc(var(--cell) * .06) solid var(--gold);outline-offset:-2px}
+/* nest + egg (idle wiggle now and then; cracks in stages on win) */
+.cell.nest .tile{background:#ffe8b8;box-shadow:inset 0 calc(var(--cell) * -.07) 0 #e7c27a}
+.nestsvg{width:92%;height:92%;overflow:visible}
+.nest .egg{transform-origin:30px 44px;animation:eggidle 4.6s ease-in-out infinite}
+@keyframes eggidle{0%,82%,100%{transform:rotate(0)}85%{transform:rotate(-9deg)}88%{transform:rotate(8deg)}91%{transform:rotate(-5deg)}94%{transform:rotate(2deg)}}
+.crk{fill:none;stroke:#7a5233;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .22s ease-out}
+.nest.crack1 .c1,.nest.crack2 .c1,.nest.crack2 .c2{stroke-dashoffset:0}
+.eggtop{transform-origin:30px 24px;transition:transform .6s cubic-bezier(.2,.9,.3,1),opacity .5s .25s}
+.nest.crack3 .eggtop{transform:translate(12px,-34px) rotate(55deg);opacity:0}
+.nest.crack3 .crk{opacity:0}
+.critter{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:calc(var(--cell) * .8);transform:scale(0);pointer-events:none;z-index:6}
+.nest.hatched .critter{animation:popout .7s cubic-bezier(.2,1.8,.4,1) forwards}
+@keyframes popout{0%{transform:scale(0) translateY(20%)}100%{transform:scale(1.25) translateY(-28%)}}
+.start .foot{font-size:calc(var(--cell) * .32);opacity:.5}
+/* the vine grows behind the buddy, segment by segment, with leaves popping out */
+.pathsvg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;overflow:visible}
+.pathsvg line{fill:none;stroke-linecap:round}
+.pathsvg line.vine{stroke:#4fae3c;stroke-width:.16;stroke-dasharray:1 1}
+.pathsvg line.jump{stroke:#b07cff;stroke-width:.1;stroke-dasharray:.04 .08}
+.pathsvg line.vine.grow{animation:vinegrow var(--d) linear backwards}
+.pathsvg line.jump.grow{animation:fadein var(--d) ease-out backwards}
+@keyframes vinegrow{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes fadein{from{opacity:0}}
+.leaf{fill:#6fd05a;stroke:#3f9a35;stroke-width:.02;transform-box:fill-box;transform-origin:center}
+.leaf.grow{animation:leafpop .45s cubic-bezier(.2,1.9,.4,1) backwards;animation-delay:var(--ld)}
+@keyframes leafpop{from{transform:scale(0)}}
+.board.done .pathsvg line.vine{stroke:#ff8fab;transition:stroke .6s}
+.pt{position:absolute;left:0;top:0;width:calc(var(--cell) * .11);height:calc(var(--cell) * .07);border-radius:60% 0;background:#5cc04a;z-index:4;pointer-events:none}
+.pt.drop{background:#e3f6ff;border-radius:50%;width:calc(var(--cell) * .09);height:calc(var(--cell) * .09);box-shadow:0 0 0 2px #7fd0ff}
+/* the buddy: position (walker) > hop squash/stretch (hop) > idle bob/blink/dance (idle) */
+.walker{position:absolute;left:0;top:0;width:var(--cell);height:var(--cell);z-index:5;pointer-events:none;padding:calc(var(--cell) * .06);transition:transform .17s cubic-bezier(.3,.7,.4,1)}
+.walker .hop{width:100%;height:100%;transform-origin:50% 92%;transition:transform .14s, filter .14s}
+.walker .idle{width:100%;height:100%;transform-origin:50% 92%;animation:wbob 2.2s ease-in-out infinite}
+.walker svg{width:100%;height:100%;display:block;filter:drop-shadow(0 4px 0 rgba(45,42,74,.18))}
+.walker.held .hop{transform:translateY(-12%) scale(1.1);filter:drop-shadow(0 10px 6px rgba(45,42,74,.25))}
+.walker.dance .idle{animation:dance .42s ease-in-out infinite alternate}
+@keyframes wbob{0%,100%{transform:translateY(0) scale(1,1)}50%{transform:translateY(-5%) scale(.97,1.03)}}
+@keyframes dance{0%{transform:translateY(0) rotate(-10deg) scale(1.05,.95)}100%{transform:translateY(-16%) rotate(10deg) scale(.95,1.05)}}
+.eyes{transform-box:fill-box;transform-origin:center}
+.walker .eyes,.hero .eyes{animation:blink 3.8s infinite}
+.hero .buds svg:nth-child(2) .eyes{animation-delay:1.3s}.hero .buds svg:nth-child(3) .eyes{animation-delay:2.1s}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+.headring{position:absolute;width:var(--cell);height:var(--cell);z-index:2;pointer-events:none;border-radius:calc(var(--cell) * .24);
+  box-shadow:inset 0 0 0 calc(var(--cell) * .05) rgba(124,77,255,.7);transition:transform .17s cubic-bezier(.3,.7,.4,1)}
+.headring::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:0 0 0 calc(var(--cell) * .05) rgba(124,77,255,.55);animation:ring 1.6s ease-out infinite}
+@keyframes ring{from{transform:scale(.92);opacity:.9}to{transform:scale(1.22);opacity:0}}
+.board.done .headring{opacity:0}
+/* level-1 coach: a hand that shows the drag */
+.hand{position:absolute;z-index:8;font-size:52px;pointer-events:none;left:0;top:0}
+.hand.tap{animation:point 1s ease-in-out infinite}
+.hand.drag{animation:dragdemo 2.3s ease-in-out infinite}
+@keyframes point{50%{transform:translateY(14px)}}
+@keyframes dragdemo{0%{transform:translate(0,0) scale(1.2);opacity:0}10%{transform:translate(0,0) scale(1.2);opacity:1}20%{transform:translate(0,0) scale(.92)}
+  50%{transform:translate(var(--x1),var(--y1)) scale(.92)}78%{transform:translate(var(--x2),var(--y2)) scale(.92);opacity:1}90%{transform:translate(var(--x2),var(--y2)) scale(1.2);opacity:0}100%{opacity:0}}
+.ctrls .btn.wig{animation:btnwig .5s 3;outline:4px solid var(--oops)}
+@keyframes btnwig{0%,100%{transform:rotate(0) scale(1)}30%{transform:rotate(-6deg) scale(1.06)}70%{transform:rotate(5deg) scale(1.06)}}
+/* overlays */
+.ov{position:fixed;inset:0;background:rgba(45,42,74,.45);z-index:40;display:flex;align-items:center;justify-content:center;padding:16px}
+.panel{background:var(--bg);border-radius:28px;padding:22px;max-width:620px;width:100%;max-height:92vh;overflow:auto;text-align:center;
+  box-shadow:0 10px 0 rgba(0,0,0,.12);animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{0%{transform:scale(.4)}100%{transform:scale(1)}}
+.panel h2{font-size:34px;margin-bottom:6px}
+.bigstars{font-size:58px;letter-spacing:6px}
+.bigstars span{display:inline-block;animation:pop .5s backwards}
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.coins{font-size:30px;font-weight:700;color:var(--gold-d);margin:8px 0}
+.winrow{display:flex;justify-content:center;align-items:flex-end;gap:10px}
+.winrow .wb{width:96px;height:96px;animation:dance .5s ease-in-out infinite alternate}
+.winrow .wc{font-size:96px;line-height:1;animation:dance .5s .25s ease-in-out infinite alternate}
+.sticker{width:140px;height:140px;margin:8px auto;perspective:600px}
+.sticker .inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;animation:flip 1.1s .5s both}
+@keyframes flip{0%{transform:rotateY(180deg)}100%{transform:rotateY(0)}}
+.sticker .face,.sticker .back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:26px;display:flex;align-items:center;justify-content:center}
+.sticker .face{background:#fff;box-shadow:0 6px 0 var(--line);border:5px solid var(--gold);font-size:84px}
+.sticker .back{background:var(--brand);transform:rotateY(180deg);font-size:60px;color:#fff}
+.book{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:12px}
+.book .slot{background:#fff;border-radius:20px;box-shadow:0 5px 0 var(--line);padding:8px;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:110px;justify-content:center}
+.book .slot .big{font-size:52px;line-height:1.1}
+.book .slot.no .big{filter:grayscale(1) brightness(.4);opacity:.3}
+.book .slot small{color:var(--muted);font-size:16px}
+.muted{color:var(--muted)}
+.left{text-align:left}
+.note{background:#fff;border-radius:18px;padding:12px 16px;box-shadow:0 4px 0 var(--line);margin:10px 0;font-size:18px}
+.newbadge{display:inline-block;background:var(--gold);border-radius:99px;padding:4px 16px;font-weight:700;font-size:24px;box-shadow:0 4px 0 var(--gold-d);animation:pop .5s}
+.demo{position:relative;display:flex;gap:6px;justify-content:center;margin:18px auto 8px;width:max-content}
+.demo .mt{width:90px;height:90px;border-radius:20px;font-size:48px}
+.demo .mt.water{background:var(--water);box-shadow:inset 0 -6px 0 var(--water-d)}
+.demo .mb{position:absolute;left:0;top:-6px;width:90px;height:90px;animation:var(--anim) 3s ease-in-out infinite}
+.demo .mb svg{width:100%;height:100%}
+@keyframes dStream{0%,15%{transform:translateX(0)}35%,45%{transform:translateX(96px)}65%,100%{transform:translateX(192px)}}
+@keyframes dStage{0%,12%{transform:translateX(0)}30%,42%{transform:translateX(96px)}60%,100%{transform:translateX(192px)}}
+@keyframes dBurrow{0%,15%{transform:translateX(0) scale(1)}30%{transform:translateX(96px) scale(1)}40%{transform:translateX(96px) scale(0)}55%{transform:translateX(288px) scale(0)}70%,100%{transform:translateX(288px) scale(1)}}
+.burst{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:35;pointer-events:none}
+.burst .rays{position:absolute;width:min(70vmin,560px);height:min(70vmin,560px);border-radius:50%;
+  background:repeating-conic-gradient(rgba(255,200,61,.6) 0 12deg,rgba(255,255,255,0) 12deg 24deg);animation:spin 5s linear infinite}
+.burst .bcw{position:relative}
+.burst .bc{font-size:min(32vmin,220px);line-height:1;transform-origin:50% 90%;animation:critbob .5s ease-in-out 1.6s infinite alternate}
+@keyframes critbob{from{transform:translateY(0) scale(1.06,.94)}to{transform:translateY(-8%) scale(.96,1.04)}}
+.coins{animation:coinpop .6s .6s cubic-bezier(.2,1.8,.4,1) backwards}
+@keyframes coinpop{from{transform:scale(0) rotate(-20deg)}}
+/* Reduced motion: no idle loops, shakes, zooms, bouncing or confetti. Moves become short glides and reveals become fades. */
+@media (prefers-reduced-motion: reduce){
+  .walker .idle,.walker .eyes,.hero .eyes,.hero .buds svg,.nest .egg,.visited .budi,.fli,.flowg,.cell.burrow .tile svg,.cell.want .sg,
+  .headring::after,.lvl.next,.lvl .scene.egg,.cell.next .tile::after,.burst .rays,.burst .bc,.winrow .wb,.winrow .wc,.ctrls .btn.wig,
+  .panel,.bigstars span,.sticker .inner,.newbadge,.coins,.walker.dance .idle{animation:none!important}
+  .visited .bud{animation:none}
+  .fl{transform:none;opacity:0;transition:opacity .4s}
+  .bloom .fl{animation:none;opacity:1}
+  .critter{transform:translateY(-25%) scale(1.2);opacity:0;transition:opacity .4s}
+  .nest.hatched .critter{animation:none;opacity:1}
+  .eggtop{transition:opacity .3s}
+  .nest.crack3 .eggtop{transform:none}
+  .pathsvg line.vine.grow{animation-duration:.01ms}
+  .demo .mb{animation-duration:6s}
+  .hand.drag{animation-duration:3.6s}
+}
+.confetti{position:fixed;top:-20px;z-index:60;width:12px;height:16px;border-radius:3px;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.holdbtn{position:relative;overflow:hidden}
+.holdbtn i{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,93,108,.35)}
+@media (max-width:640px){
+  .pill{font-size:19px;padding:4px 12px} .jarbar{width:56px}
+  .btn{font-size:20px;padding:10px 14px}
+  .top{gap:6px} .top .iconbtn{width:52px;height:52px;font-size:26px} .pill{min-height:52px}
+  .rule .rtx{font-size:15px} .book{grid-template-columns:repeat(3,1fr)} .levels{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+<div id="app" role="main"></div>
+<div id="ov"></div>
+<script>
+"use strict";
+/* ==========================================================================
+   SPROUT TRAIL: a path-deduction mini-game for Elzee.
+   Walk a buddy over EVERY garden tile exactly once and finish at the nest.
+   Each tile you step on sprouts; finish the trail and the whole garden blooms
+   and the egg in the nest hatches a surprise critter. Twists: streams push you
+   (level 3), seeds must be visited in growing order (level 6), burrows teleport
+   you (level 9). Every level has exactly one solution (verified offline).
+   ========================================================================== */
+
+const GAME = {
+  id: "sprouttrail",
+  storageKey: "logicquest.minigame.sprouttrail.v1", // this game's own key
+  mainKey: "logicquest.v1",                          // main app key: READ ONLY, never written here
+};
+const ECON = {
+  firstClear: 3,        // first time a level is solved
+  firstThreeStars: 2,   // first time a level earns 3 stars
+  replay: 1,            // solving an already-cleared level
+  replayPaidPerDay: 3,  // replay tokens paid at most this many times a day
+  dailyCap: 15,         // hard cap on tokens per kid per day from this game
+};
+
+/* ---------- rules engine (shared with the offline level verifier) ---------- */
+const DIRS = { ">": [0, 1], "<": [0, -1], "^": [-1, 0], "v": [1, 0] };
+// Parse a level: rows of chars. . tile  # rock  S start  G nest(goal)  ><^v stream  1-4 growth stage  a/b burrow pairs
+function parseLevel(L) {
+  const H = L.g.length, W = L.g[0].length, cells = [];
+  let S = -1, G = -1, open = 0; const portals = {};
+  for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
+    const ch = L.g[r][c], i = r * W + c, cell = { r, c, i, rock: ch === "#", arrow: DIRS[ch] ? ch : null, cp: /[1-9]/.test(ch) ? +ch : 0, portal: /[a-z]/.test(ch) && ch !== "v" ? ch : null, pair: -1 };
+    if (ch === "S") S = i; if (ch === "G") G = i;
+    if (!cell.rock) open++;
+    if (cell.portal) (portals[ch] = portals[ch] || []).push(i);
+    cells.push(cell);
+  }
+  for (const k in portals) { const [p, q] = portals[k]; cells[p].pair = q; cells[q].pair = p; }
+  const cpCount = cells.reduce((m, x) => Math.max(m, x.cp), 0);
+  return { W, H, cells, S, G, open, cpCount };
+}
+function nbr(P, i, dr, dc) {
+  const r = Math.floor(i / P.W) + dr, c = (i % P.W) + dc;
+  if (r < 0 || c < 0 || r >= P.H || c >= P.W) return -1;
+  return r * P.W + c;
+}
+const adjacent = (P, a, b) => { const ra = Math.floor(a / P.W), ca = a % P.W, rb = Math.floor(b / P.W), cb = b % P.W; return Math.abs(ra - rb) + Math.abs(ca - cb) === 1; };
+/* Try to step from the current head into cell t. st = { vis:Uint8Array, n:visited count, ck:next growth stage needed }.
+   Returns the list of cells entered (t plus anything a stream or burrow carries you to), or {fail, at, why}. Does not mutate st. */
+function tryStep(P, st, t) {
+  const vis = st.vis.slice(); let n = st.n, ck = st.ck; const seq = [];
+  let cur = t;
+  for (let guard = 0; guard < 64; guard++) {
+    const why = blocked(P, vis, n, ck, cur);
+    if (why) return { fail: true, at: cur, why, seq };
+    const cell = P.cells[cur];
+    vis[cur] = 1; n++; seq.push(cur); if (cell.cp) ck = cell.cp + 1;
+    if (cell.portal) {
+      const q = cell.pair, w2 = blocked(P, vis, n, ck, q);
+      if (w2) return { fail: true, at: q, why: w2, seq };
+      vis[q] = 1; n++; seq.push(q); if (P.cells[q].cp) ck = P.cells[q].cp + 1;
+      break; // you pop out of the other burrow and stop there
+    }
+    if (cell.arrow) { const [dr, dc] = DIRS[cell.arrow]; const nx = nbr(P, cur, dr, dc); if (nx < 0) return { fail: true, at: cur, why: "edge", seq }; cur = nx; continue; }
+    break;
+  }
+  return { seq, vis, n, ck };
+}
+function blocked(P, vis, n, ck, i) {
+  if (i < 0) return "edge";
+  const c = P.cells[i];
+  if (c.rock) return "rock";
+  if (vis[i]) return "used";
+  if (c.cp && c.cp !== ck) return "order";
+  if (i === P.G && n !== P.open - 1) return "early";
+  return null;
+}
+function startState(P) { const vis = new Uint8Array(P.cells.length); vis[P.S] = 1; return { vis, n: 1, ck: 1 }; }
+const NB4 = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+/* Count solutions (up to `limit`). Each solution = list of tapped cells. */
+function solve(P, limit = 2, maxNodes = 5e6) {
+  const sols = []; let nodes = 0;
+  const taps = [];
+  function reachable(st, head) {
+    // every unvisited cell must be reachable from head through unvisited cells (burrows connect pairs)
+    const seen = new Uint8Array(P.cells.length); const q = [head]; seen[head] = 1; let cnt = 0;
+    while (q.length) { const x = q.pop();
+      const ns = NB4.map(([a, b]) => nbr(P, x, a, b)); if (P.cells[x].pair >= 0 && x !== head) ns.push(P.cells[x].pair);
+      for (const y of ns) if (y >= 0 && !seen[y] && !st.vis[y] && !P.cells[y].rock) { seen[y] = 1; cnt++; q.push(y); } }
+    return cnt === P.open - st.n;
+  }
+  function dfs(st, head) {
+    if (sols.length >= limit || ++nodes > maxNodes) return;
+    if (st.n === P.open) { if (head === P.G) sols.push(taps.slice()); return; }
+    if (!reachable(st, head)) return;
+    for (const [a, b] of NB4) {
+      const t = nbr(P, head, a, b); if (t < 0) continue;
+      const r = tryStep(P, st, t); if (r.fail) continue;
+      taps.push(t); dfs(r, r.seq[r.seq.length - 1]); taps.pop();
+    }
+  }
+  dfs(startState(P), P.S);
+  return { sols, nodes, capped: nodes > maxNodes };
+}
+
+
+/* ---------- levels ----------
+   Grid chars: . tile  # rock  S start  G nest (finish)  > < ^ v stream (pushes you one more tile that way)
+   1 2 3 growth stages (visit in order: seed, sprout, tulip)  a burrow pair (hop in one, pop out the other). */
+const LEVELS = [
+  { g: ["#..","S..","G.."],                                   name: "Sunny Patch",    walker: "B", critter: "🐣", age: 6 },
+  { g: [".S..","....","#..G"],                                name: "Carrot Corner",  walker: "F", critter: "🐞", age: 6 },
+  { g: ["....",">..S","...#","...G"],                         name: "Splashy Stream", walker: "A", critter: "🐢", age: 6.5, twist: "stream" },
+  { g: ["S...","....",".<<#","....","G..."],                  name: "Double Splash",  walker: "F", critter: "🦆", age: 7 },
+  { g: [".....","..^..","...^.",".S#..","..G.#"],             name: "Rocky Brook",    walker: "D", critter: "🦋", age: 7.5 },
+  { g: [".1..2",".....",".G.3.","...S.","#...."],             name: "Grow Time",      walker: "C", critter: "🐝", age: 7.5, twist: "stage" },
+  { g: ["G.3..","...1.",".S.2.","...#.","^...."],             name: "Seeds & Streams",walker: "B", critter: "🐌", age: 8 },
+  { g: ["v....",".32..","G...#",".1...",".S..<","....#"],     name: "Big Garden",     walker: "A", critter: "🦔", age: 8.5 },
+  { g: [".....","a..#.",".....","S..G.","a...<"],             name: "Bunny Burrows",  walker: "B", critter: "🦄", age: 8.5, twist: "burrow" },
+  { g: ["a..#..","2...G.","....#.","^3^...",".a1.S.","......"],name: "Mega Garden",   walker: "D", critter: "🐉", age: 9 },
+]; // END LEVELS
+const STAGE_ICON = ["", "🌰", "🌱", "🌷", "🌻"];
+const FLOWERS = ["🌸", "🌼", "🌷", "🌻", "🌺"];
+const TWIST = {
+  stream: { ico: "💧", words: "Streams push you one more tile, the way the arrow points.", say: "New! Streams push you one more tile, the way the arrow points." },
+  stage:  { ico: "🌰", words: "Visit the seeds in growing order: seed, then sprout, then tulip.", say: "New! Visit the seeds in growing order. Seed, then sprout, then tulip." },
+  burrow: { ico: "🕳️", words: "Hop into a burrow and you pop out of the other one!", say: "New! Hop into a burrow and you pop out of the other one." },
+};
+
+/* ---------- buddies (same cast + art as Squish Seats) ---------- */
+const BUDDIES = {
+  D: { name: "Dumpling", full: "Dumpling Detective" },
+  C: { name: "Capybara", full: "Capybara Judge" },
+  A: { name: "Axolotl",  full: "Axolotl" },
+  B: { name: "Bunny",    full: "Mochi Bunny" },
+  F: { name: "Frog",     full: "Boba Frog" },
+};
+function face(ey, mood, opt = {}) {
+  const sp = opt.sp || 12, cx = 50;
+  const eyes = mood === "yay"
+    ? `<g class="eyes"><path d="M${cx-sp-5} ${ey+1} q5 -7 10 0 M${cx+sp-5} ${ey+1} q5 -7 10 0" stroke="#2d2a4a" stroke-width="3.5" fill="none" stroke-linecap="round"/></g>`
+    : `<g class="eyes"><circle cx="${cx-sp}" cy="${ey}" r="4.8" fill="#2d2a4a"/><circle cx="${cx+sp}" cy="${ey}" r="4.8" fill="#2d2a4a"/>
+       <circle cx="${cx-sp+1.6}" cy="${ey-1.8}" r="1.6" fill="#fff"/><circle cx="${cx+sp+1.6}" cy="${ey-1.8}" r="1.6" fill="#fff"/></g>`;
+  const m = ey + (opt.my || 9);
+  const mouth = mood === "sad" ? `<path d="M${cx-5} ${m+4} q5 -6 10 0" stroke="#2d2a4a" stroke-width="3" fill="none" stroke-linecap="round"/>`
+    : mood === "oh" ? `<ellipse cx="${cx}" cy="${m + 1}" rx="4" ry="5" fill="#2d2a4a"/>`
+    : mood === "yay" ? `<path d="M${cx-6} ${m-1} q6 10 12 0 z" fill="#e35d7a" stroke="#2d2a4a" stroke-width="2.5" stroke-linejoin="round"/>`
+    : `<path d="M${cx-5} ${m} q5 5 10 0" stroke="#2d2a4a" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  const brow = mood === "oh" ? `<path d="M${cx-sp-5} ${ey-10} q5 -5 10 0 M${cx+sp-5} ${ey-10} q5 -5 10 0" stroke="#2d2a4a" stroke-width="2.5" fill="none" stroke-linecap="round"/>`
+    : mood === "sad" ? `<path d="M${cx-sp-6} ${ey-9} l9 3 M${cx+sp+6} ${ey-9} l-9 3" stroke="#2d2a4a" stroke-width="2.5" stroke-linecap="round"/>` : "";
+  return `${eyes}${brow}<ellipse cx="${cx-sp-9}" cy="${ey+8}" rx="6" ry="3.6" fill="#ff8fab" opacity=".55"/>
+    <ellipse cx="${cx+sp+9}" cy="${ey+8}" rx="6" ry="3.6" fill="#ff8fab" opacity=".55"/>${mouth}`;
+}
+function buddySVG(id, mood = "happy") {
+  let body = "";
+  if (id === "D") body = `
+    <path d="M10 72 Q10 40 50 32 Q90 40 90 72 Q90 88 50 88 Q10 88 10 72Z" fill="#fff3dc" stroke="#e5c995" stroke-width="3"/>
+    <path d="M34 37 q4 -7 8 0 M46 33 q4 -7 8 0 M58 37 q4 -7 8 0" stroke="#e5c995" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M30 34 Q34 12 52 12 Q68 13 72 30 Z" fill="#9b6b43"/><path d="M24 33 Q50 24 80 31 Q52 38 24 33Z" fill="#7a5233"/>
+    <path d="M40 18 l10 -6 l3 4" stroke="#c99b6b" stroke-width="3" fill="none"/>${face(60, mood)}`;
+  else if (id === "C") body = `
+    <circle cx="26" cy="30" r="7" fill="#a86f42"/><circle cx="74" cy="30" r="7" fill="#a86f42"/>
+    <rect x="12" y="26" width="76" height="64" rx="30" fill="#c48a5a"/>
+    <g fill="#fff" stroke="#ddd" stroke-width="2"><circle cx="38" cy="24" r="9"/><circle cx="50" cy="20" r="9.5"/><circle cx="62" cy="24" r="9"/>
+    <circle cx="15" cy="48" r="8"/><circle cx="13" cy="62" r="8"/><circle cx="85" cy="48" r="8"/><circle cx="87" cy="62" r="8"/></g>
+    <ellipse cx="50" cy="71" rx="19" ry="12" fill="#a86f42"/>
+    <ellipse cx="44" cy="66" rx="2.5" ry="1.6" fill="#5b3a22"/><ellipse cx="56" cy="66" rx="2.5" ry="1.6" fill="#5b3a22"/>
+    ${face(50, mood, { my: 24, sp: 14 })}`;
+  else if (id === "A") body = `
+    <g fill="#ff7aa2"><rect x="2" y="34" width="22" height="9" rx="4.5" transform="rotate(-25 13 38)"/><rect x="0" y="49" width="22" height="9" rx="4.5"/>
+    <rect x="2" y="63" width="22" height="9" rx="4.5" transform="rotate(25 13 67)"/>
+    <rect x="76" y="34" width="22" height="9" rx="4.5" transform="rotate(25 87 38)"/><rect x="78" y="49" width="22" height="9" rx="4.5"/>
+    <rect x="76" y="63" width="22" height="9" rx="4.5" transform="rotate(-25 87 67)"/></g>
+    <ellipse cx="50" cy="60" rx="35" ry="29" fill="#ffc2d4" stroke="#f59ab8" stroke-width="3"/>${face(56, mood, { sp: 14 })}`;
+  else if (id === "B") body = `
+    <ellipse cx="36" cy="26" rx="9" ry="21" fill="#e3d6ff" stroke="#c4b0f5" stroke-width="3"/><ellipse cx="36" cy="28" rx="4" ry="13" fill="#ffc2d4"/>
+    <ellipse cx="64" cy="26" rx="9" ry="21" fill="#e3d6ff" stroke="#c4b0f5" stroke-width="3"/><ellipse cx="64" cy="28" rx="4" ry="13" fill="#ffc2d4"/>
+    <ellipse cx="50" cy="64" rx="36" ry="27" fill="#e3d6ff" stroke="#c4b0f5" stroke-width="3"/>${face(60, mood)}`;
+  else if (id === "F") body = `
+    <circle cx="32" cy="38" r="14" fill="#8fd16a" stroke="#6cb14a" stroke-width="3"/><circle cx="68" cy="38" r="14" fill="#8fd16a" stroke="#6cb14a" stroke-width="3"/>
+    <ellipse cx="50" cy="64" rx="38" ry="26" fill="#8fd16a" stroke="#6cb14a" stroke-width="3"/>
+    <ellipse cx="50" cy="74" rx="22" ry="12" fill="#c9efb0"/>
+    <circle cx="44" cy="78" r="3" fill="#5b3a22"/><circle cx="52" cy="80" r="3" fill="#5b3a22"/><circle cx="58" cy="76" r="3" fill="#5b3a22"/>
+    ${face(38, mood, { sp: 18, my: 20 })}`;
+  return `<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">${body}</svg>`;
+}
+const BUD_ICON = `<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 36 V20" stroke="#3f9a35" stroke-width="4" stroke-linecap="round"/><path d="M20 26 q-10 -2 -12 -10 q9 0 12 8 M20 24 q9 -1 12 -9 q-9 0 -12 8" fill="#5cc04a"/><circle cx="20" cy="14" r="7" fill="#ff8fab" stroke="#e35d7a" stroke-width="2"/></svg>`;
+const BUD_SVG = `<span class="bud">${BUD_ICON.replace("<svg ", '<svg class="budi" ')}</span>`;
+const ROT = { ">": 0, "v": 90, "<": 180, "^": 270 };
+const chevSVG = d => `<svg class="chev" viewBox="0 0 40 40" aria-hidden="true" style="transform:rotate(${ROT[d]}deg)"><g class="flowg" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">${[-14, 0, 14, 28].map(x => `<path d="M${x + 6} 11 L${x + 14} 20 L${x + 6} 29"/>`).join("")}</g></svg>`;
+const BURROW_COL = { a: ["#8a5cff", "#d6c4ff"], b: ["#ff7a3d", "#ffd0b5"] };
+const burrowSVG = k => { const [c1, c2] = BURROW_COL[k] || BURROW_COL.a; return `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#4a3a2a"/><path d="M20 5 a15 15 0 0 1 0 30 a11 11 0 0 1 0 -22 a7 7 0 0 1 0 14" fill="none" stroke="${c1}" stroke-width="4" stroke-linecap="round"/><circle cx="20" cy="20" r="3" fill="${c2}"/></svg>`; };
+const EGG_ART = `<ellipse cx="30" cy="27" rx="13" ry="17" fill="#fffaf0" stroke="#e8d8b8" stroke-width="2"/><circle cx="25" cy="20" r="2.6" fill="#8fd16a"/><circle cx="34" cy="31" r="3.2" fill="#7c4dff" opacity=".7"/><circle cx="26" cy="35" r="2" fill="#ff8fab"/>`;
+const NEST_SVG = `<svg class="nestsvg" viewBox="0 0 60 60" aria-hidden="true"><defs>
+  <clipPath id="eggTop"><polygon points="0,0 60,0 60,26 43,26 37,21 33,27 29,21 25,27 21,21 17,26 0,26"/></clipPath>
+  <clipPath id="eggBot"><polygon points="0,26 17,26 21,21 25,27 29,21 33,27 37,21 43,26 60,26 60,60 0,60"/></clipPath></defs>
+  <g class="egg"><g clip-path="url(#eggBot)">${EGG_ART}</g><g class="eggtop" clip-path="url(#eggTop)">${EGG_ART}</g>
+  <path class="crk c1" pathLength="1" d="M17 26 L21 21 L25 27"/><path class="crk c2" pathLength="1" d="M25 27 L29 21 L33 27 L37 21 L43 26"/></g>
+  <path d="M8 38 Q30 62 52 38 Q48 34 30 36 Q12 34 8 38Z" fill="#b5803f" stroke="#8a5a26" stroke-width="2"/><path d="M12 40 q8 4 14 1 M30 43 q8 2 14 -2" stroke="#8a5a26" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+const miniTile = (inner = "", cls = "") => `<span class="mt ${cls}">${inner}</span>`;
+
+/* ---------- utilities ---------- */
+const $app = document.getElementById("app"), $ov = document.getElementById("ov");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+function ymd(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+const todayStr = () => ymd(new Date());
+const starStr = n => "⭐".repeat(n) + `<span class="nostar">${"⭐".repeat(3 - n)}</span>`;
+const num = (v, d = 0) => (typeof v === "number" && isFinite(v) ? Math.max(0, Math.round(v)) : d);
+
+/* ---------- main app profile (read only; identical to Squish Seats) ---------- */
+function readMainProfile() {
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem(GAME.mainKey)); } catch (e) { raw = null; }
+  const base = { id: "guest", name: "Guest", avatar: "🙂", little: false, sound: true, linked: false };
+  if (!raw || typeof raw !== "object" || !Array.isArray(raw.profiles)) return base;
+  const p = raw.profiles.find(x => x && x.id === raw.activeId);
+  const sound = typeof raw.sound === "boolean" ? raw.sound : true;
+  if (!p) return { ...base, sound };
+  return { id: String(p.id).slice(0, 40), name: typeof p.name === "string" && p.name.trim() ? p.name.slice(0, 40) : "Player",
+    avatar: typeof p.avatar === "string" && p.avatar ? p.avatar.slice(0, 16) : "🙂", little: p.pathId === "little", sound, linked: true };
+}
+
+/* ---------- this game's own store (same schema as Squish Seats) ---------- */
+const Store = {
+  data: null,
+  load() {
+    let raw = null;
+    try { raw = JSON.parse(localStorage.getItem(GAME.storageKey)); } catch (e) { raw = null; }
+    const d = { version: 1, kids: {} };
+    if (raw && typeof raw === "object" && raw.kids && typeof raw.kids === "object") {
+      for (const [id, k] of Object.entries(raw.kids)) {
+        if (!k || typeof k !== "object") continue;
+        const progress = {};
+        for (const [li, v] of Object.entries(k.progress && typeof k.progress === "object" ? k.progress : {})) {
+          if (/^\d+$/.test(li) && +li < LEVELS.length && v && typeof v === "object") progress[li] = { stars: Math.min(3, num(v.stars)), clears: num(v.clears) };
+        }
+        d.kids[String(id).slice(0, 40)] = {
+          progress,
+          day: typeof k.day === "string" ? k.day : null,
+          earnedToday: num(k.earnedToday), replayPaidToday: num(k.replayPaidToday),
+          pending: num(k.pending), lifetime: num(k.lifetime),
+          noRead: typeof k.noRead === "boolean" ? k.noRead : null,
+          sound: typeof k.sound === "boolean" ? k.sound : null,
+        };
+      }
+    }
+    this.data = d;
+  },
+  save() { try { localStorage.setItem(GAME.storageKey, JSON.stringify(this.data)); } catch (e) { /* private mode / full */ } },
+};
+let me = readMainProfile();
+function kid() {
+  const d = Store.data;
+  if (!d.kids[me.id]) d.kids[me.id] = { progress: {}, day: null, earnedToday: 0, replayPaidToday: 0, pending: 0, lifetime: 0, noRead: null, sound: null };
+  const k = d.kids[me.id];
+  if (k.day !== todayStr()) { k.day = todayStr(); k.earnedToday = 0; k.replayPaidToday = 0; }
+  return k;
+}
+const noRead = () => { const k = kid(); return k.noRead === null ? me.little : k.noRead; };
+const soundOn = () => { const k = kid(); return k.sound === null ? me.sound : k.sound; };
+const isCleared = li => !!(kid().progress[li] && kid().progress[li].clears);
+const isUnlocked = li => li === 0 || isCleared(li - 1);
+
+/* Award tokens for a solve. Returns a breakdown; never exceeds the daily cap. (Identical to Squish Seats.) */
+function award(li, stars) {
+  const k = kid(), prev = k.progress[li] || { stars: 0, clears: 0 };
+  const lines = []; let want = 0;
+  if (!prev.clears) { want += ECON.firstClear; lines.push(["first", ECON.firstClear]); }
+  else if (k.replayPaidToday < ECON.replayPaidPerDay) { want += ECON.replay; lines.push(["replay", ECON.replay]); k.replayPaidToday++; }
+  if (stars === 3 && prev.stars < 3) { want += ECON.firstThreeStars; lines.push(["stars", ECON.firstThreeStars]); }
+  const room = Math.max(0, ECON.dailyCap - k.earnedToday);
+  const got = Math.min(want, room);
+  k.earnedToday += got; k.pending += got; k.lifetime += got;
+  const newSticker = !prev.clears;
+  k.progress[li] = { stars: Math.max(prev.stars, stars), clears: prev.clears + 1 };
+  Store.save();
+  return { want, got, capped: got < want, lines, newSticker };
+}
+
+/* ---------- sound + optional speech (all on-device) ---------- */
+const Sound = {
+  ctx: null,
+  play(notes) {
+    if (!soundOn()) return;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      this.ctx = this.ctx || new AC();
+      if (this.ctx.state === "suspended" && this.ctx.resume) this.ctx.resume().catch(() => {});
+      let t = this.ctx.currentTime;
+      for (const [f, dur] of notes) {
+        const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = "triangle"; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.2, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g).connect(this.ctx.destination); o.start(t); o.stop(t + dur + 0.02); t += dur * 0.75;
+      }
+    } catch (e) { /* no audio */ }
+  },
+  sweep(pts, type = "sine", vol = .2) { // a pitch glide, e.g. a cartoon "boing"
+    if (!soundOn()) return;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      this.ctx = this.ctx || new AC();
+      if (this.ctx.state === "suspended" && this.ctx.resume) this.ctx.resume().catch(() => {});
+      const t = this.ctx.currentTime, o = this.ctx.createOscillator(), g = this.ctx.createGain(), end = t + pts[pts.length - 1][1];
+      o.type = type; o.frequency.setValueAtTime(pts[0][0], t);
+      pts.slice(1).forEach(([f, dt]) => o.frequency.exponentialRampToValueAtTime(f, t + dt));
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, end);
+      o.connect(g).connect(this.ctx.destination); o.start(t); o.stop(end + 0.02);
+    } catch (e) { /* no audio */ }
+  },
+  boing() { this.sweep([[170, 0], [540, .09], [210, .34]], "sine", .25); },
+  crack(n) { this.play(n === 1 ? [[1500, .03], [1100, .04]] : [[1700, .03], [1250, .03], [900, .05]]); },
+  step(n) { this.play([[392 * Math.pow(2, Math.min(n, 24) / 12), .08]]); },
+  splash() { this.sweep([[1100, 0], [380, .22]], "triangle", .15); },
+  poof() { this.sweep([[600, 0], [140, .16]], "sine", .2); },
+  pop() { this.sweep([[220, 0], [900, .14]], "sine", .2); },
+  tap() { this.play([[600, .05]]); }, oops() { this.play([[330, .18], [294, .22]]); },
+  win() { this.play([[523, .14], [659, .14], [784, .14], [1047, .3]]); },
+  hatch() { this.play([[784, .08], [988, .08], [1175, .08], [1568, .3]]); },
+};
+const Speech = {
+  ok: "speechSynthesis" in window && typeof SpeechSynthesisUtterance === "function",
+  say(text) {
+    if (!this.ok) return;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const vs = (speechSynthesis.getVoices() || []).filter(v => v.localService !== false && /^en/i.test(v.lang)); // on-device voices only
+      if (vs.length) u.voice = vs[0];
+      u.rate = 0.88; u.pitch = 1.1; u.onerror = () => {};
+      this.cur = u; speechSynthesis.speak(u);
+    } catch (e) {}
+  },
+  stop() { if (this.ok) try { speechSynthesis.cancel(); } catch (e) {} },
+};
+
+/* ---------- screens ---------- */
+let view = "map";
+let play = null; // { li, P, steps:[{tap,seq}], st, hints, hinted:Set, done, sol }
+const timers = new Set();
+const later = (fn, ms) => { const t = setTimeout(() => { timers.delete(t); fn(); }, ms); timers.add(t); return t; };
+const clearTimers = () => { timers.forEach(clearTimeout); timers.clear(); };
+
+function topBar(back) {
+  const k = kid(), pct = Math.round(100 * k.earnedToday / ECON.dailyCap), nr = noRead();
+  return `<div class="top">
+    ${back ? `<button class="iconbtn" data-act="map" aria-label="Back to levels">⬅️</button>`
+      : me.linked ? `<a class="iconbtn" href="../index.html#home" aria-label="Back to Elzee">🏠</a>` : ""}
+    <div class="pill" aria-label="Player"><span class="av">${esc(me.avatar)}</span>${nr ? "" : `<span class="nm">${esc(me.name)}</span>`}</div>
+    <div class="pill jar" aria-label="Tokens earned today ${k.earnedToday} of ${ECON.dailyCap}">🪙 <b>${k.earnedToday}</b><span class="jarbar"><i style="width:${pct}%"></i></span>${k.earnedToday >= ECON.dailyCap ? "✅" : ""}</div>
+    ${back && play ? `<div class="pill lvpill" aria-label="Level ${play.li + 1}">${play.li + 1}</div>` : ""}
+    <div class="spacer"></div>
+    <button class="iconbtn ${nr ? "on" : ""}" data-act="toggleRead" aria-label="Picture mode (no reading)" aria-pressed="${nr}">${nr ? "🖼️" : "🔤"}</button>
+    <button class="iconbtn" data-act="toggleSound" aria-label="Sound" aria-pressed="${soundOn()}">${soundOn() ? "🔊" : "🔇"}</button>
+    ${back ? "" : `<button class="iconbtn" data-act="book" aria-label="Critter book">📒</button>
+    <button class="iconbtn" data-act="grown" aria-label="For grown-ups">ⓘ</button>`}
+  </div>`;
+}
+
+function renderMap() {
+  const nr = noRead(), k = kid();
+  const next = LEVELS.findIndex((_, i) => !isCleared(i));
+  const full = k.earnedToday >= ECON.dailyCap;
+  $app.innerHTML = `${topBar(false)}
+    <div class="mapwrap">
+    <div class="hero"><div class="buds">${"BFA".split("").map(b => buddySVG(b)).join("")}</div>
+      ${nr ? `<div class="bubble" aria-label="Step on every tile, finish at the nest">${miniTile(BUD_ICON)}${miniTile(BUD_ICON)}${miniTile(BUD_ICON)} <span class="ar">➜</span> 🪺 <span class="ar">➜</span> 🐣${full ? " &nbsp; 🪙✅🌙" : ""}</div>`
+        : `<div class="bubble"><b>Sprout Trail!</b> Step on every garden tile once, then finish at the nest. What will hatch?${full ? "<br><span class='muted'>Your token jar is full for today 🌙 Puzzles are still free to play!</span>" : ""}</div>`}
+    </div>
+    <div class="levels">${LEVELS.map((L, i) => {
+      const un = isUnlocked(i), st = (k.progress[i] || {}).stars || 0, P = parseLevel(L);
+      return `<button class="lvl ${un ? "" : "locked"} ${i === next ? "next" : ""}" data-act="${un ? "start" : "locked"}" data-li="${i}"
+        aria-label="Level ${i + 1}${un ? "" : ", locked"}">
+        <span class="num">${i + 1}</span>${L.twist ? `<span class="tw" aria-hidden="true">${TWIST[L.twist].ico}</span>` : ""}
+        <span class="scene ${un && !isCleared(i) ? "egg" : ""}">${!un ? "🔒" : isCleared(i) ? L.critter : "🥚"}</span>
+        ${nr ? "" : `<b style="font-size:16px">${esc(L.name)}</b>`}
+        <span class="gsize" aria-hidden="true">${P.W}×${P.H}</span>
+        <span class="stars">${un ? starStr(st) : ""}</span></button>`;
+    }).join("")}</div></div>`;
+}
+
+/* ---------- play state ---------- */
+const RMQ = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+const reduced = () => !!(RMQ && RMQ.matches);
+/* Animation queue: game state updates instantly; the buddy acts each move out in order (hop / slide / burrow). */
+const anim = { q: [], busy: false, pending: new Set(), idle: [], gen: 0 };
+function resetAnim() {
+  anim.gen++; anim.q = []; anim.busy = false; anim.pending.clear(); anim.idle = [];
+  const h = document.querySelector("#walker .hop"); if (h && h.getAnimations) h.getAnimations().forEach(a => a.cancel());
+}
+function startLevel(li) {
+  clearTimers(); resetAnim();
+  const L = LEVELS[li], P = parseLevel(L);
+  play = { li, P, steps: [], st: startState(P), hints: 0, hinted: new Set(), done: false, sol: null, walkerAt: P.S };
+  view = "play"; render();
+  if (L.twist && !isCleared(li)) showTwist(L.twist);
+}
+const head = () => (play.steps.length ? play.steps[play.steps.length - 1].seq.slice(-1)[0] : play.P.S);
+const pathCells = () => [play.P.S, ...play.steps.flatMap(s => s.seq)];
+function rebuildState() {
+  let st = startState(play.P);
+  for (const s of play.steps) { const r = tryStep(play.P, st, s.tap); if (r.fail) break; st = r; }
+  play.st = st;
+}
+function solution() { if (!play.sol) play.sol = (solve(play.P, 1, 2e7).sols[0]) || []; return play.sol; }
+function legalMoves() {
+  const out = [];
+  for (const [a, b] of NB4) { const t = nbr(play.P, head(), a, b); if (t >= 0 && !tryStep(play.P, play.st, t).fail) out.push(t); }
+  return out;
+}
+function rulesFor(L, P) {
+  const has = ch => L.g.join("").includes(ch), r = [];
+  const stages = []; for (let i = 1; i <= P.cpCount; i++) stages.push(STAGE_ICON[i]);
+  r.push({ id: "goal", ic: `${miniTile(BUD_ICON)}${miniTile(BUD_ICON)}<span class="ar">➜</span>🪺`, words: "Step on every tile once. Finish at the nest." });
+  if (/[<>^v]/.test(L.g.join(""))) r.push({ id: "stream", ic: `${miniTile(chevSVG(">"), "")}`.replace('class="mt "', 'class="mt" style="background:var(--water)"') + `<span class="ar">➜</span>${miniTile()}`, words: TWIST.stream.words });
+  if (P.cpCount) r.push({ id: "stage", ic: stages.map(s => miniTile(s)).join('<span class="ar">➜</span>'), words: "Visit the seeds in growing order." });
+  if (has("a")) r.push({ id: "burrow", ic: `${miniTile(burrowSVG("a"))}<span class="ar">⇄</span>${miniTile(burrowSVG("a"))}`, words: TWIST.burrow.words });
+  return r;
+}
+function renderPlay() {
+  resetAnim();
+  const L = LEVELS[play.li], P = play.P, nr = noRead();
+  const rules = rulesFor(L, P);
+  let cells = "";
+  P.cells.forEach((c, i) => {
+    let cls = "", inner = "";
+    if (c.rock) { cls = "rock"; inner = "🪨"; }
+    else if (c.arrow) { cls = "stream"; inner = chevSVG(c.arrow); }
+    else if (c.portal) { cls = "burrow"; inner = burrowSVG(c.portal); }
+    else if (c.cp) { cls = "stage"; inner = `<span class="pips">${"●".repeat(c.cp)}</span><span class="sg">${STAGE_ICON[c.cp]}</span>`; }
+    else if (i === P.G) { cls = "nest"; inner = `${NEST_SVG}<span class="critter">${L.critter}</span>`; }
+    else if (i === P.S) { cls = "start"; inner = `<span class="foot">🐾</span>`; }
+    const fl = FLOWERS[(c.r * 7 + c.c * 3 + play.li) % FLOWERS.length];
+    cells += `<div class="cell ${cls}" data-cell="${i}" style="left:calc(var(--cell) * ${c.c});top:calc(var(--cell) * ${c.r})"><div class="tile">${inner}${c.rock || i === P.G ? "" : BUD_SVG}${c.rock ? "" : `<span class="fl"><span class="fli" style="animation-delay:-${((c.r * 3 + c.c * 2) % 7) * .3}s">${fl}</span></span>`}</div></div>`;
+  });
+  $app.innerHTML = `${topBar(true)}
+  <div class="playwrap">
+    <div class="rules">${rules.map(r => `<div class="rule ${L.twist === r.id ? "newr" : ""}" aria-label="${esc(r.words)}"><span class="ric">${r.ic}</span>${nr ? "" : `<span class="rtx">${esc(r.words)}</span>`}</div>`).join("")}</div>
+    <div class="boardbox" id="boardbox"><div class="cam" id="cam"><div class="board" id="board" style="--w:${P.W};--h:${P.H}">
+      ${cells}
+      <svg class="pathsvg" viewBox="0 0 ${P.W} ${P.H}" preserveAspectRatio="none" aria-hidden="true"><g id="vine"></g></svg>
+      <div class="headring" id="headring"></div>
+      <div class="walker" id="walker" role="img" aria-label="${BUDDIES[L.walker].full}"><div class="hop"><div class="idle">${buddySVG(L.walker)}</div></div></div>
+    </div></div></div>
+    <div class="ctrls">
+      <button class="btn ghost" data-act="undo" aria-label="Step back"><span class="ico">↩️</span></button>
+      <button class="btn ghost" data-act="restart" aria-label="Start over"><span class="ico">🔄</span></button>
+      <button class="btn ghost" data-act="hint" aria-label="Hint"><span class="ico">💡</span></button>
+      ${Speech.ok ? `<button class="btn ghost" data-act="say" aria-label="Read the rules aloud"><span class="ico">🔈</span></button>` : ""}
+    </div>
+  </div>`;
+  fitBoard(); paint(true);
+}
+function fitBoard() {
+  const box = document.getElementById("boardbox"), board = document.getElementById("board");
+  if (!box || !board) return;
+  const r = box.getBoundingClientRect(), pad = 20; // room for the board frame + shadow
+  const cell = Math.max(40, Math.floor(Math.min((r.width - pad) / play.P.W, (r.height - pad) / play.P.H, 170)));
+  board.style.setProperty("--cell", cell + "px");
+  play.cellPx = cell;
+  placeHand();
+}
+const cellXY = i => [i % play.P.W, Math.floor(i / play.P.W)];
+const byId = id => document.getElementById(id);
+const cellEl = i => document.querySelector(`#board [data-cell="${i}"]`);
+const tileEl = i => { const c = cellEl(i); return c && c.querySelector(".tile"); };
+const hopEl = () => document.querySelector("#walker .hop");
+/* Web Animations helper: transforms/opacity only, so the browser can run it on the compositor. */
+function wa(el, frames, opts) { if (!el || !el.animate) return null; try { return el.animate(frames, opts); } catch (e) { return null; } }
+function setWalker(i, ms, ease) {
+  const w = byId("walker"), ring = byId("headring"); if (!w) return;
+  const [x, y] = cellXY(i), s = play.cellPx || 80, tr = `translate(${x * s}px,${y * s}px)`;
+  const t = ms ? `transform ${ms}ms ${ease || "cubic-bezier(.3,.7,.4,1)"}` : "none";
+  w.style.transition = t; ring.style.transition = t;
+  w.style.transform = tr; ring.style.transform = tr;
+  play.walkerAt = i;
+}
+function setMood(m) { const w = document.querySelector("#walker .idle"); if (w) w.innerHTML = buddySVG(LEVELS[play.li].walker, m); }
+const FX = {
+  pop:   [[{ transform: "scale(1)" }, { transform: "scale(.82,.78)", offset: .25 }, { transform: "scale(1.1)", offset: .6 }, { transform: "scale(1)" }], 420],
+  boing: [[{ transform: "rotate(0) scale(1)" }, { transform: "rotate(-9deg) scale(1.08,.92)", offset: .2 }, { transform: "rotate(7deg) scale(.95,1.06)", offset: .45 }, { transform: "rotate(-4deg) scale(1.02)", offset: .7 }, { transform: "rotate(0) scale(1)" }], 560],
+  hey:   [[{ transform: "translateY(0)" }, { transform: "translateY(-16%) scale(1.04)", offset: .35 }, { transform: "translateY(0) scale(1.04,.96)", offset: .7 }, { transform: "translateY(0)" }], 520],
+  dive:  [[{ transform: "scale(1)" }, { transform: "scale(.78)", offset: .4 }, { transform: "scale(1.14)", offset: .75 }, { transform: "scale(1)" }], 440],
+};
+function fx(i, name, delay = 0) {
+  const t = tileEl(i); if (!t) return null;
+  if (reduced()) return name === "pop" ? null : wa(t, [{ opacity: 1 }, { opacity: .5 }, { opacity: 1 }], { duration: 600, delay });
+  const [f, d] = FX[name]; return wa(t, f, { duration: d, delay, easing: "ease-out" });
+}
+/* little leaves (or water drops) that puff out of a tile */
+function puff(i, kind) {
+  const b = byId("board"); if (!b || reduced()) return;
+  const [x, y] = cellXY(i), s = play.cellPx;
+  for (let k = 0; k < 4; k++) {
+    const p = document.createElement("span"); p.className = "pt " + (kind || "");
+    b.appendChild(p);
+    const ang = (-160 + k * 47) * Math.PI / 180, r = s * .34, x0 = (x + .5) * s, y0 = (y + .72) * s;
+    const a = wa(p, [{ transform: `translate(${x0}px,${y0}px) scale(1) rotate(0)`, opacity: 1 },
+      { transform: `translate(${x0 + Math.cos(ang) * r}px,${y0 + Math.sin(ang) * r}px) scale(.4) rotate(${k * 90}deg)`, opacity: 0 }], { duration: 480, easing: "cubic-bezier(.2,.8,.4,1)" });
+    if (a) a.onfinish = () => p.remove(); else p.remove();
+  }
+}
+/* ---- the vine: one SVG line per move, drawn with a dash animation, plus a leaf ---- */
+function segSVG(a, b, ms) {
+  const [x1, y1] = cellXY(a), [x2, y2] = cellXY(b), jump = !adjacent(play.P, a, b), grow = ms > 0 && !reduced();
+  const k = play.segN = (play.segN || 0) + 1, side = k % 2 ? 1 : -1, horiz = y1 === y2;
+  const mx = (x1 + x2) / 2 + .5 + (horiz ? 0 : side * .11), my = (y1 + y2) / 2 + .5 + (horiz ? side * .11 : 0);
+  const rot = horiz ? side * 35 : 90 + side * 35;
+  const leaf = jump ? "" : `<g transform="rotate(${rot} ${mx} ${my})"><ellipse class="leaf ${grow ? "grow" : ""}" style="--ld:${Math.round(ms * .5)}ms" cx="${mx}" cy="${my}" rx=".12" ry=".055"/></g>`;
+  return `<line class="${jump ? "jump" : "vine"} ${grow ? "grow" : ""}" style="--d:${ms}ms" pathLength="1" x1="${x1 + .5}" y1="${y1 + .5}" x2="${x2 + .5}" y2="${y2 + .5}"/>${leaf}`;
+}
+function drawVine() {
+  const cells = pathCells(); let h = "";
+  for (let k = 1; k < cells.length; k++) h += segSVG(cells[k - 1], cells[k], 0);
+  byId("vine").innerHTML = h;
+}
+const addSeg = (a, b, ms) => byId("vine").insertAdjacentHTML("beforeend", segSVG(a, b, ms));
+/* Update tiles from state. Tiles the buddy hasn't reached yet (still queued) stay unplanted until it lands. */
+function paint(instant) {
+  const P = play.P, vis = play.st.vis, h = head();
+  const nxt = play.done ? [] : NB4.map(([a, b]) => nbr(P, h, a, b)).filter(t => t >= 0 && !P.cells[t].rock && !vis[t]);
+  document.querySelectorAll("#board .cell").forEach(el => {
+    const i = +el.dataset.cell, shown = !!vis[i] && !anim.pending.has(i) && (i !== P.S || play.steps.length > 0);
+    el.classList.toggle("visited", shown);
+    el.classList.toggle("next", nxt.includes(i));
+    el.classList.toggle("want", !play.done && P.cells[i].cp > 0 && P.cells[i].cp === play.st.ck);
+    el.classList.toggle("hint", play.hinted.has(i) && shown);
+  });
+  if (instant) { drawVine(); setWalker(h, 0); }
+  placeHand();
+}
+function enqueueSeq(seq, from) {
+  let prev = from;
+  for (const c of seq) {
+    const kind = !adjacent(play.P, prev, c) ? "burrow" : play.P.cells[prev].arrow ? "slide" : "hop";
+    anim.q.push({ from: prev, to: c, kind }); anim.pending.add(c); prev = c;
+  }
+  if (!anim.busy) runQ(anim.gen);
+}
+function runQ(gen) {
+  if (gen !== anim.gen) return;
+  const m = anim.q.shift();
+  if (!m) { anim.busy = false; const cbs = anim.idle; anim.idle = []; cbs.forEach(f => f()); return; }
+  anim.busy = true;
+  // catch up when moves pile up (fast drags), and rush the last few once the puzzle is solved
+  later(() => runQ(gen), doMove(m, play.done ? 3 : anim.q.length > 2 ? 2 : anim.q.length > 0 ? 1 : 0, gen));
+}
+const whenIdle = fn => { if (!anim.busy && !anim.q.length) fn(); else anim.idle.push(fn); };
+function land(i, gen) {
+  if (gen !== anim.gen) return;
+  anim.pending.delete(i);
+  const el = cellEl(i); if (!el) return;
+  el.classList.add("visited"); if (play.hinted.has(i)) el.classList.add("hint");
+  fx(i, "pop"); puff(i);
+  Sound.step(pathCells().indexOf(i));
+}
+/* Act out one move. Returns how long it takes (ms). */
+function doMove(m, fast, gen) {
+  const rm = reduced(), hop = hopEl(), P = play.P;
+  if (m.from === P.S && !cellEl(P.S).classList.contains("visited")) { cellEl(P.S).classList.add("visited"); fx(P.S, "pop"); }
+  if (m.kind === "hop") { // squash, stretch up, squash on landing
+    const ms = rm ? 120 : [200, 140, 90, 70][fast];
+    setWalker(m.to, ms); addSeg(m.from, m.to, ms);
+    if (!rm) wa(hop, [
+      { transform: "translateY(0) scale(1.16,.82)" },
+      { transform: "translateY(-32%) scale(.88,1.16)", offset: .42 },
+      { transform: "translateY(0) scale(1.2,.78)", offset: .8 },
+      { transform: "translateY(0) scale(1,1)" }], { duration: ms + 80, easing: "ease-out" });
+    later(() => land(m.to, gen), ms * .8);
+    return ms;
+  }
+  if (m.kind === "slide") { // the stream carries the buddy: a smooth slide with a lean, and splashes
+    const ms = rm ? 160 : fast >= 2 ? 160 : 300, [fx0, fy0] = cellXY(m.from), [tx, ty] = cellXY(m.to), lean = (tx - fx0) * 12 + (ty - fy0) * 4;
+    setWalker(m.to, ms, "cubic-bezier(.45,0,.3,1)"); addSeg(m.from, m.to, ms);
+    Sound.splash(); puff(m.from, "drop");
+    if (!rm) wa(hop, [{ transform: "rotate(0) scale(1)" }, { transform: `rotate(${lean}deg) scale(1.12,.88)`, offset: .25 },
+      { transform: `rotate(${lean}deg) scale(1.12,.88)`, offset: .75 }, { transform: "rotate(0) scale(1)" }], { duration: ms + 60, easing: "ease-in-out" });
+    later(() => { if (gen === anim.gen) puff(m.to, "drop"); land(m.to, gen); }, ms * .85);
+    return ms;
+  }
+  // burrow: pop down into one hole, pop up out of the other
+  const down = rm ? 120 : fast >= 2 ? 130 : 210, up = rm ? 120 : fast >= 2 ? 180 : 300;
+  addSeg(m.from, m.to, down + up); fx(m.from, "dive"); Sound.poof();
+  const dn = rm ? wa(hop, [{ opacity: 1 }, { opacity: 0 }], { duration: down, fill: "forwards" })
+    : wa(hop, [{ transform: "translateY(0) scale(1)" }, { transform: "translateY(-14%) scale(1.1,.9)", offset: .3 },
+      { transform: "translateY(42%) scale(.1,.3)", opacity: 0 }], { duration: down, easing: "ease-in", fill: "forwards" });
+  later(() => {
+    if (gen !== anim.gen) return;
+    setWalker(m.to, 0); if (dn) dn.cancel(); fx(m.to, "dive"); Sound.pop();
+    if (rm) wa(hop, [{ opacity: 0 }, { opacity: 1 }], { duration: up });
+    else wa(hop, [{ transform: "translateY(42%) scale(.1,.3)", opacity: 0 }, { transform: "translateY(-34%) scale(.88,1.2)", opacity: 1, offset: .55 },
+      { transform: "translateY(0) scale(1.18,.82)", offset: .8 }, { transform: "translateY(0) scale(1)" }], { duration: up, easing: "ease-out" });
+    later(() => land(m.to, gen), up * .5);
+  }, down);
+  return down + up;
+}
+/* A rejected move is a playful boing, never a buzzer: the buddy bounces toward the tile and springs back. */
+function bump(res, t) {
+  Sound.boing(); setMood("oh"); later(() => { if (play && !play.done) setMood("happy"); }, 800);
+  const P = play.P, h = head();
+  if (!reduced() && t >= 0 && adjacent(P, h, t) && !anim.busy) {
+    const [hx, hy] = cellXY(h), [tx, ty] = cellXY(t), dx = (tx - hx) * 24, dy = (ty - hy) * 24;
+    wa(hopEl(), [{ transform: "translate(0,0) scale(1)" }, { transform: `translate(${dx}%,${dy}%) scale(${dx ? .84 : 1.14},${dx ? 1.14 : .84})`, offset: .32 },
+      { transform: `translate(${-dx * .2}%,${-dy * .2}%) scale(1.06,.95)`, offset: .65 }, { transform: "translate(0,0) scale(1)" }], { duration: 480, easing: "ease-out" });
+  }
+  const open = P.cells.map((c, i) => i).filter(i => !P.cells[i].rock && !play.st.vis[i] && i !== P.G);
+  if (res.why === "early") { // "not yet!": the egg jiggles and the tiles still to plant hop in a wave
+    fx(P.G, "boing"); wobbleEgg(10);
+    open.forEach((i, k) => fx(i, "hey", Math.min(k * 35, 700)));
+  } else if (res.why === "order") { fx(res.at, "boing"); P.cells.forEach((c, i) => { if (c.cp === play.st.ck) fx(i, "hey", 150); }); }
+  else { fx(t, "boing"); if (res.at !== t && res.at >= 0) fx(res.at, "boing", 140); }
+}
+function wobbleEgg(r) {
+  const e = document.querySelector("#board .nest .egg"); if (!e || reduced()) return;
+  wa(e, [{ transform: "rotate(0)" }, { transform: `rotate(${-r}deg)` }, { transform: `rotate(${r}deg)` }, { transform: `rotate(${-r / 2}deg)` }, { transform: "rotate(0)" }], { duration: 420, easing: "ease-in-out" });
+}
+function stepTo(t) {
+  if (!play || play.done) return false;
+  const P = play.P, h = head();
+  if (t < 0 || !adjacent(P, h, t)) return false;
+  const res = tryStep(P, play.st, t);
+  if (res.fail) { bump(res, t); return false; }
+  play.steps.push({ tap: t, seq: res.seq }); play.st = res;
+  enqueueSeq(res.seq, h);
+  paint(false);
+  if (play.st.n === P.open && head() === P.G) win();
+  else if (!legalMoves().length) whenIdle(() => later(stuck, 80));
+  return true;
+}
+function stuck() {
+  if (!play || play.done) return;
+  setMood("oh"); Sound.boing();
+  const P = play.P;
+  P.cells.forEach((c, i) => { if (!c.rock && !play.st.vis[i]) fx(i, "hey"); });
+  const u = document.querySelector('[data-act="undo"]'); if (u) { u.classList.add("wig"); later(() => u.classList.remove("wig"), 1600); }
+}
+function snapBack() { // instant rewind, with a little springy landing so it still feels physical
+  resetAnim(); rebuildState(); Sound.tap(); setMood("happy"); paint(true);
+  if (!reduced()) wa(hopEl(), [{ transform: "scale(.6)", opacity: .3 }, { transform: "scale(1.12,.9)", opacity: 1, offset: .6 }, { transform: "scale(1)" }], { duration: 300, easing: "ease-out" });
+}
+function truncateTo(cell) {
+  // tap a tile on your trail to go back to it (whole stream/burrow moves stay together)
+  if (cell === play.P.S) play.steps = [];
+  else { const k = play.steps.findIndex(s => s.seq.includes(cell)); if (k < 0) return; play.steps = play.steps.slice(0, k + 1); }
+  snapBack();
+}
+function undo() { if (!play || play.done || !play.steps.length) return; play.steps.pop(); snapBack(); }
+function restart() { if (!play || play.done) return; play.steps = []; snapBack(); }
+function hint() {
+  if (!play || play.done) return;
+  const sol = solution(); let k = 0;
+  while (k < play.steps.length && k < sol.length && play.steps[k].tap === sol[k]) k++;
+  if (k < play.steps.length || anim.busy) { play.steps = play.steps.slice(0, k); resetAnim(); rebuildState(); paint(true); }
+  if (k >= sol.length) return;
+  play.hints++;
+  const t = sol[k]; const res = tryStep(play.P, play.st, t);
+  res.seq.forEach(c => play.hinted.add(c));
+  stepTo(t);
+}
+
+/* Level-1 coach (until first clear): a hand that shows a DRAG from the buddy along the next two tiles. No reading needed. */
+function placeHand() {
+  document.querySelectorAll(".hand").forEach(h => h.remove());
+  if (view !== "play" || !play || play.li !== 0 || isCleared(0) || play.done || $ov.innerHTML || drag) return;
+  const sol = solution(); let k = 0;
+  while (k < play.steps.length && play.steps[k].tap === sol[k]) k++;
+  const board = byId("board"); if (!board) return;
+  const h = document.createElement("div"); h.className = "hand"; h.textContent = "👆"; h.setAttribute("aria-hidden", "true");
+  const s = play.cellPx || 80;
+  if (k < play.steps.length) { // off the trail: point at the step-back button
+    const u = document.querySelector('[data-act="undo"]'); if (!u) return;
+    const r = u.getBoundingClientRect(); h.classList.add("tap"); h.style.position = "fixed"; h.style.left = (r.left + r.width / 2 - 16) + "px"; h.style.top = (r.top + r.height * .5) + "px";
+    document.body.appendChild(h); return;
+  }
+  const pts = [head(), ...sol.slice(k, k + 2)].map(cellXY), [x0, y0] = pts[0], [x1, y1] = pts[1] || pts[0], [x2, y2] = pts[2] || pts[1] || pts[0];
+  h.classList.add("drag");
+  h.style.left = (x0 * s + s * .32) + "px"; h.style.top = (y0 * s + s * .4) + "px";
+  h.style.setProperty("--x1", (x1 - x0) * s + "px"); h.style.setProperty("--y1", (y1 - y0) * s + "px");
+  h.style.setProperty("--x2", (x2 - x0) * s + "px"); h.style.setProperty("--y2", (y2 - y0) * s + "px");
+  board.appendChild(h);
+}
+
+/* ---------- the big win (about 4 s, tap to skip; toned down for reduced motion) ---------- */
+function win() {
+  play.done = true;
+  const stars = Math.max(1, 3 - Math.min(2, play.hints));
+  const res = award(play.li, stars);
+  play.winData = { stars, res };
+  document.querySelectorAll(".hand").forEach(h => h.remove());
+  paint(false);
+  whenIdle(() => celebrate(stars, res));
+}
+const shakeFrames = a => [{ transform: "translate(0,0)" }, { transform: `translate(${a}px,${-a / 2}px) rotate(.5deg)` }, { transform: `translate(${-a}px,${a / 2}px) rotate(-.5deg)` },
+  { transform: `translate(${a / 2}px,${a / 3}px)` }, { transform: "translate(0,0)" }];
+function celebrate(stars, res) {
+  const rm = reduced(), P = play.P, L = LEVELS[play.li], cells = pathCells();
+  const nest = document.querySelector("#board .nest"), cam = byId("cam"), board = byId("board");
+  board.classList.add("done"); play.celebrating = true; play.celebratedAt = performance.now();
+  document.querySelectorAll("#board .cell.next,#board .cell.want").forEach(el => el.classList.remove("next", "want"));
+  Sound.win();
+  // 1) the garden blooms in a wave along the trail
+  const stepMs = rm ? 0 : Math.min(60, 800 / cells.length);
+  cells.forEach((c, k) => {
+    if (c === P.G) return; const el = cellEl(c); if (!el) return;
+    const d = Math.round(k * stepMs), fl = el.querySelector(".fl");
+    if (fl) fl.style.animationDelay = d + "ms";
+    el.classList.add("bloom"); fx(c, "pop", d);
+  });
+  // the buddy hops aside so everyone can see the egg
+  const side = cellXY(P.G)[0] < P.W / 2 ? 1 : -1; // toward the middle of the board
+  wa(hopEl(), [{ transform: "translate(0,0) scale(1)" }, { transform: `translate(${side * 58}%,-14%) scale(.68)` }], { duration: rm ? 1 : 320, delay: rm ? 300 : 650, easing: "cubic-bezier(.3,1.7,.5,1)", fill: "forwards" });
+  const T = rm ? { c1: 500, c2: 800, c3: 1100, panel: 2000 } : { zoom: 950, c1: 1300, c2: 1750, c3: 2200, panel: 3950 };
+  // 2) camera zooms in on the egg
+  if (!rm) later(() => {
+    const [x, y] = cellXY(P.G), s = play.cellPx;
+    cam.style.transformOrigin = `${(x + .5) * s}px ${(y + .5) * s}px`;
+    play.zoom = wa(cam, [{ transform: "scale(1)" }, { transform: "scale(1.22)" }], { duration: 420, easing: "cubic-bezier(.3,.8,.3,1)", fill: "forwards" });
+  }, T.zoom);
+  // 3) the egg cracks in stages, with a camera bump each time
+  const crack = (n, big) => {
+    nest.classList.add("crack" + n); Sound.crack(n);
+    if (!rm) { wobbleEgg(big ? 18 : 10); wa(board, shakeFrames(big ? 7 : 4), { duration: 320 }); }
+  };
+  later(() => crack(1, false), T.c1); later(() => crack(2, true), T.c2);
+  // 4) the critter bursts out and bounces around the screen; confetti; the buddy dances
+  later(() => {
+    nest.classList.add("crack3", "hatched"); Sound.hatch(); setMood("yay"); byId("walker").classList.add("dance");
+    if (play.zoom) { play.zoom.cancel(); play.zoom = null; wa(cam, [{ transform: "scale(1.22)" }, { transform: "scale(1)" }], { duration: 520, easing: "cubic-bezier(.3,1.5,.5,1)" }); }
+    if (!rm) { wa(board, shakeFrames(9), { duration: 380 }); confetti(); }
+    burst(L.critter, rm);
+  }, T.c3);
+  later(() => showWin(stars, res), T.panel);
+}
+function burst(critter, rm) {
+  const b = document.createElement("div"); b.className = "burst"; b.setAttribute("aria-hidden", "true");
+  b.innerHTML = `<div class="rays"></div><div class="bcw"><div class="bc">${critter}</div></div>`;
+  document.body.appendChild(b);
+  if (rm) { wa(b, [{ opacity: 0 }, { opacity: 1 }], { duration: 400 }); return; }
+  const nr = document.querySelector("#board .nest").getBoundingClientRect(), vw = innerWidth, vh = innerHeight;
+  const sx = nr.left + nr.width / 2 - vw / 2, sy = nr.top + nr.height / 2 - vh / 2;
+  wa(b.querySelector(".bcw"), [
+    { transform: `translate(${sx}px,${sy}px) scale(.2)` },
+    { transform: `translate(${-vw * .22}px,${-vh * .14}px) scale(.75)`, offset: .25 },
+    { transform: `translate(${vw * .22}px,${-vh * .04}px) scale(.8)`, offset: .5 },
+    { transform: `translate(${-vw * .08}px,${-vh * .18}px) scale(.9)`, offset: .72 },
+    { transform: "translate(0,0) scale(1)" }], { duration: 1500, easing: "ease-in-out" });
+  wa(b.querySelector(".bc"), [{ transform: "scale(1) rotate(0)" }, { transform: "scale(1.3,.7) rotate(-10deg)", offset: .25 }, { transform: "scale(.9,1.12) rotate(6deg)", offset: .34 },
+    { transform: "scale(1.3,.7) rotate(10deg)", offset: .5 }, { transform: "scale(.9,1.12) rotate(-6deg)", offset: .59 }, { transform: "scale(1.25,.75)", offset: .72 },
+    { transform: "scale(.94,1.08)", offset: .82 }, { transform: "scale(1.15,.85)", offset: .95 }, { transform: "scale(1) rotate(0)" }], { duration: 1600, easing: "ease-in-out" });
+  wa(b.querySelector(".rays"), [{ opacity: 0, transform: "scale(.2)" }, { opacity: 1, transform: "scale(1)" }], { duration: 600, delay: 1000, fill: "backwards", easing: "cubic-bezier(.3,1.5,.5,1)" });
+}
+function showWin(stars, res) {
+  clearTimers(); play.winData = null; play.celebrating = false;
+  document.querySelectorAll(".burst").forEach(b => b.remove());
+  const cam = byId("cam"); if (cam && cam.getAnimations) cam.getAnimations().forEach(a => a.cancel());
+  const nest = document.querySelector("#board .nest"); if (nest) nest.classList.add("crack1", "crack2", "crack3", "hatched");
+  const nr = noRead(), L = LEVELS[play.li];
+  const nextOk = play.li + 1 < LEVELS.length;
+  const words = { first: "First solve", replay: "Replay", stars: "3 stars!" };
+  $ov.innerHTML = `<div class="ov"><div class="panel" role="dialog" aria-label="Level solved">
+    <h2>${nr ? "🎉" : "🎉 The garden bloomed!"}</h2>
+    <div class="winrow"><span class="wb">${buddySVG(L.walker, "yay")}</span><span class="wc" aria-hidden="true">${L.critter}</span></div>
+    <div class="bigstars">${[0, 1, 2].map(i => `<span style="animation-delay:${.2 + i * .2}s" class="${i < stars ? "" : "nostar"}">⭐</span>`).join("")}</div>
+    ${res.got ? `<div class="coins">+${res.got} 🪙</div>` : ""}
+    ${!nr && res.lines.length ? `<div class="muted" style="font-size:17px">${res.lines.map(([k, v]) => `${words[k]} +${v}`).join(" · ")}</div>` : ""}
+    ${res.capped ? `<div class="note capnote">${nr ? "🪙✅🌙" : "Your token jar is full for today. Come back tomorrow for more. Puzzles are always free to play! 🌙"}</div>` : ""}
+    ${res.newSticker ? `<div class="sticker" aria-label="New critter for your book"><div class="inner"><div class="face">${L.critter}</div><div class="back">?</div></div></div>
+      ${nr ? "" : `<div class="muted">A new critter for your book!</div>`}` : ""}
+    <div class="row">
+      <button class="btn ghost" data-act="map" aria-label="Back to levels"><span class="ico">🗺️</span></button>
+      <button class="btn ghost" data-act="replay" aria-label="Play again"><span class="ico">🔁</span></button>
+      ${nextOk ? `<button class="btn" data-act="next" aria-label="Next level"><span class="ico">▶️</span>${nr ? "" : "Next"}</button>` : ""}
+    </div></div></div>`;
+  if (soundOn()) Speech.say(res.got ? `The garden bloomed! You earned ${res.got} tokens!` : "The garden bloomed! Great thinking!");
+}
+function showTwist(kind) {
+  const nr = noRead(), T = TWIST[kind], B = buddySVG("B");
+  let tiles = "", anim = "";
+  if (kind === "stream") { tiles = miniTile() + miniTile(chevSVG(">"), "water") + miniTile(); anim = "dStream"; }
+  if (kind === "stage") { tiles = miniTile("🌰") + miniTile("🌱") + miniTile("🌷"); anim = "dStage"; }
+  if (kind === "burrow") { tiles = miniTile() + miniTile(burrowSVG("a")) + miniTile() + miniTile(burrowSVG("a")); anim = "dBurrow"; }
+  $ov.innerHTML = `<div class="ov"><div class="panel" role="dialog" aria-label="New idea">
+    <span class="newbadge">✨ ${nr ? "" : "NEW!"} ${T.ico}</span>
+    <div class="demo" aria-hidden="true">${tiles}<span class="mb" style="--anim:${anim}">${B}</span></div>
+    ${nr ? "" : `<p style="font-size:22px">${esc(T.words)}</p>`}
+    <div class="row">${Speech.ok ? `<button class="btn ghost" data-act="sayTwist" data-kind="${kind}" aria-label="Read aloud"><span class="ico">🔈</span></button>` : ""}
+    <button class="btn" data-act="closeOv" aria-label="Let's go"><span class="ico">👍</span></button></div></div></div>`;
+  if (soundOn()) Speech.say(T.say);
+}
+function showBook() {
+  const nr = noRead();
+  $ov.innerHTML = `<div class="ov"><div class="panel" role="dialog" aria-label="Critter book">
+    <h2>📒 ${nr ? "" : "Critter Book"}</h2>
+    <div class="book">${LEVELS.map((L, i) => `<div class="slot ${isCleared(i) ? "" : "no"}"><span class="big">${isCleared(i) ? L.critter : "🥚"}</span><small>${i + 1}</small></div>`).join("")}</div>
+    <div class="row"><button class="btn" data-act="closeOv" aria-label="Close"><span class="ico">👍</span></button></div></div></div>`;
+}
+function showGrown() {
+  const k = kid();
+  $ov.innerHTML = `<div class="ov"><div class="panel left" role="dialog" aria-label="For grown-ups">
+    <h2 style="text-align:center">For grown-ups</h2>
+    <p><b>What it practices:</b> planning a route, working out forced moves ("this corner tile only has one way in, so…"), cause and effect (streams), ordering (seed, sprout, tulip), and holding several rules at once. Every level has exactly one answer. There's no timer, and nothing depends on speed or luck.</p>
+    <p><b>Tokens:</b> earned only by solving puzzles. First solve +${ECON.firstClear}, first 3-star solve +${ECON.firstThreeStars}, replays +${ECON.replay} (up to ${ECON.replayPaidPerDay} a day). At most <b>${ECON.dailyCap} tokens a day</b> per kid. Hints cost a star, never tokens. No purchases, no ads, nothing lost for missing a day.</p>
+    <div class="note">Player: ${esc(me.avatar)} ${esc(me.name)} ${me.linked ? "(from Elzee)" : "(no Elzee player found on this device)"}<br>
+      Today: ${k.earnedToday}/${ECON.dailyCap} · Waiting to go into the Elzee jar: <b>${k.pending}</b> · All-time: ${k.lifetime}</div>
+    <p class="muted" style="font-size:16px">Tokens from this game move into the kid's Elzee jar the next time Elzee's home screen opens (up to ${ECON.dailyCap} a day). Picture mode hides all words; 🔈 reads the rules aloud with the device's own voice.</p>
+    <p class="muted" style="font-size:16px">Hold the button below for 2 seconds to reset this kid's puzzle progress and critters. Today's token count is kept so the daily cap can't be reset.</p>
+    <div class="row"><button class="btn ghost holdbtn" data-hold="reset" aria-label="Hold to reset puzzle progress"><i></i>Hold to reset</button>
+      <button class="btn" data-act="closeOv">Close</button></div></div></div>`;
+}
+function toastNote(msg) {
+  const el = document.createElement("div");
+  el.className = "note"; el.style.cssText = "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:45;max-width:90vw";
+  el.textContent = msg; document.body.appendChild(el); setTimeout(() => el.remove(), 2200);
+}
+function confetti(n = 110) {
+  if (reduced()) return;
+  const colors = ["#7c4dff", "#3ccf4e", "#ffc83d", "#ff6b3d", "#ff8fab", "#4dc3ff"];
+  for (let i = 0; i < n; i++) {
+    const c = document.createElement("div"); c.className = "confetti"; // decoration only; randomness never affects play
+    c.style.left = Math.random() * 100 + "vw"; c.style.background = colors[i % colors.length];
+    if (i % 3 === 0) c.style.borderRadius = "50%";
+    c.style.animationDuration = (1.6 + Math.random() * 1.6) + "s"; c.style.animationDelay = (Math.random() * .4) + "s";
+    document.body.appendChild(c); setTimeout(() => c.remove(), 3800);
+  }
+}
+function render() {
+  Speech.stop();
+  document.querySelectorAll(".confetti,.hand,.burst,.pt").forEach(c => c.remove());
+  if (view === "play" && play) renderPlay(); else { view = "map"; play = null; clearTimers(); renderMap(); }
+}
+
+/* ---------- input: buttons ---------- */
+const ACTS = {
+  map() { $ov.innerHTML = ""; view = "map"; play = null; render(); },
+  start(el) { const li = +el.dataset.li; if (isUnlocked(li)) { Sound.tap(); startLevel(li); } },
+  locked() { Sound.boing(); },
+  toggleRead() { kid().noRead = !noRead(); Store.save(); if (view === "play" && play) { const keep = play; render(); play = keep; } else render(); },
+  toggleSound() { kid().sound = !soundOn(); Store.save(); if (!soundOn()) Speech.stop(); render(); },
+  book() { showBook(); }, grown() { showGrown(); },
+  closeOv() { $ov.innerHTML = ""; if (view === "play") placeHand(); else render(); },
+  undo() { undo(); }, restart() { restart(); }, hint() { hint(); },
+  say() { Speech.say(rulesFor(LEVELS[play.li], play.P).map(r => r.words).join(" ")); },
+  sayTwist(el) { Speech.say(TWIST[el.dataset.kind].say); },
+  replay() { $ov.innerHTML = ""; startLevel(play.li); },
+  next() { $ov.innerHTML = ""; startLevel(Math.min(LEVELS.length - 1, play.li + 1)); },
+};
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]");
+  if (el && !el.disabled && ACTS[el.dataset.act]) ACTS[el.dataset.act](el);
+});
+
+/* ---------- input: tap or drag across the board (pointer events: finger, pencil, or mouse) ---------- */
+let drag = null;
+function cellAt(x, y, rect) {
+  const b = document.getElementById("board"); if (!b || !play) return -1;
+  const r = rect || b.getBoundingClientRect(), s = play.cellPx, c = Math.floor((x - r.left) / s), rr = Math.floor((y - r.top) / s);
+  if (c < 0 || rr < 0 || c >= play.P.W || rr >= play.P.H) return -1;
+  // only count it when the finger is well inside the tile, so diagonal drags don't skip
+  const fx = (x - r.left) / s - c, fy = (y - r.top) / s - rr;
+  return { i: rr * play.P.W + c, inner: fx > .15 && fx < .85 && fy > .15 && fy < .85 };
+}
+function touchCell(i, fromDrag) {
+  if (!play || play.done) return;
+  const h = head();
+  if (i === h) return;
+  if (play.st.vis[i]) {
+    // dragging back over the previous tile = step back; tapping any trail tile = go back to it
+    if (fromDrag) {
+      const last = play.steps[play.steps.length - 1];
+      const before = play.steps.length > 1 ? play.steps[play.steps.length - 2].seq.slice(-1)[0] : play.P.S;
+      if (last && (i === before || last.seq.includes(i))) undo();
+    }
+    else truncateTo(i);
+    return;
+  }
+  if (adjacent(play.P, h, i)) stepTo(i);
+  else if (!fromDrag) { // not next to the buddy: the buddy waves "over here!"
+    Sound.boing(); if (!reduced()) wa(hopEl(), FX.hey[0], { duration: 520, easing: "ease-out" });
+    const ring = byId("headring"); if (ring) wa(ring, [{ opacity: 1 }, { opacity: .2 }, { opacity: 1 }], { duration: 500, iterations: 2 });
+  }
+}
+document.addEventListener("pointerdown", e => {
+  // impatient? a tap during the celebration jumps straight to the prize card
+  if (play && play.done && play.winData && !$ov.innerHTML) { const w = play.winData; e.preventDefault(); showWin(w.stars, w.res); return; }
+  if (!play || play.done || view !== "play" || $ov.innerHTML) return;
+  const b = byId("board"); if (!b || !e.target.closest("#board")) return;
+  const rect = b.getBoundingClientRect(), hit = cellAt(e.clientX, e.clientY, rect); if (hit === -1) return;
+  e.preventDefault();
+  drag = { id: e.pointerId, last: hit.i, rect };
+  document.querySelectorAll(".hand").forEach(h => h.remove());
+  byId("walker").classList.add("held");
+  touchCell(hit.i, false);
+  try { e.target.releasePointerCapture && e.target.releasePointerCapture(e.pointerId); } catch (err) {}
+});
+document.addEventListener("pointermove", e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  const hit = cellAt(e.clientX, e.clientY, drag.rect); if (hit === -1 || !hit.inner || hit.i === drag.last) return;
+  drag.last = hit.i; touchCell(hit.i, true);
+});
+["pointerup", "pointercancel"].forEach(ev => document.addEventListener(ev, e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  drag = null; const w = byId("walker"); if (w) w.classList.remove("held");
+  if (play && !play.done) placeHand();
+}));
+
+/* hold-to-confirm (grown-up reset) */
+let hold = null;
+document.addEventListener("pointerdown", e => {
+  const el = e.target.closest("[data-hold]"); if (!el) return;
+  const bar = el.querySelector("i"), t0 = Date.now();
+  hold = setInterval(() => {
+    const p = Math.min(1, (Date.now() - t0) / 2000); bar.style.width = (p * 100) + "%";
+    if (p >= 1) {
+      clearInterval(hold); hold = null;
+      const k = kid(); k.progress = {}; Store.save(); $ov.innerHTML = ""; render(); toastNote("Puzzle progress reset.");
+    }
+  }, 50);
+});
+["pointerup", "pointercancel", "pointerleave"].forEach(ev => document.addEventListener(ev, () => {
+  if (hold) { clearInterval(hold); hold = null; document.querySelectorAll("[data-hold] i").forEach(b => b.style.width = "0"); }
+}));
+
+/* keep in sync if the main app switches player in another tab; refit the board on rotate */
+window.addEventListener("storage", e => { if (e.key === GAME.mainKey) { me = readMainProfile(); render(); } else if (e.key === GAME.storageKey) { Store.load(); if (view !== "play") render(); } });
+window.addEventListener("resize", () => { if (view === "play" && play && !play.done) { resetAnim(); fitBoard(); paint(true); } else if (view === "play" && play) fitBoard(); });
+
+Store.load(); render();
+</script>
+</body>
+</html>

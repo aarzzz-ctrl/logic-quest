@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Offline-only: the page may not load anything from anywhere (no fonts, images, scripts, or fetches). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; media-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#7c4dff">
+<title>Jelly Jars · Elzee</title>
+<style>
+/* Visual language matches Elzee (lq-site/index.html) and Squish Seats: cream background, purple brand, chunky 3D buttons. */
+:root{
+  --bg:#fff8e7; --ink:#2d2a4a; --muted:#7a7699; --card:#fff; --line:#e7e2f5;
+  --brand:#7c4dff; --brand-d:#5a2fd6; --brand-l:#efe9ff;
+  --good:#3ccf4e; --good-d:#2a9d38; --good-l:#e6fbe9;
+  --oops:#ff9f43; --oops-d:#e07b15; --oops-l:#fff3e3;
+  --gold:#ffc83d; --gold-d:#e0a400;
+  --radius:22px;
+  --font:"Fredoka","Chalkboard SE","Comic Sans MS","Arial Rounded MT Bold",system-ui,sans-serif;
+  --jw:110px; --sh:76px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:20px;line-height:1.3;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-text-size-adjust:100%;overscroll-behavior:none}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2,h3{margin:0}
+#app{max-width:1180px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 10px) calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 14px) calc(env(safe-area-inset-left) + 16px)}
+.hidden{display:none!important}
+
+/* buttons */
+.btn{border:none;border-radius:18px;padding:12px 24px;min-height:64px;min-width:64px;font-size:23px;font-weight:600;
+  background:var(--good);color:#fff;box-shadow:0 5px 0 var(--good-d);display:inline-flex;align-items:center;justify-content:center;gap:10px}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--good-d)}
+.btn.brand{background:var(--brand);box-shadow:0 5px 0 var(--brand-d)}
+.btn.ghost{background:#fff;color:var(--ink);box-shadow:0 5px 0 var(--line);border:2px solid var(--line)}
+.btn[disabled]{background:#d9d6e6;box-shadow:0 5px 0 #bdb9cf;color:#fff}
+.btn .ico{font-size:30px;line-height:1}
+.iconbtn{border:none;background:#fff;border-radius:18px;width:60px;height:60px;font-size:30px;flex:none;text-decoration:none;
+  box-shadow:0 4px 0 var(--line);display:inline-flex;align-items:center;justify-content:center;position:relative}
+.iconbtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.iconbtn.on{background:var(--brand-l);box-shadow:0 4px 0 #cbbcff}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex:none}
+.pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:6px 16px;min-height:56px;
+  font-size:22px;font-weight:700;box-shadow:0 4px 0 var(--line)}
+.pill .av{font-size:32px}
+.pill .nm{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jar-meter{display:inline-flex;align-items:center;gap:8px}
+.jar-meter b{color:var(--gold-d)}
+.jarbar{width:90px;height:16px;border-radius:99px;background:#f1edfa;overflow:hidden}
+.jarbar i{display:block;height:100%;background:var(--gold);border-radius:99px;transition:width .6s}
+.spacer{flex:1}
+
+/* map */
+.mapwrap{flex:1;min-height:0;overflow:auto;padding-bottom:8px}
+.hero{display:flex;align-items:center;gap:14px;margin:4px 0 14px}
+.hero .buds{display:flex;gap:2px;align-items:flex-end}
+.hero .buds .jl{width:64px;animation:breathe 2.4s ease-in-out infinite;transform-origin:50% 100%}
+.hero .buds .jl:nth-child(2){animation-delay:.3s}.hero .buds .jl:nth-child(3){animation-delay:.6s}.hero .buds .jl:nth-child(4){animation-delay:.9s}
+.bubble{background:#fff;border-radius:20px;padding:12px 18px;box-shadow:0 4px 0 var(--line);font-size:21px;flex:1}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:16px}
+.lvl{position:relative;border:none;background:#fff;border-radius:24px;box-shadow:0 6px 0 var(--line);min-height:150px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px}
+.lvl:active{transform:translateY(4px);box-shadow:0 2px 0 var(--line)}
+.lvl .scene{font-size:50px;line-height:1}
+.lvl .num{position:absolute;top:8px;left:12px;font-weight:700;color:var(--muted);font-size:20px}
+.lvl .tw{position:absolute;top:6px;right:10px;font-size:22px}
+.lvl .stars{font-size:22px;letter-spacing:2px}
+.lvl .friend{position:absolute;bottom:6px;right:8px;width:38px}
+.lvl.locked{background:#eeebf6;box-shadow:0 6px 0 #d9d6e6}
+.lvl.locked .scene{filter:grayscale(1);opacity:.35}
+.lvl.next{outline:5px solid var(--brand);outline-offset:-5px;animation:glow 1.6s ease-in-out infinite}
+@keyframes glow{50%{outline-color:#b9a2ff}}
+.nostar{filter:grayscale(1);opacity:.3}
+
+/* play */
+.rules{display:flex;align-items:center;gap:10px;flex:none;min-height:64px;margin-bottom:6px}
+.rulechip{display:inline-flex;align-items:center;gap:6px;background:#fff;border-radius:18px;padding:6px 12px;box-shadow:0 4px 0 var(--line);min-height:60px}
+.rulechip .mini{width:40px;display:block}
+.rulechip .op{font-size:24px;font-weight:700;color:var(--brand-d)}
+.ministack{display:inline-flex;flex-direction:column;align-items:center;justify-content:flex-end;width:48px;height:52px;border:3px solid #d8cff5;border-top:none;border-radius:4px 4px 12px 12px;padding:0 0 2px}
+.ministack .mini{display:block}
+.ruletxt{font-size:19px;line-height:1.25;flex:1;min-width:0}
+.ruletxt b{font-size:22px}
+.say{width:56px;height:56px;font-size:26px}
+.stage{flex:1;min-height:0;position:relative;border-radius:30px;background:linear-gradient(#eaf6ff,#fdf3ff 70%,#fff0e0);box-shadow:0 6px 0 var(--line);
+  display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden;padding:10px}
+.stage .scenebg{position:absolute;right:14px;top:8px;font-size:46px;opacity:.5;pointer-events:none}
+.stage .lvtitle{position:absolute;left:18px;top:12px;font-weight:700;font-size:22px;color:var(--brand-d)}
+.shelf{display:flex;flex-direction:column;gap:18px;align-items:center}
+.shelfrow{display:flex;gap:var(--gap,14px);align-items:flex-end;justify-content:center;position:relative}
+.shelfrow::after{content:"";position:absolute;left:-14px;right:-14px;bottom:-12px;height:14px;border-radius:8px;background:#d7a46f;box-shadow:0 5px 0 #b07b48}
+.jcol{display:flex;flex-direction:column;align-items:center;gap:6px;width:var(--jw);touch-action:none;cursor:grab;position:relative;z-index:1}
+.badge{height:54px;min-width:54px;padding:0 6px;display:flex;align-items:center;justify-content:center;gap:2px;background:#fff;border-radius:16px;
+  box-shadow:0 3px 0 var(--line);border:3px solid var(--line);position:relative}
+.badge.none{visibility:hidden}
+.badge .mini{width:38px;display:block}
+.badge .plus{font-weight:700;color:var(--brand-d);font-size:18px}
+.badge.goalb{border-color:#cbbcff}
+.badge.mys{background:var(--brand);border-color:var(--brand-d);color:#fff;font-size:30px;font-weight:700}
+.badge.flash{animation:flash .5s 2}
+@keyframes flash{50%{background:#ffe0e4;border-color:#ff5d6c;transform:scale(1.18)}}
+.jar{position:relative;width:100%;border:5px solid rgba(124,77,255,.28);border-top:none;border-radius:8px 8px calc(var(--jw)*.28) calc(var(--jw)*.28);
+  background:linear-gradient(90deg,rgba(255,255,255,.55),rgba(255,255,255,.2) 40%,rgba(255,255,255,.45));box-shadow:inset 0 -8px 0 rgba(124,77,255,.08)}
+.jar::before{content:"";position:absolute;left:-9px;right:-9px;top:-8px;height:12px;border-radius:8px;background:rgba(124,77,255,.32)}
+.jar::after{content:"";position:absolute;left:12%;top:14px;width:9%;bottom:22%;border-radius:99px;background:rgba(255,255,255,.75);pointer-events:none}
+.jar.goal{border-color:rgba(255,200,61,.7)}.jar.goal::before{background:rgba(224,164,0,.55)}
+.jar.src{border-radius:8px 8px 26px 26px;border-color:rgba(160,120,80,.4);background:linear-gradient(#fff6ea,#f6e3cc)}
+.jar.src::before{background:rgba(160,120,80,.45)}
+.jcol.hover .jar{border-color:var(--brand);background:rgba(239,233,255,.85)}
+.jcol.hover .badge{transform:translateY(-4px)}
+.jcol.hint .jar{animation:hintpulse 1s ease-in-out infinite}
+@keyframes hintpulse{50%{box-shadow:0 0 0 8px rgba(255,200,61,.7)}}
+.jcol.nope{animation:nope .45s}
+@keyframes nope{20%{transform:translateX(-10px) rotate(-3deg)}40%{transform:translateX(9px) rotate(3deg)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+.jcol.thud .jar{animation:thud .35s}
+@keyframes thud{40%{transform:scaleY(.95) translateY(3px)}}
+.slot{position:absolute;left:0;right:0;height:var(--sh);display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+.ghostslot{position:absolute;left:8%;right:8%;height:calc(var(--sh) - 6px);border:3px dashed;border-radius:40% 40% 30% 30%;opacity:.55;pointer-events:none}
+.jelly{display:block;transform-origin:50% 100%;pointer-events:none}
+.jelly svg{display:block;width:100%;height:auto;overflow:visible}
+.jelly.idle{animation:breathe 2.6s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.04,.96)}}
+.jelly.lockd{filter:saturate(.75)}
+.lockpin{position:absolute;right:2px;bottom:2px;font-size:18px}
+.jelly.held{visibility:hidden}
+.float{position:fixed;left:0;top:0;z-index:60;pointer-events:none;will-change:transform}
+.float .in{transform-origin:50% 80%;will-change:transform}
+.float .in svg{display:block;width:100%;height:auto;overflow:visible;filter:drop-shadow(0 10px 6px rgba(45,42,74,.18))}
+.nopepop{position:fixed;z-index:61;font-size:44px;pointer-events:none;animation:nopepop .9s forwards}
+@keyframes nopepop{0%{transform:translate(-50%,-50%) scale(.3)}30%{transform:translate(-50%,-80%) scale(1.2)}100%{transform:translate(-50%,-120%) scale(1);opacity:0}}
+.ctrls{display:flex;gap:12px;flex:none;margin-top:12px;justify-content:center}
+.ctrls .btn{flex:0 1 160px}
+.ctrls .btn.wig{animation:nope .6s 3}
+.stage.worried .jelly{animation:none}
+
+/* win state on the shelf */
+.stage.win .jcol{animation:jardance .5s ease-in-out infinite alternate}
+.stage.win .jcol:nth-child(2n){animation-delay:.25s}
+@keyframes jardance{0%{transform:translateY(0) rotate(-5deg)}100%{transform:translateY(-16px) rotate(5deg)}}
+.stage.win .jelly{animation:jbounce .5s cubic-bezier(.3,0,.5,1) infinite alternate}
+@keyframes jbounce{0%{transform:translateY(0) scale(1.15,.85)}60%{transform:translateY(-14px) scale(.92,1.1)}100%{transform:translateY(-20px) scale(1,1)}}
+.lid{position:absolute;left:-12px;right:-12px;top:-22px;height:22px;border-radius:12px 12px 6px 6px;background:linear-gradient(#ffd96a,#f4b400);box-shadow:0 4px 0 #c99200;
+  animation:liddrop .5s cubic-bezier(.3,1.6,.5,1) backwards}
+@keyframes liddrop{0%{transform:translateY(-120px) rotate(-20deg);opacity:0}100%{transform:none;opacity:1}}
+
+/* overlays */
+.ov{position:fixed;inset:0;background:rgba(45,42,74,.45);z-index:40;display:flex;align-items:center;justify-content:center;padding:16px}
+.panel{background:var(--bg);border-radius:28px;padding:22px;max-width:620px;width:100%;max-height:94vh;overflow:auto;text-align:center;
+  box-shadow:0 10px 0 rgba(0,0,0,.12);animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{0%{transform:scale(.4)}100%{transform:scale(1)}}
+.panel h2{font-size:34px;margin-bottom:6px}
+.bigstars{font-size:58px;letter-spacing:6px}
+.bigstars span{display:inline-block;animation:pop .5s backwards}
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.coins{font-size:30px;font-weight:700;color:var(--gold-d);margin:8px 0}
+.note{background:#fff;border-radius:18px;padding:12px 16px;box-shadow:0 4px 0 var(--line);margin:10px 0;font-size:18px}
+.muted{color:var(--muted)}
+.left{text-align:left}
+.hand{position:fixed;z-index:62;font-size:56px;pointer-events:none;transform:translate(-30%,-10%)}
+#fx{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:70}
+.holdbtn{position:relative;overflow:hidden}
+.holdbtn i{position:absolute;left:0;top:0;bottom:0;width:0;background:rgba(255,93,108,.35)}
+
+/* twist intro demo */
+.twistcard .demo{position:relative;width:300px;height:270px;margin:6px auto 0}
+.twistcard .dbadge{position:absolute;left:50%;top:6px;transform:translateX(-50%);height:52px;min-width:56px;padding:0 6px;display:flex;align-items:center;justify-content:center;gap:2px;
+  background:#fff;border:3px solid #cbbcff;border-radius:16px;font-size:30px;font-weight:700;z-index:2}
+.twistcard .dbadge .mini{width:36px;display:block}.twistcard .dbadge .plus{font-weight:700;color:var(--brand-d);font-size:18px}
+.twistcard .dbadge.mys{background:var(--brand);color:#fff}
+.twistcard .dbadge .rv{position:absolute;inset:-3px;display:flex;align-items:center;justify-content:center;background:#fff;border:3px solid #cbbcff;border-radius:16px;opacity:0;animation:rv 4.4s infinite}
+@keyframes rv{0%,40%{opacity:0;transform:rotateY(90deg)}50%,92%{opacity:1;transform:none}100%{opacity:0}}
+.twistcard .djar{position:absolute;left:102px;width:96px;top:70px;height:182px;border:5px solid rgba(255,200,61,.75);border-top:none;border-radius:6px 6px 26px 26px;background:rgba(255,255,255,.6)}
+.twistcard .dj{position:absolute;left:50%;display:block}
+.twistcard .dj svg{display:block;width:100%;height:auto}
+.twistcard .dg{position:absolute;left:115px;width:70px;height:48px;border:3px dashed;border-radius:40% 40% 30% 30%}
+.twistcard .dj.ok{animation:dOk 4.4s infinite;transform-origin:50% 100%}
+.twistcard .dj.bad{animation:dBad 4.4s infinite;transform-origin:50% 100%}
+@keyframes dOk{0%{transform:translate(-120px,0);opacity:0}6%{opacity:1}18%{transform:translate(0,0);opacity:1}28%{transform:translate(0,var(--land)) scale(1.25,.7)}33%{transform:translate(0,var(--land)) scale(.9,1.12)}38%,44%{transform:translate(0,var(--land)) scale(1);opacity:1}48%,100%{transform:translate(0,var(--land));opacity:0}}
+@keyframes dBad{0%,50%{transform:translate(120px,0);opacity:0}56%{opacity:1}66%{transform:translate(0,0);opacity:1}72%{transform:translate(0,40px) scale(.9,1.1)}76%{transform:translate(-8px,30px) rotate(-12deg)}80%{transform:translate(8px,10px) rotate(12deg)}88%{transform:translate(120px,-30px) rotate(0) scale(1.1,.9)}94%{transform:translate(120px,0);opacity:1}100%{transform:translate(120px,0);opacity:0}}
+.twistcard .mk{position:absolute;font-size:40px;left:212px;top:150px;opacity:0}
+.twistcard .m1{animation:mk1 4.4s infinite}.twistcard .m2{animation:mk2 4.4s infinite;left:212px;top:40px}
+@keyframes mk1{0%,30%{opacity:0;transform:scale(.3)}34%,46%{opacity:1;transform:scale(1)}50%,100%{opacity:0}}
+@keyframes mk2{0%,72%{opacity:0;transform:scale(.3)}76%,92%{opacity:1;transform:scale(1)}96%,100%{opacity:0}}
+/* win reveal */
+.reveal{position:relative;height:210px;margin:4px auto 0;width:260px}
+.reveal.big{height:250px}
+.reveal .rays{position:absolute;left:50%;top:46%;width:420px;height:420px;margin:-210px 0 0 -210px;border-radius:50%;
+  background:repeating-conic-gradient(rgba(255,200,61,.42) 0 12deg,transparent 12deg 24deg);animation:spin 9s linear infinite, raysin .8s .5s backwards;
+  -webkit-mask:radial-gradient(circle,#000 30%,transparent 68%);mask:radial-gradient(circle,#000 30%,transparent 68%)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes raysin{0%{opacity:0;transform:scale(.2)}}
+.reveal .rjar{position:absolute;left:50%;bottom:0;width:130px;height:110px;margin-left:-65px;border:6px solid rgba(124,77,255,.35);border-top:none;border-radius:10px 10px 40px 40px;background:rgba(255,255,255,.7);
+  animation:jarshake .5s 2}
+@keyframes jarshake{25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+.reveal .rlid{position:absolute;left:-16px;right:-16px;top:-22px;height:22px;border-radius:12px 12px 6px 6px;background:linear-gradient(#ffd96a,#f4b400);box-shadow:0 4px 0 #c99200;
+  animation:lidpop 1s .45s forwards}
+@keyframes lidpop{30%{transform:translateY(-30px) rotate(-10deg)}100%{transform:translate(120px,40px) rotate(70deg);opacity:0}}
+.reveal .rfriend{position:absolute;left:50%;bottom:30px;width:150px;margin-left:-75px;animation:popout 1.1s .6s cubic-bezier(.3,1.5,.5,1) backwards, floaty 2.2s 1.8s ease-in-out infinite;transform-origin:50% 100%}
+.reveal.big .rjar{opacity:0;animation:none}
+.reveal.big .rfriend{width:190px;margin-left:-95px}
+@keyframes popout{0%{transform:translateY(90px) scale(.3,.3)}40%{transform:translateY(-70px) scale(.8,1.25)}70%{transform:translateY(0) scale(1.25,.8)}100%{transform:none}}
+@keyframes floaty{50%{transform:translateY(-10px) scale(1.04,.97)}}
+.friendj svg{display:block;width:100%;height:auto}
+.friendj .acc{position:absolute;left:50%;top:-14%;transform:translateX(-50%);font-size:40%;font-size:min(2.4em,60%)}
+.rfriend .friendj .acc{font-size:54px;top:-22%}
+.reveal.big .friendj .acc{font-size:72px}
+.parade{display:flex;justify-content:center;gap:2px;margin:6px 0 0}
+.parade>span{width:46px;animation:jbounce .45s cubic-bezier(.3,0,.5,1) infinite alternate;transform-origin:50% 100%}
+.parade .friendj .acc{font-size:20px;top:-30%}
+.book{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:12px;margin-top:12px}
+.bslot{background:#fff;border-radius:22px;box-shadow:0 5px 0 var(--line);padding:16px 10px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:130px;justify-content:flex-end}
+.bslot .friendj{width:76px}.bslot .friendj .acc{font-size:30px;top:-30%}
+.bslot.no .friendj{filter:grayscale(1);opacity:.35}
+.bslot small{color:var(--muted);font-size:16px}
+.bslot.king{background:#fff6d6}
+.lvl .friend svg{display:block;width:100%;height:auto}
+@media (max-width:640px){
+  .pill{font-size:19px;padding:4px 12px}
+  .jarbar{width:56px}
+  .btn{font-size:20px;padding:10px 16px}
+  .top{gap:6px} .top .iconbtn{width:52px;height:52px;font-size:26px} .pill{min-height:52px}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;animation-delay:0s!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<div id="app" role="main"></div>
+<div id="ov"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<script>
+"use strict";
+/* ==========================================================================
+   JELLY JARS: a hands-on sorting-logic interlude for Elzee.
+   Drag (or tap-tap) the top jelly of a jar into another jar. Jars can have
+   rule badges (only stripes, only red, NOT red, two rules at once), a size
+   rule (never a bigger jelly on a smaller one), a color-pattern jar, and
+   mystery jars whose hidden rule you work out from example jellies.
+   No randomness: every level is a fixed puzzle verified solvable offline
+   (jelly-jars-dev/verify-levels.js runs the engine below from this file).
+   ========================================================================== */
+
+const GAME = {
+  id: "jellyjars",
+  storageKey: "logicquest.minigame.jellyjars.v1", // this game's own key
+  mainKey: "logicquest.v1",                        // main app key: READ ONLY, never written here
+};
+const ECON = {
+  firstClear: 3,        // first time a level is solved
+  firstThreeStars: 2,   // first time a level earns 3 stars
+  replay: 1,            // solving an already-cleared level
+  replayPaidPerDay: 3,  // replay tokens paid at most this many times a day
+  dailyCap: 15,         // hard cap on tokens per kid per day from this game
+};
+const RM = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- rules engine + levels (identical copy is run by the offline verifier) ---------- */
+/*ENGINE-START*/
+/* Jelly code: color + pattern + size, e.g. "rs2" = red, stripes, medium.
+   colors r b y g p o · patterns p plain, s stripes, d dots · sizes 1 small, 2 medium, 3 big */
+function J(code) { return { c: code[0], p: code[1] || "p", s: +(code[2] || 2) }; }
+function matches(rule, j) {
+  if (!rule) return true;
+  for (const k of ["c", "p", "s"]) if (rule[k] !== undefined && j[k] !== rule[k]) return false;
+  if (rule.not) for (const k of ["c", "p", "s"]) if (rule.not[k] !== undefined && j[k] === rule.not[k]) return false;
+  return true;
+}
+const topOf = a => (a.length ? J(a[a.length - 1]) : null);
+function canPick(L, jars, from) { const def = L.jars[from]; return jars[from].length > (def.lock || 0); }
+/* Why a drop is not allowed (null = allowed). Reasons: same, src, full, badge, seq, color, size */
+function dropBlock(L, jars, from, to) {
+  if (from === to) return "same";
+  const def = L.jars[to], dst = jars[to], src = jars[from];
+  const j = J(src[src.length - 1]);
+  if (def.src) return "src";
+  if (dst.length >= def.cap) return "full";
+  if (def.badge && !matches(def.badge, j)) return "badge";
+  if (def.seq && def.seq[dst.length] !== j.c) return "seq";
+  const t = topOf(dst);
+  if (t && L.stack === "color" && t.c !== j.c) return "color";
+  if (t && L.stack === "size" && t.s < j.s) return "size";
+  return null;
+}
+function legalMoves(L, jars) {
+  const out = [];
+  for (let a = 0; a < jars.length; a++) {
+    if (!canPick(L, jars, a)) continue;
+    for (let b = 0; b < jars.length; b++) if (a !== b && !dropBlock(L, jars, a, b)) out.push([a, b]);
+  }
+  return out;
+}
+function applyMove(jars, [a, b]) { const n = jars.map(x => x.slice()); n[b].push(n[a].pop()); return n; }
+function isWin(L, jars) {
+  if (L.win === "sort") return jars.every((a, i) => !a.length || (a.length === L.jars[i].cap && a.every(x => x[0] === a[0][0])));
+  return jars.every((a, i) => {
+    const d = L.jars[i];
+    if (!d.goal) return a.length === 0;
+    if (d.seq) return a.length === d.seq.length;
+    return true;
+  });
+}
+const keyOf = jars => jars.map(a => a.join(",")).join("|");
+/* Shortest solution from a position (BFS). Returns array of moves, or null if stuck for good. */
+function solve(L, jars, limit = 400000) {
+  const k0 = keyOf(jars);
+  if (isWin(L, jars)) return [];
+  const prev = new Map([[k0, null]]), q = [jars]; let qi = 0;
+  while (qi < q.length) {
+    const s = q[qi++], ks = keyOf(s);
+    for (const m of legalMoves(L, s)) {
+      const n = applyMove(s, m), kn = keyOf(n);
+      if (prev.has(kn)) continue;
+      prev.set(kn, [ks, m, s]);
+      if (isWin(L, n)) {
+        const path = []; let k = kn;
+        while (prev.get(k)) { const [pk, mv] = prev.get(k); path.unshift(mv); k = pk; }
+        return path;
+      }
+      if (prev.size > limit) return null;
+      q.push(n);
+    }
+  }
+  return null;
+}
+const startJars = L => L.jars.map(d => (d.start || []).slice());
+
+/* ---------- levels ----------
+   stack: "color" (only onto the same color), "size" (never bigger on smaller), "any".
+   win: "sort" (each jar empty or full of one color) or "goal" (only goal jars hold jellies; pattern jars full).
+   Jar: cap, start (bottom → top), badge rule, seq (color pattern bottom → top), goal, lock (example jellies that stay put),
+   mystery (badge hidden until solved), star (target jar), src (a jelly bowl: take from it, never drop into it). */
+const LEVELS = [
+  { name: "Berry Jam", scene: "🍓", age: 6, stack: "color", win: "sort", jars: [
+    { cap: 3, start: ["b", "r", "r"] }, { cap: 3, start: ["r", "b", "b"] }, { cap: 3, start: [] } ] },
+  { name: "Lemon Lane", scene: "🍋", age: 6, stack: "color", win: "sort", jars: [
+    { cap: 3, start: ["y", "r", "b"] }, { cap: 3, start: ["b", "y", "r"] }, { cap: 3, start: ["r", "b", "y"] }, { cap: 3, start: [] }, { cap: 3, start: [] } ] },
+  { name: "Minty Mix", scene: "🌿", age: 6.5, stack: "color", win: "sort", jars: [
+    { cap: 4, start: ["g", "b", "y", "g"] }, { cap: 4, start: ["y", "g", "b", "b"] }, { cap: 4, start: ["b", "y", "g", "y"] }, { cap: 4, start: [] }, { cap: 4, start: [] } ] },
+  { name: "Stripy Shop", scene: "🍬", age: 7, twist: "badge", stack: "any", win: "goal", jars: [
+    { cap: 4, src: true, start: ["rd", "bs", "yp", "gs"] }, { cap: 4, src: true, start: ["ys", "rp", "bd", "gd"] },
+    { cap: 3, goal: true, badge: { p: "s" } }, { cap: 3, goal: true, badge: { p: "d" } }, { cap: 2, goal: true, badge: { p: "p" } } ] },
+  { name: "Picky Pots", scene: "🍯", age: 7.5, stack: "any", win: "goal", jars: [
+    { cap: 3, src: true, start: ["rd", "yd", "bs"] }, { cap: 3, src: true, start: ["gs", "rs", "rp"] },
+    { cap: 2, goal: true, badge: { c: "r" } }, { cap: 2, goal: true, badge: { p: "s" } }, { cap: 2, goal: true, badge: { p: "d" } } ] },
+  { name: "No-Red Rule", scene: "🍒", age: 7.5, stack: "any", win: "goal", jars: [
+    { cap: 4, src: true, start: ["bd", "rs", "rd", "yp"] }, { cap: 4, src: true, start: ["rp", "gd", "ys", "bs"] },
+    { cap: 3, goal: true, badge: { not: { c: "r" } } }, { cap: 3, goal: true, badge: { c: "r" } }, { cap: 2, goal: true, badge: { p: "d" } } ] },
+  { name: "Jelly Tower", scene: "🗼", age: 8, twist: "size", stack: "size", win: "goal", jars: [
+    { cap: 3, start: ["pp3", "bp2", "yp1"] }, { cap: 3, start: [] }, { cap: 3, start: [], goal: true, star: true } ] },
+  { name: "Pattern Parade", scene: "🎏", age: 8, twist: "seq", stack: "any", win: "goal", jars: [
+    { cap: 3, src: true, start: ["r", "b", "y"] }, { cap: 3, src: true, start: ["r", "b", "y"] }, { cap: 2, start: [] },
+    { cap: 6, goal: true, seq: ["r", "b", "y", "r", "b", "y"] } ] },
+  { name: "Double Rules", scene: "🧁", age: 8.5, twist: "two", stack: "size", win: "goal", jars: [
+    { cap: 4, src: true, start: ["rs3", "bd3", "bs1", "rs1"] }, { cap: 4, src: true, start: ["bs3", "rd3", "bd1", "rd1"] }, { cap: 2, start: [] },
+    { cap: 2, goal: true, badge: { c: "r", p: "s" } }, { cap: 2, goal: true, badge: { c: "r", p: "d" } },
+    { cap: 2, goal: true, badge: { c: "b", p: "s" } }, { cap: 2, goal: true, badge: { c: "b", p: "d" } } ] },
+  { name: "Mystery Jars", scene: "🔮", age: 9, twist: "mystery", stack: "any", win: "goal", jars: [
+    { cap: 3, src: true, start: ["ys2", "gd3", "rs1"] }, { cap: 3, src: true, start: ["yp1", "bs3", "yd2"] },
+    { cap: 4, goal: true, mystery: true, lock: 2, badge: { p: "s" }, start: ["rs2", "bs1"] },
+    { cap: 4, goal: true, mystery: true, lock: 2, badge: { c: "y" }, start: ["yd3", "yp2"] },
+    { cap: 4, goal: true, mystery: true, lock: 2, badge: { s: 3 }, start: ["gp3", "rd3"] } ] },
+];
+/*ENGINE-END*/
+
+/* ---------- look ---------- */
+const COLORS = {
+  r: { name: "red",    fill: "#ff5d73", dark: "#d93a55" },
+  b: { name: "blue",   fill: "#4b9bff", dark: "#2f73d1" },
+  y: { name: "yellow", fill: "#ffcc3a", dark: "#dba11a" },
+  g: { name: "green",  fill: "#45cf7c", dark: "#25a35a" },
+  p: { name: "purple", fill: "#a77bff", dark: "#7d4fe0" },
+  k: { name: "rainbow", fill: "url(#RAINBOW)", dark: "#7d4fe0" },
+};
+const PATNAME = { p: "plain", s: "striped", d: "spotty" };
+const SIZENAME = { 1: "small", 2: "medium", 3: "big" };
+const SIZESCALE = { 1: 0.6, 2: 0.8, 3: 0.98 };
+let UID = 0;
+const BODY = "M8 64 C4 38 22 12 50 12 C78 12 96 38 92 64 C90 77 72 80 50 80 C28 80 10 77 8 64Z";
+function face(mood) {
+  const eyes = mood === "yay"
+    ? `<path d="M31 50 q6 -8 12 0 M57 50 q6 -8 12 0" stroke="#2d2a4a" stroke-width="4" fill="none" stroke-linecap="round"/>`
+    : `<ellipse cx="37" cy="48" rx="5" ry="${mood === "sad" ? 4.5 : 6}" fill="#2d2a4a"/><ellipse cx="63" cy="48" rx="5" ry="${mood === "sad" ? 4.5 : 6}" fill="#2d2a4a"/>
+       <circle cx="39" cy="45.5" r="2" fill="#fff"/><circle cx="65" cy="45.5" r="2" fill="#fff"/>`;
+  const brow = mood === "sad" ? `<path d="M29 38 l9 3 M71 38 l-9 3" stroke="#2d2a4a" stroke-width="3" stroke-linecap="round"/>` : "";
+  const mouth = mood === "sad" ? `<path d="M44 64 q6 -6 12 0" stroke="#2d2a4a" stroke-width="3.5" fill="none" stroke-linecap="round"/>`
+    : mood === "yay" ? `<path d="M42 57 q8 13 16 0 z" fill="#e35d7a" stroke="#2d2a4a" stroke-width="3" stroke-linejoin="round"/>`
+    : `<path d="M44 58 q6 6 12 0" stroke="#2d2a4a" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+  return `${eyes}${brow}<ellipse cx="25" cy="58" rx="6" ry="3.5" fill="#ff8fab" opacity=".6"/><ellipse cx="75" cy="58" rx="6" ry="3.5" fill="#ff8fab" opacity=".6"/>${mouth}`;
+}
+/* One jelly as inline SVG. opt.ghost draws an outline only; opt.noface for tiny badge icons. */
+function jellySVG(code, mood = "happy", opt = {}) {
+  const j = J(code), C = COLORS[j.c] || { fill: "#ddd", dark: "#aaa" }, id = "jc" + (++UID);
+  if (opt.ghost) return `<svg viewBox="0 0 100 84" aria-hidden="true"><path d="${BODY}" fill="none" stroke="${C.dark}" stroke-width="4" stroke-dasharray="8 7" opacity=".7"/></svg>`;
+  const grad = j.c === "k" ? `<linearGradient id="RAINBOW" x1="0" x2="1"><stop offset="0" stop-color="#ff5d73"/><stop offset=".25" stop-color="#ffcc3a"/><stop offset=".5" stop-color="#45cf7c"/><stop offset=".75" stop-color="#4b9bff"/><stop offset="1" stop-color="#a77bff"/></linearGradient>` : "";
+  let pat = "";
+  if (j.p === "s") pat = `<g clip-path="url(#${id})" fill="#fff" opacity=".6"><g transform="rotate(32 50 46)">${[0, 1, 2, 3, 4, 5, 6].map(i => `<rect x="${-24 + i * 22}" y="-30" width="9" height="150"/>`).join("")}</g></g>`;
+  if (j.p === "d") pat = `<g clip-path="url(#${id})" fill="#fff" opacity=".75">${[[24, 32, 6], [76, 32, 6], [50, 21, 5], [14, 58, 6], [86, 58, 6], [30, 73, 5], [70, 73, 5], [50, 74, 4]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}"/>`).join("")}</g>`;
+  return `<svg viewBox="0 0 100 84" aria-hidden="true" focusable="false"><defs>${grad}<clipPath id="${id}"><path d="${BODY}"/></clipPath></defs>
+    <ellipse cx="50" cy="80" rx="36" ry="4" fill="rgba(45,42,74,.13)"/>
+    <path d="${BODY}" fill="${C.fill}" stroke="${C.dark}" stroke-width="3.5"/>${pat}
+    <ellipse cx="30" cy="27" rx="10" ry="5.5" fill="#fff" opacity=".65" transform="rotate(-28 30 27)"/>
+    ${opt.noface ? "" : face(mood)}</svg>`;
+}
+const jellyLabel = code => { const j = J(code); return `${SIZENAME[j.s]} ${PATNAME[j.p]} ${COLORS[j.c].name} jelly`; };
+/* Picture icons for rules: a neutral grey jelly shows a pattern; a color blob shows a color; sizes show a big jelly next to a small one. */
+const GREY = { s: "zs", d: "zd", p: "zp" };
+COLORS.z = { name: "any color", fill: "#c6bde6", dark: "#8f84bd" };
+const BAN = `<svg viewBox="0 0 100 100" aria-hidden="true" style="position:absolute;inset:-4px;width:calc(100% + 8px);height:calc(100% + 8px)"><circle cx="50" cy="50" r="42" fill="none" stroke="#ff5d6c" stroke-width="9"/><path d="M21 21 L79 79" stroke="#ff5d6c" stroke-width="9"/></svg>`;
+function ruleIcon(rule) {
+  const parts = [];
+  if (rule.c !== undefined && rule.p !== undefined) parts.push(`<span class="mini">${jellySVG(rule.c + "p2", "happy", { noface: true })}</span><span class="plus">+</span><span class="mini">${jellySVG(GREY[rule.p], "happy", { noface: true })}</span>`);
+  else if (rule.c !== undefined) parts.push(`<span class="mini">${jellySVG(rule.c + "p2", "happy", { noface: true })}</span>`);
+  else if (rule.p !== undefined) parts.push(`<span class="mini">${jellySVG(GREY[rule.p], "happy", { noface: true })}</span>`);
+  if (rule.s !== undefined) parts.push(`<span class="mini" style="width:44px">${jellySVG("zp" + rule.s, "happy", { noface: true })}</span><span style="font-size:18px">⬆</span>`);
+  if (rule.not) parts.push(`<span class="mini" style="position:relative">${jellySVG((rule.not.c || "z") + (rule.not.p || "p") + "2", "happy", { noface: true })}${BAN}</span>`);
+  return parts.join("");
+}
+function ruleText(rule) {
+  const bits = [];
+  if (rule.s !== undefined) bits.push(`${SIZENAME[rule.s]}`);
+  if (rule.p !== undefined) bits.push(PATNAME[rule.p]);
+  if (rule.c !== undefined) bits.push(COLORS[rule.c].name);
+  let t = bits.length ? `only ${bits.join(" ")} jellies` : "";
+  if (rule.not) t = (t ? t + ", " : "") + `NO ${COLORS[rule.not.c] ? COLORS[rule.not.c].name : PATNAME[rule.not.p]} jellies`;
+  return t;
+}
+
+/* Fixed jelly friend revealed by each level (collection only; never random). */
+const FRIENDS = [["rp3", "🎀"], ["yd3", "🕶️"], ["gs3", "🌸"], ["bs3", "🍭"], ["rd3", "🍯"], ["pd3", "🍒"], ["bp3", "⭐"], ["ys3", "🎈"], ["gd3", "🧁"], ["ps3", "🔮"]];
+const KING = ["kp3", "👑"];
+function friendHTML([code, acc], mood = "yay", cls = "") {
+  return `<span class="friendj ${cls}" style="position:relative;display:inline-block">${jellySVG(code, mood)}<span class="acc">${acc}</span></span>`;
+}
+
+/* ---------- utilities ---------- */
+const $app = document.getElementById("app"), $ov = document.getElementById("ov");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+function ymd(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+const todayStr = () => ymd(new Date());
+const starStr = n => "⭐".repeat(n) + `<span class="nostar">${"⭐".repeat(3 - n)}</span>`;
+const num = (v, d = 0) => (typeof v === "number" && isFinite(v) ? Math.max(0, Math.round(v)) : d);
+
+/* ---------- main app profile (read only) ---------- */
+function readMainProfile() {
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem(GAME.mainKey)); } catch (e) { raw = null; }
+  const base = { id: "guest", name: "Guest", avatar: "🙂", little: false, sound: true, linked: false };
+  if (!raw || typeof raw !== "object" || !Array.isArray(raw.profiles)) return base;
+  const p = raw.profiles.find(x => x && x.id === raw.activeId);
+  const sound = typeof raw.sound === "boolean" ? raw.sound : true;
+  if (!p) return { ...base, sound };
+  return { id: String(p.id).slice(0, 40), name: typeof p.name === "string" && p.name.trim() ? p.name.slice(0, 40) : "Player",
+    avatar: typeof p.avatar === "string" && p.avatar ? p.avatar.slice(0, 16) : "🙂", little: p.pathId === "little", sound, linked: true };
+}
+
+/* ---------- this game's own store ---------- */
+const Store = {
+  data: null,
+  load() {
+    let raw = null;
+    try { raw = JSON.parse(localStorage.getItem(GAME.storageKey)); } catch (e) { raw = null; }
+    const d = { version: 1, kids: {} };
+    if (raw && typeof raw === "object" && raw.kids && typeof raw.kids === "object") {
+      for (const [id, k] of Object.entries(raw.kids)) {
+        if (!k || typeof k !== "object") continue;
+        const progress = {};
+        for (const [li, v] of Object.entries(k.progress && typeof k.progress === "object" ? k.progress : {})) {
+          if (/^\d+$/.test(li) && +li < LEVELS.length && v && typeof v === "object") progress[li] = { stars: Math.min(3, num(v.stars)), clears: num(v.clears) };
+        }
+        d.kids[String(id).slice(0, 40)] = {
+          progress,
+          day: typeof k.day === "string" ? k.day : null,
+          earnedToday: num(k.earnedToday), replayPaidToday: num(k.replayPaidToday),
+          pending: num(k.pending), lifetime: num(k.lifetime),
+          noRead: typeof k.noRead === "boolean" ? k.noRead : null,
+          sound: typeof k.sound === "boolean" ? k.sound : null,
+        };
+      }
+    }
+    this.data = d;
+  },
+  save() { try { localStorage.setItem(GAME.storageKey, JSON.stringify(this.data)); } catch (e) { /* private mode / full */ } },
+};
+let me = readMainProfile();
+function kid() {
+  const d = Store.data;
+  if (!d.kids[me.id]) d.kids[me.id] = { progress: {}, day: null, earnedToday: 0, replayPaidToday: 0, pending: 0, lifetime: 0, noRead: null, sound: null };
+  const k = d.kids[me.id];
+  if (k.day !== todayStr()) { k.day = todayStr(); k.earnedToday = 0; k.replayPaidToday = 0; }
+  return k;
+}
+const noRead = () => { const k = kid(); return k.noRead === null ? me.little : k.noRead; };
+const soundOn = () => { const k = kid(); return k.sound === null ? me.sound : k.sound; };
+const isCleared = li => !!(kid().progress[li] && kid().progress[li].clears);
+const isUnlocked = li => li === 0 || isCleared(li - 1);
+
+/* Award tokens for a solve. Returns a breakdown; never exceeds the daily cap. */
+function award(li, stars) {
+  const k = kid(), prev = k.progress[li] || { stars: 0, clears: 0 };
+  const lines = []; let want = 0;
+  if (!prev.clears) { want += ECON.firstClear; lines.push(["first", ECON.firstClear]); }
+  else if (k.replayPaidToday < ECON.replayPaidPerDay) { want += ECON.replay; lines.push(["replay", ECON.replay]); k.replayPaidToday++; }
+  if (stars === 3 && prev.stars < 3) { want += ECON.firstThreeStars; lines.push(["stars", ECON.firstThreeStars]); }
+  const room = Math.max(0, ECON.dailyCap - k.earnedToday);
+  const got = Math.min(want, room);
+  k.earnedToday += got; k.pending += got; k.lifetime += got;
+  const newSticker = !prev.clears;
+  k.progress[li] = { stars: Math.max(prev.stars, stars), clears: prev.clears + 1 };
+  Store.save();
+  return { want, got, capped: got < want, lines, newSticker };
+}
+
+/* ---------- sound + optional speech (all on-device) ---------- */
+const Sound = {
+  ctx: null,
+  tone(f0, f1, dur, type = "sine", vol = 0.18, delay = 0) {
+    if (!soundOn()) return;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      this.ctx = this.ctx || new AC();
+      if (this.ctx.state === "suspended" && this.ctx.resume) this.ctx.resume().catch(() => {});
+      const t = this.ctx.currentTime + delay, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(this.ctx.destination); o.start(t); o.stop(t + dur + 0.03);
+    } catch (e) { /* no audio */ }
+  },
+  pick() { this.tone(300, 720, 0.13, "sine"); },
+  plop(h = 0) { this.tone(520 + h * 70, 180, 0.16, "triangle", 0.22); },
+  boing() { this.tone(260, 520, 0.12, "triangle", 0.18); this.tone(520, 200, 0.22, "triangle", 0.15, 0.11); },
+  tap() { this.tone(600, 600, 0.05, "triangle", 0.1); },
+  win() { [523, 659, 784, 1047, 1319].forEach((f, i) => this.tone(f, f * 1.01, 0.22, "triangle", 0.18, i * 0.11)); },
+  pop() { this.tone(900, 300, 0.1, "sine", 0.15); },
+};
+const Speech = {
+  ok: "speechSynthesis" in window && typeof SpeechSynthesisUtterance === "function",
+  say(text) {
+    if (!this.ok || !soundOn()) return;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const vs = (speechSynthesis.getVoices() || []).filter(v => v.localService !== false && /^en/i.test(v.lang)); // on-device voices only
+      if (vs.length) u.voice = vs[0];
+      u.rate = 0.88; u.pitch = 1.1; u.onerror = () => {};
+      this.cur = u; speechSynthesis.speak(u);
+    } catch (e) { /* no speech */ }
+  },
+  stop() { if (this.ok) try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } },
+};
+
+/* ---------- state ---------- */
+let view = "map";
+let play = null; // { li, jars:[[id..]], code:{id:code}, hist:[], hints, done, stuck, busy }
+const codesOf = () => play.jars.map(a => a.map(id => play.code[id]));
+
+function startLevel(li) {
+  const L = LEVELS[li], code = {};
+  let n = 0;
+  const jars = L.jars.map(d => (d.start || []).map(c => { const id = "j" + (n++); code[id] = c; return id; }));
+  play = { li, jars, code, hist: [], hints: 0, done: false, stuck: false, busy: false, moves: 0, hint: null };
+  view = "play"; $ov.innerHTML = ""; render();
+  maybeTwistIntro();
+}
+/* ---------- screens ---------- */
+function topBar(back) {
+  const k = kid(), pct = Math.round(100 * k.earnedToday / ECON.dailyCap), nr = noRead();
+  return `<div class="top">
+    ${back ? `<button class="iconbtn" data-act="map" aria-label="Back to levels">⬅️</button>`
+      : me.linked ? `<a class="iconbtn" href="../index.html#home" aria-label="Back to Elzee">🏠</a>` : ""}
+    <div class="pill" aria-label="Player"><span class="av">${esc(me.avatar)}</span>${nr ? "" : `<span class="nm">${esc(me.name)}</span>`}</div>
+    <div class="pill jar-meter" aria-label="Tokens earned today ${k.earnedToday} of ${ECON.dailyCap}">🪙 <b>${k.earnedToday}</b><span class="jarbar"><i style="width:${pct}%"></i></span>${k.earnedToday >= ECON.dailyCap ? "✅" : ""}</div>
+    <div class="spacer"></div>
+    <button class="iconbtn ${nr ? "on" : ""}" data-act="toggleRead" aria-label="Picture mode (no reading)" aria-pressed="${nr}">${nr ? "🖼️" : "🔤"}</button>
+    <button class="iconbtn" data-act="toggleSound" aria-label="Sound" aria-pressed="${soundOn()}">${soundOn() ? "🔊" : "🔇"}</button>
+    ${back ? "" : `<button class="iconbtn" data-act="book" aria-label="Jelly friend book">📒</button>
+    <button class="iconbtn" data-act="grown" aria-label="For grown-ups">ⓘ</button>`}
+  </div>`;
+}
+function renderMap() {
+  const nr = noRead(), k = kid();
+  const next = LEVELS.findIndex((_, i) => !isCleared(i));
+  const full = k.earnedToday >= ECON.dailyCap;
+  $app.innerHTML = `${topBar(false)}
+    <div class="mapwrap">
+    <div class="hero"><div class="buds">${["rp2", "bs2", "yd2", "gp2"].map(c => `<span class="jl">${jellySVG(c)}</span>`).join("")}</div>
+      ${nr ? "" : `<div class="bubble"><b>Jelly Jars!</b> Pick up a jelly and drop it in a jar. Follow the jar rules to fill every jar.${full ? "<br><span class='muted'>Your token jar is full for today 🌙 Puzzles are still free to play!</span>" : ""}</div>`}
+      ${nr && full ? `<div class="bubble" aria-label="Token jar full for today">🪙✅🌙</div>` : ""}
+    </div>
+    <div class="levels">${LEVELS.map((L, i) => {
+      const un = isUnlocked(i), st = (k.progress[i] || {}).stars || 0;
+      return `<button class="lvl ${un ? "" : "locked"} ${i === next ? "next" : ""}" data-act="${un ? "start" : "locked"}" data-li="${i}"
+        aria-label="Level ${i + 1}${un ? "" : ", locked"}">
+        <span class="num">${i + 1}</span>${L.twist && un ? `<span class="tw" aria-hidden="true">✨</span>` : ""}<span class="scene">${un ? L.scene : "🔒"}</span>
+        ${nr ? "" : `<b style="font-size:17px">${esc(L.name)}</b>`}
+        <span class="stars">${un ? starStr(st) : ""}</span>
+        ${isCleared(i) ? `<span class="friend" aria-hidden="true">${jellySVG(FRIENDS[i][0], "yay")}</span>` : ""}</button>`;
+    }).join("")}</div></div>`;
+}
+
+function miniStack(codes) { // tiny jar, codes listed top → bottom
+  return `<span class="ministack">${codes.map(c => `<span class="mini" style="width:${Math.round(40 * SIZESCALE[J(c).s])}px">${jellySVG(c, "happy", { noface: true })}</span>`).join("")}</span>`;
+}
+/* Rule strip: how stacking works + what "done" looks like, as pictures. */
+function ruleStrip(L) {
+  const nr = noRead(), chips = [];
+  let txt = "";
+  if (L.stack === "color") { chips.push(`<span class="rulechip" aria-label="Same color on top only"><span class="mini">${jellySVG("rp2", "happy", { noface: true })}</span><span class="op">⬇</span><span class="mini">${jellySVG("rp2", "happy", { noface: true })}</span><span class="op">✅</span></span>`); txt = "Stack a jelly only on the same color. Fill each jar with one color."; }
+  if (L.stack === "size") { chips.push(`<span class="rulechip" aria-label="Never a bigger jelly on a smaller one">${miniStack(["zp1", "zp3"])}<span class="op">✅</span>${miniStack(["zp3", "zp1"])}<span class="op">🚫</span></span>`); txt = "A big jelly can never sit on a smaller one."; }
+  if (L.win === "sort") chips.push(`<span class="rulechip" aria-label="Goal: each jar one color"><span class="op">🫙</span><span class="op">=</span><span class="mini" style="width:26px">${jellySVG("bp2", "happy", { noface: true })}</span><span class="mini" style="width:26px">${jellySVG("bp2", "happy", { noface: true })}</span><span class="mini" style="width:26px">${jellySVG("bp2", "happy", { noface: true })}</span></span>`);
+  else chips.push(`<span class="rulechip" aria-label="Goal: fill the gold jars, empty the bowls"><span class="op">🥣</span><span class="op">➜</span><span class="op" style="font-size:30px">⭐🫙</span></span>`);
+  const tw = L.twist;
+  const NEW = play && isCleared(play.li) ? "" : "New! ";
+  if (tw === "badge") txt = NEW + "Jars have rule badges. Each jelly must go in a jar whose badge it matches.";
+  if (tw === "seq") txt = NEW + "The tall jar wants a color pattern. Drop jellies in the pattern order, bottom to top.";
+  if (tw === "size") txt = NEW + "Never a bigger jelly on a smaller one. Move the whole tower to the star jar.";
+  if (tw === "two") txt = NEW + "Two-rule badges: a jelly must match BOTH. Big jellies can't sit on small ones!";
+  if (tw === "mystery") txt = NEW + "Mystery jars. Look at the jellies already inside: what do they share? That's the secret rule.";
+  if (!tw && L.win === "goal") txt = "Read the badges. Count the spaces. Every jelly needs a jar it matches.";
+  if (L.win === "sort" && !txt) txt = "Fill each jar with one color.";
+  return `<div class="rules">${chips.join("")}${nr ? `<span class="spacer"></span>` : `<span class="ruletxt">${esc(txt)}</span>`}
+    ${Speech.ok ? `<button class="iconbtn say" data-act="say" aria-label="Read the rules aloud">🔈</button>` : ""}</div>`;
+}
+const levelSpeech = L => { const tmp = document.createElement("div"); tmp.innerHTML = ruleStrip(L); const t = tmp.querySelector(".ruletxt"); return t ? t.textContent : ""; };
+
+function badgeHTML(d) {
+  if (d.mystery) return play.done ? `<div class="badge goalb" aria-label="Revealed rule: ${esc(ruleText(d.badge))}">${ruleIcon(d.badge)}</div>`
+    : `<div class="badge mys" aria-label="Mystery jar">?</div>`;
+  if (d.badge) return `<div class="badge goalb" aria-label="Badge: ${esc(ruleText(d.badge))}">${ruleIcon(d.badge)}</div>`;
+  if (d.star) return `<div class="badge goalb" aria-label="Star jar"><span style="font-size:30px">⭐</span></div>`;
+  if (d.seq) return `<div class="badge goalb" aria-label="Pattern jar">${d.seq.slice(0, 3).map(c => `<span class="mini" style="width:22px">${jellySVG(c + "p2", "happy", { noface: true })}</span>`).join("")}<span class="plus">…</span></div>`;
+  if (d.src) return `<div class="badge" aria-label="Jelly bowl: take only"><span style="font-size:26px">⤴️</span></div>`;
+  return `<div class="badge none" aria-hidden="true"></div>`;
+}
+
+/* Fit jars to the stage: biggest jars that fit across (1 or 2 rows) and up. */
+function layoutJars() {
+  const stage = document.querySelector(".stage"); if (!stage || !play) return;
+  const L = LEVELS[play.li], n = L.jars.length, maxCap = Math.max(...L.jars.map(d => d.cap));
+  const W = stage.clientWidth - 24, H = stage.clientHeight - 24, gap = 14, extra = 54 + 6 + 10 + 22; // badge, gap, jar padding, shelf
+  let best = null;
+  for (const rows of [1, 2]) {
+    const per = Math.ceil(n / rows);
+    const byW = (W - (per - 1) * gap) / per;
+    const byH = ((H - (rows - 1) * 18) / rows - extra) / (maxCap * 0.66 + 0.12);
+    const jw = Math.floor(Math.min(165, byW, byH));
+    if (!best || jw > best.jw + 6) best = { rows, per, jw };
+  }
+  const jw = Math.max(44, best.jw), sh = Math.round(jw * 0.66);
+  stage.style.setProperty("--jw", jw + "px"); stage.style.setProperty("--sh", sh + "px");
+  const shelf = stage.querySelector(".shelf");
+  const cols = [...shelf.querySelectorAll(".jcol")];
+  shelf.innerHTML = "";
+  for (let r = 0; r < best.rows; r++) {
+    const row = document.createElement("div"); row.className = "shelfrow";
+    cols.slice(r * best.per, (r + 1) * best.per).forEach(c => row.appendChild(c));
+    if (row.children.length) shelf.appendChild(row);
+  }
+  cols.forEach(c => {
+    const d = L.jars[+c.dataset.jar], jar = c.querySelector(".jar");
+    jar.style.height = (d.cap * sh + Math.round(jw * 0.12) + 10) + "px";
+    c.querySelectorAll(".slot,.ghostslot").forEach(s => { s.style.bottom = (8 + (+s.dataset.h) * sh) + "px"; });
+    c.querySelectorAll(".slot .jelly").forEach(e => { e.style.width = Math.round(jw * SIZESCALE[J(play.code[e.dataset.id]).s] * 0.94) + "px"; });
+  });
+}
+
+function renderPlay() {
+  const L = LEVELS[play.li], nr = noRead();
+  const mood = play.done ? "yay" : play.stuck ? "sad" : "happy";
+  const jarsHTML = L.jars.map((d, i) => {
+    const ids = play.jars[i], lock = d.lock || 0;
+    let ghosts = "";
+    if (d.seq) ghosts = d.seq.map((c, h) => h >= ids.length ? `<div class="ghostslot" data-h="${h}" style="border-color:${COLORS[c].dark};background:${COLORS[c].fill}22"></div>` : "").join("");
+    if (d.star) ghosts = [3, 2, 1].map((s, h) => h >= ids.length ? `<div class="ghostslot" data-h="${h}" style="border-color:#e0a400;left:${50 - SIZESCALE[s] * 46}%;right:${50 - SIZESCALE[s] * 46}%"></div>` : "").join("");
+    const slots = ids.map((id, h) => `<div class="slot" data-h="${h}"><span class="jelly idle ${h < lock ? "lockd" : ""}" data-id="${id}" style="animation-delay:${((i * 3 + h) % 7) * -0.37}s">${jellySVG(play.code[id], mood)}</span>${h < lock ? `<span class="lockpin" aria-hidden="true">📌</span>` : ""}</div>`).join("");
+    const lbl = `Jar ${i + 1}${d.src ? " (bowl)" : ""}: ${ids.length ? ids.map(id => jellyLabel(play.code[id])).join(", ") : "empty"}`;
+    return `<div class="jcol" data-jar="${i}" role="button" aria-label="${esc(lbl)}">${badgeHTML(d)}
+      <div class="jar ${d.goal ? "goal" : ""} ${d.src ? "src" : ""}">${ghosts}${slots}${play.done && d.goal ? `<div class="lid" style="animation-delay:${i * 0.12}s"></div>` : ""}</div></div>`;
+  }).join("");
+  $app.innerHTML = `${topBar(true)}${ruleStrip(L)}
+    <div class="stage ${play.done ? "win" : ""} ${play.stuck ? "worried" : ""}">
+      <span class="scenebg" aria-hidden="true">${L.scene}</span>
+      <span class="lvtitle">${nr ? play.li + 1 : `${play.li + 1}. ${esc(L.name)}`}</span>
+      <div class="shelf">${jarsHTML}</div>
+    </div>
+    <div class="ctrls">
+      <button class="btn ghost ${play.stuck ? "wig" : ""}" data-act="undo" aria-label="Undo" ${play.hist.length && !play.done ? "" : "disabled"}><span class="ico">↩️</span></button>
+      <button class="btn ghost" data-act="restart" aria-label="Start over" ${play.done ? "disabled" : ""}><span class="ico">🔄</span></button>
+      <button class="btn brand" data-act="hint" aria-label="Hint" ${play.done ? "disabled" : ""}><span class="ico">💡</span>${nr ? "" : "Hint"}</button>
+    </div>`;
+  layoutJars();
+  if (play.hint) play.hint.forEach(j => { const c = jcol(j); if (c) c.classList.add("hint"); });
+  scheduleDemo();
+}
+const jcol = i => document.querySelector(`.jcol[data-jar="${i}"]`);
+const jellyEl = id => document.querySelector(`.jelly[data-id="${id}"]`);
+
+function render() {
+  Speech.stop();
+  stopDemo();
+  if (view === "play" && play) renderPlay(); else { view = "map"; play = null; renderMap(); }
+}
+
+/* ---------- moves ---------- */
+function commitMove(a, b) {
+  play.hist.push(play.jars.map(x => x.slice()));
+  const id = play.jars[a].pop(); play.jars[b].push(id);
+  play.moves++; play.hint = null;
+  play.demoOff = true;
+  const L = LEVELS[play.li], cur = codesOf();
+  const won = isWin(L, cur);
+  play.stuck = !won && !solve(L, cur);
+  if (won) play.done = true;
+  render();
+  const el = jellyEl(id);
+  if (el) landSquash(el, jcol(b));
+  Sound.plop(play.jars[b].length);
+  if (won) celebrate();
+}
+function landSquash(el, col) {
+  if (RM()) return;
+  el.classList.remove("idle");
+  el.animate([{ transform: "scale(1.3,.62)" }, { transform: "scale(.86,1.16)" }, { transform: "scale(1.08,.94)" }, { transform: "scale(.98,1.02)" }, { transform: "scale(1,1)" }],
+    { duration: 520, easing: "ease-out" }).onfinish = () => { if (!play || !play.done) el.classList.add("idle"); };
+  if (col) { col.classList.remove("thud"); void col.offsetWidth; col.classList.add("thud"); }
+}
+function nope(a, b, why) {
+  const col = jcol(b); if (!col) return;
+  col.classList.remove("nope"); void col.offsetWidth; col.classList.add("nope");
+  const L = LEVELS[play.li], d = L.jars[b];
+  if (why === "badge" || why === "src" || why === "seq") { const bd = col.querySelector(".badge"); if (bd) { bd.classList.remove("flash"); void bd.offsetWidth; bd.classList.add("flash"); } }
+  if (why === "seq") { const g = col.querySelector(".ghostslot"); if (g) g.animate([{ transform: "scale(1)" }, { transform: "scale(1.15)" }, { transform: "scale(1)" }], { duration: 400, iterations: 2 }); }
+  if (why === "color" || why === "size") { const ids = play.jars[b]; const t = jellyEl(ids[ids.length - 1]); if (t) t.animate([{ transform: "rotate(0)" }, { transform: "rotate(-12deg) scale(1.1)" }, { transform: "rotate(12deg) scale(1.1)" }, { transform: "rotate(0)" }], { duration: 420 }); }
+  const r = col.getBoundingClientRect(), p = document.createElement("div");
+  p.className = "nopepop"; p.textContent = why === "full" ? "🈵" : "🚫"; if (why === "full") p.textContent = "✋";
+  p.style.left = (r.left + r.width / 2) + "px"; p.style.top = (r.top + 20) + "px"; document.body.appendChild(p); setTimeout(() => p.remove(), 950);
+  Sound.boing();
+  void d;
+}
+/* Blocked jars also get a short spoken reason in words mode (optional audio). */
+const WHY = { full: "That jar is full.", badge: "That jelly doesn't match the badge.", seq: "That's not the next color in the pattern.", color: "Only the same color can go on top.", size: "A big jelly can't sit on a smaller one.", src: "Bowls only give jellies. Pick a jar!" };
+/* ---------- tactile input: drag with spring physics, or tap a jar then tap a jar ---------- */
+let hold = null, raf = 0, lastTs = 0;
+function jarAt(x, y) {
+  let best = null, bd = 1e9;
+  document.querySelectorAll(".jcol").forEach(c => {
+    const r = c.getBoundingClientRect();
+    if (y < r.top - 90 || y > r.bottom + 30 || x < r.left - 12 || x > r.right + 12) return;
+    const d = Math.abs(x - (r.left + r.width / 2));
+    if (d < bd) { bd = d; best = +c.dataset.jar; }
+  });
+  return best;
+}
+function setHover(b) {
+  document.querySelectorAll(".jcol.hover").forEach(c => { if (+c.dataset.jar !== b) c.classList.remove("hover"); });
+  if (b !== null && b !== undefined && hold && b !== hold.from) { const c = jcol(b); if (c) c.classList.add("hover"); }
+}
+function liftFrom(a, e) {
+  const ids = play.jars[a], id = ids[ids.length - 1], src = jellyEl(id);
+  if (!src) return;
+  const r = src.getBoundingClientRect();
+  const f = document.createElement("div"); f.className = "float"; f.style.width = r.width + "px";
+  f.innerHTML = `<div class="sq"><div class="in">${jellySVG(play.code[id], "yay")}</div></div>`;
+  document.body.appendChild(f); src.classList.add("held");
+  hold = { from: a, id, el: f, sq: f.firstChild, inner: f.firstChild.firstChild, w: r.width, h: r.height, x: r.left, y: r.top, vx: 0, vy: -500,
+    home: { x: r.left, y: r.top }, tx: r.left, ty: r.top - r.height * 0.45, mode: "press", pid: e.pointerId, px: e.clientX, py: e.clientY };
+  f.style.transform = `translate(${r.left}px,${r.top}px)`;
+  if (!RM()) hold.sq.animate([{ transform: "scale(1.25,.7)" }, { transform: "scale(.82,1.22)" }, { transform: "scale(1.08,.92)" }, { transform: "scale(1,1)" }],
+    { duration: 420, easing: "ease-out" });
+  Sound.pick();
+  if (!raf) { lastTs = performance.now(); raf = requestAnimationFrame(step); }
+}
+function step(ts) {
+  raf = 0;
+  const h = hold; if (!h) return;
+  const dt = Math.min(0.033, Math.max(0.001, (ts - lastTs) / 1000)); lastTs = ts;
+  let ty = h.ty; if (h.mode === "tap" || h.mode === "tapPress") ty += Math.sin(ts / 260) * 6;
+  const K = { drag: [900, 40], return: [260, 13], fly: [520, 40] }[h.mode] || [420, 24];
+  if (RM() && (h.mode === "return" || h.mode === "fly")) { h.x = h.tx; h.y = ty; h.vx = h.vy = 0; }
+  else {
+    h.vx += (K[0] * (h.tx - h.x) - K[1] * h.vx) * dt; h.vy += (K[0] * (ty - h.y) - K[1] * h.vy) * dt;
+    h.x += h.vx * dt; h.y += h.vy * dt;
+  }
+  const sp = Math.hypot(h.vx, h.vy), st = Math.min(0.32, sp / 3200), ang = Math.atan2(h.vy, h.vx) * 180 / Math.PI;
+  const tilt = Math.max(-22, Math.min(22, h.vx / 40));
+  h.el.style.transform = `translate(${h.x.toFixed(1)}px,${h.y.toFixed(1)}px)`;
+  h.inner.style.transform = `rotate(${tilt.toFixed(1)}deg) rotate(${ang.toFixed(1)}deg) scale(${(1 + st).toFixed(3)},${(1 - st * 0.6).toFixed(3)}) rotate(${(-ang).toFixed(1)}deg)`;
+  if ((h.mode === "return" || h.mode === "fly") && Math.hypot(h.tx - h.x, ty - h.y) < 1 && sp < 14) { settle(); return; }
+  raf = requestAnimationFrame(step);
+}
+function settle() {
+  const h = hold; hold = null;
+  setHover(null);
+  if (h.mode === "fly") { h.el.remove(); commitMove(h.from, h.to); return; }
+  h.el.remove();
+  const src = jellyEl(h.id);
+  if (src) { src.classList.remove("held"); if (!RM()) src.animate([{ transform: "scale(1.2,.8)" }, { transform: "scale(.9,1.1)" }, { transform: "scale(1.04,.97)" }, { transform: "scale(1)" }], { duration: 450 }); }
+}
+function returnHome(kick) {
+  if (!hold) return;
+  hold.mode = "return"; hold.tx = hold.home.x; hold.ty = hold.home.y;
+  if (kick) { hold.vy -= 700; hold.vx += (hold.x > hold.home.x ? 400 : -400); }
+  if (!raf) { lastTs = performance.now(); raf = requestAnimationFrame(step); }
+}
+function tryDrop(b) {
+  const L = LEVELS[play.li], a = hold.from;
+  const why = dropBlock(L, codesOf(), a, b);
+  if (why) {
+    nope(a, b, why);
+    if (!noRead()) toastNote(WHY[why] || "");
+    returnHome(true); return;
+  }
+  // fly into the next free slot of jar b
+  const jarEl = jcol(b).querySelector(".jar"), r = jarEl.getBoundingClientRect();
+  const sh = parseFloat(getComputedStyle(document.querySelector(".stage")).getPropertyValue("--sh")) || 70;
+  const hgt = play.jars[b].length;
+  hold.mode = "fly"; hold.to = b;
+  hold.tx = r.left + (r.width - hold.w) / 2; hold.ty = r.bottom - 5 - 8 - hgt * sh - hold.h;
+  if (!raf) { lastTs = performance.now(); raf = requestAnimationFrame(step); }
+}
+document.addEventListener("pointerdown", e => {
+  if (view !== "play" || !play || play.done || $ov.innerHTML) return;
+  if (hold && (hold.mode === "fly" || hold.mode === "return")) return;
+  const col = e.target.closest(".jcol");
+  if (hold && hold.mode === "tap") {
+    e.preventDefault();
+    hold.mode = "tapPress"; hold.pid = e.pointerId; hold.px = e.clientX; hold.py = e.clientY;
+    hold.pressJar = col ? +col.dataset.jar : jarAt(e.clientX, e.clientY);
+    return;
+  }
+  if (!col || hold) return;
+  e.preventDefault(); stopDemo(); play.demoOff = true;
+  const a = +col.dataset.jar;
+  if (!canPick(LEVELS[play.li], codesOf(), a)) {
+    col.animate([{ transform: "translateY(0)" }, { transform: "translateY(-6px)" }, { transform: "translateY(0)" }], { duration: 250 });
+    const ids = play.jars[a]; if (ids.length) { const t = jellyEl(ids[ids.length - 1]); if (t) t.animate([{ transform: "rotate(0)" }, { transform: "rotate(-8deg)" }, { transform: "rotate(8deg)" }, { transform: "rotate(0)" }], { duration: 300 }); }
+    Sound.tap(); return;
+  }
+  liftFrom(a, e);
+});
+document.addEventListener("pointermove", e => {
+  if (!hold || e.pointerId !== hold.pid) return;
+  if ((hold.mode === "press" || hold.mode === "tapPress") && Math.hypot(e.clientX - hold.px, e.clientY - hold.py) > 8) {
+    if (hold.mode === "tapPress" && hold.pressJar !== hold.from) return; // a tap that wobbled a bit on the target jar
+    hold.mode = "drag";
+  }
+  if (hold.mode === "drag") {
+    hold.tx = e.clientX - hold.w / 2; hold.ty = e.clientY - hold.h * 0.9;
+    setHover(jarAt(e.clientX, e.clientY));
+    if (!raf) { lastTs = performance.now(); raf = requestAnimationFrame(step); }
+  }
+});
+document.addEventListener("pointerup", e => {
+  if (!hold || e.pointerId !== hold.pid) return;
+  if (hold.mode === "drag") {
+    const b = jarAt(e.clientX, e.clientY);
+    if (b === null || b === hold.from) returnHome(false); else tryDrop(b);
+  } else if (hold.mode === "press") {
+    hold.mode = "tap"; // held: floats above its jar until you tap where it goes
+    const c = jcol(hold.from); if (c) { const r = c.getBoundingClientRect(); hold.ty = r.top - hold.h * 0.35; }
+    if (!raf) { lastTs = performance.now(); raf = requestAnimationFrame(step); }
+  } else if (hold.mode === "tapPress") {
+    const b = hold.pressJar;
+    if (b === null || b === undefined || b === hold.from) returnHome(false); else tryDrop(b);
+  }
+});
+document.addEventListener("pointercancel", e => { if (hold && e.pointerId === hold.pid && hold.mode !== "fly") returnHome(false); });
+
+/* ---------- undo / restart / hint ---------- */
+function undo() {
+  if (!play || play.done || hold || !play.hist.length) return;
+  play.jars = play.hist.pop(); play.hint = null;
+  play.stuck = !solve(LEVELS[play.li], codesOf());
+  Sound.pop(); render();
+}
+function hint() {
+  if (!play || play.done || hold) return;
+  const L = LEVELS[play.li];
+  let path = solve(L, codesOf());
+  while (!path && play.hist.length) { play.jars = play.hist.pop(); path = solve(L, codesOf()); } // stuck: step back to a position that can still win
+  if (!path || !path.length) return;
+  play.hints++; play.hint = path[0]; play.stuck = false;
+  Sound.pop(); render();
+  showHandMove(path[0][0], path[0][1], 2);
+}
+
+/* ---------- demo hand (no reading needed) ---------- */
+let demoTimer = 0;
+function stopDemo() { clearTimeout(demoTimer); demoTimer = 0; document.querySelectorAll(".hand,.demoghost").forEach(h => h.remove()); }
+function scheduleDemo() {
+  if (!play || play.li !== 0 || isCleared(0) || play.moves || play.demoOff || play.done || $ov.innerHTML) return;
+  demoTimer = setTimeout(() => { if (!play || play.moves || play.demoOff) return; const p = solve(LEVELS[0], codesOf()); if (p && p.length) showHandMove(p[0][0], p[0][1], 99); }, 700);
+}
+function showHandMove(a, b, times) {
+  stopDemo();
+  const ca = jcol(a), cb = jcol(b); if (!ca || !cb) return;
+  const ids = play.jars[a], top = jellyEl(ids[ids.length - 1]); if (!top) return;
+  const ra = top.getBoundingClientRect(), rb = cb.querySelector(".jar").getBoundingClientRect();
+  const g = document.createElement("div"); g.className = "float demoghost"; g.style.width = ra.width + "px"; g.style.opacity = ".55";
+  g.innerHTML = jellySVG(play.code[ids[ids.length - 1]]);
+  const hand = document.createElement("div"); hand.className = "hand"; hand.textContent = "👆"; hand.setAttribute("aria-hidden", "true");
+  document.body.append(g, hand);
+  const x0 = ra.left, y0 = ra.top, x1 = rb.left + (rb.width - ra.width) / 2, y1 = rb.top - ra.height * 0.2;
+  const frames = [
+    { transform: `translate(${x0}px,${y0}px)`, offset: 0 }, { transform: `translate(${x0}px,${y0 - 40}px)`, offset: 0.2 },
+    { transform: `translate(${(x0 + x1) / 2}px,${Math.min(y0, y1) - 90}px)`, offset: 0.5 }, { transform: `translate(${x1}px,${y1}px)`, offset: 0.8 }, { transform: `translate(${x1}px,${y1}px)`, offset: 1 }];
+  const opt = { duration: 1900, iterations: times, easing: "ease-in-out" };
+  g.animate(frames, opt);
+  hand.style.left = "0px"; hand.style.top = "0px";
+  const off = ra.width * 0.4, offy = ra.height * 0.55;
+  hand.animate(frames.map(f => ({ ...f, transform: f.transform.replace(/translate\(([-\d.]+)px,([-\d.]+)px\)/, (m, x, y) => `translate(${+x + off}px,${+y + offy}px)`) })), opt)
+    .onfinish = () => { g.remove(); hand.remove(); };
+}
+
+/* ---------- twist intro card: an animated mini demo (✅ one goes in, 🚫 one bounces off) ---------- */
+const introSeen = new Set();
+function maybeTwistIntro() {
+  const L = LEVELS[play.li];
+  if (!L.twist || isCleared(play.li) || introSeen.has(play.li)) return;
+  introSeen.add(play.li); showTwist(L.twist);
+}
+const TWISTS = {
+  badge:   { badge: ruleIcon({ p: "s" }), inside: [], ok: "bs2", bad: "rd2", say: "New! Rule badges. This jar only takes striped jellies." },
+  size:    { badge: `<span style="font-size:26px">📶</span>`, inside: ["bp2"], ok: "yp1", bad: "pp3", say: "New! A big jelly can never sit on a smaller one." },
+  seq:     { badge: ["r", "b", "y"].map(c => `<span class="mini" style="width:22px">${jellySVG(c + "p2", "happy", { noface: true })}</span>`).join(""), inside: ["rp2"], ghost: ["b", "y"], ok: "bp2", bad: "yp2", say: "New! Pattern jar. Drop the colors in the pattern order, bottom to top." },
+  two:     { badge: ruleIcon({ c: "r", p: "s" }), inside: [], ok: "rs2", bad: "rd2", say: "New! Two rules at once. The jelly has to match both." },
+  mystery: { badge: "?", reveal: ruleIcon({ p: "s" }), inside: ["rs2", "bs1"], ok: "gs2", bad: "gd2", say: "New! Mystery jars. What do the jellies inside have in common? That's the secret rule." },
+};
+function showTwist(tw) {
+  const T = TWISTS[tw], nr = noRead();
+  const slotY = n => 185 - n * 56, n = T.inside.length;
+  const jel = (c, y, cls = "", extra = "") => `<span class="dj ${cls}" style="top:${y}px;width:${64 * SIZESCALE[J(c).s] / 0.8}px;margin-left:${-32 * SIZESCALE[J(c).s] / 0.8}px;${extra}">${jellySVG(c)}</span>`;
+  $ov.innerHTML = `<div class="ov"><div class="panel twistcard" role="dialog" aria-label="New rule">
+    <h2>✨ ${nr ? "" : "New!"}</h2>
+    <div class="demo" style="--land:${slotY(n) - 6}px">
+      <div class="dbadge ${tw === "mystery" ? "mys" : ""}">${T.badge}${T.reveal ? `<span class="rv">${T.reveal}</span>` : ""}</div>
+      <div class="djar"></div>
+      ${(T.ghost || []).map((c, i) => `<span class="dg" style="top:${slotY(n + i) + 4}px;border-color:${COLORS[c].dark};background:${COLORS[c].fill}33"></span>`).join("")}
+      ${T.inside.map((c, i) => jel(c, slotY(i))).join("")}
+      ${jel(T.ok, -6, "ok")}${jel(T.bad, -6, "bad")}
+      <span class="mk m1">✅</span><span class="mk m2">🚫</span>
+    </div>
+    ${nr ? "" : `<p style="font-size:21px">${esc(T.say)}</p>`}
+    <div class="row">${Speech.ok ? `<button class="iconbtn" data-act="sayTwist" data-tw="${tw}" aria-label="Read aloud">🔈</button>` : ""}
+      <button class="btn" data-act="closeOv" aria-label="Got it"><span class="ico">👍</span></button></div></div></div>`;
+  if (soundOn()) Speech.say(T.say);
+}
+
+/* ---------- celebration ---------- */
+const FX = {
+  cv: document.getElementById("fx"), ctx: null, parts: [], on: false,
+  size() { const d = window.devicePixelRatio || 1; this.cv.width = innerWidth * d; this.cv.height = innerHeight * d; this.ctx = this.cv.getContext("2d"); this.ctx.setTransform(d, 0, 0, d, 0, 0); },
+  burst(x, y, n = 40, spread = 1, up = 1) {
+    if (RM()) return;
+    const cols = ["#7c4dff", "#3ccf4e", "#ffc83d", "#ff6b3d", "#ff8fab", "#4dc3ff", "#ff5d73"];
+    for (let i = 0; i < n; i++) {
+      const a = up ? -Math.PI / 2 + (Math.random() - 0.5) * 1.6 * spread : Math.random() * Math.PI * 2;
+      const v = 380 + Math.random() * 520;
+      this.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: Math.random() * 6, vr: (Math.random() - 0.5) * 14, w: 8 + Math.random() * 7, h: 10 + Math.random() * 8,
+        c: cols[i % cols.length], life: 2.6 + Math.random(), round: i % 4 === 0 });
+    }
+    if (!this.on) { this.on = true; this.size(); this.t = performance.now(); requestAnimationFrame(t => this.tick(t)); }
+  },
+  tick(t) {
+    const dt = Math.min(0.033, (t - this.t) / 1000); this.t = t;
+    const g = this.ctx; g.clearRect(0, 0, innerWidth, innerHeight);
+    this.parts = this.parts.filter(p => (p.life -= dt) > 0 && p.y < innerHeight + 40);
+    for (const p of this.parts) {
+      p.vy += 900 * dt; p.vx *= 0.985; p.vy *= 0.985; p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+      g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.c; g.globalAlpha = Math.min(1, p.life);
+      if (p.round) { g.beginPath(); g.arc(0, 0, p.w / 2, 0, 7); g.fill(); } else g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.r * 2)) + 2);
+      g.restore();
+    }
+    if (this.parts.length) requestAnimationFrame(tt => this.tick(tt)); else { this.on = false; g.clearRect(0, 0, innerWidth, innerHeight); }
+  },
+};
+let winTimer = 0, winRes = null;
+function celebrate() {
+  const stars = Math.max(1, 3 - play.hints);
+  winRes = { stars, res: award(play.li, stars) };
+  Sound.win();
+  document.querySelectorAll(".jcol").forEach((c, i) => { const r = c.getBoundingClientRect(); setTimeout(() => FX.burst(r.left + r.width / 2, r.top + 30, 26), i * 120); });
+  // re-render the top bar meter so the coin count ticks up right away
+  const top = document.querySelector(".top"); if (top) top.outerHTML = topBar(true);
+  winTimer = setTimeout(showWin, RM() ? 200 : 1900);
+}
+function showWin() {
+  clearTimeout(winTimer); winTimer = 0;
+  if (!play || !winRes || $ov.innerHTML) return;
+  const { stars, res } = winRes, nr = noRead(), li = play.li, final = li === LEVELS.length - 1;
+  const nextOk = li + 1 < LEVELS.length;
+  const words = { first: "First solve", replay: "Replay", stars: "3 stars!" };
+  const parade = final ? `<div class="parade">${FRIENDS.map((f, i) => `<span style="animation-delay:${i * 0.09}s">${friendHTML(f)}</span>`).join("")}</div>` : "";
+  $ov.innerHTML = `<div class="ov"><div class="panel winpanel ${final ? "final" : ""}" role="dialog" aria-label="Level solved">
+    <h2>${final ? "🏆" : "🎉"} ${nr ? "" : final ? "Every jar is sorted!" : "Jars full!"}</h2>
+    <div class="reveal ${final ? "big" : ""}"><div class="rays"></div><div class="rjar"><div class="rlid"></div></div>
+      <div class="rfriend">${friendHTML(final ? KING : FRIENDS[li])}</div></div>
+    ${parade}
+    <div class="bigstars">${[0, 1, 2].map(i => `<span style="animation-delay:${0.9 + i * 0.2}s" class="${i < stars ? "" : "nostar"}">⭐</span>`).join("")}</div>
+    ${res.got ? `<div class="coins">+${res.got} 🪙</div>` : ""}
+    ${!nr && res.lines.length && res.got ? `<div class="muted" style="font-size:17px">${res.lines.map(([k, v]) => `${words[k]} +${v}`).join(" · ")}</div>` : ""}
+    ${res.capped ? `<div class="note">${nr ? "🪙✅🌙" : "Your token jar is full for today. Come back tomorrow for more. Puzzles are always free to play! 🌙"}</div>` : ""}
+    ${res.newSticker && !nr ? `<div class="muted">${final ? "You found the Jelly King and all 10 jelly friends!" : "A new jelly friend for your book!"}</div>` : ""}
+    <div class="row">
+      <button class="btn ghost" data-act="map" aria-label="Back to levels"><span class="ico">🗺️</span></button>
+      <button class="btn ghost" data-act="replay" aria-label="Play again"><span class="ico">🔁</span></button>
+      ${nextOk ? `<button class="btn" data-act="next" aria-label="Next level"><span class="ico">▶️</span>${nr ? "" : "Next"}</button>` : ""}
+    </div></div></div>`;
+  setTimeout(() => { Sound.pop(); const f = document.querySelector(".rfriend"); if (f) { const r = f.getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top + r.height / 2, final ? 90 : 50, 1, 0); } }, 650);
+  if (final && !RM()) for (let i = 1; i <= 6; i++) setTimeout(() => { if (!$ov.querySelector(".final")) return; FX.burst(innerWidth * (0.15 + 0.7 * ((i * 37) % 10) / 10), innerHeight * (0.15 + 0.1 * (i % 3)), 70, 1, 0); Sound.pop(); }, 900 + i * 520);
+  if (soundOn()) Speech.say(final ? "You did it! Every jar is sorted. Here comes the Jelly King!" : res.got ? `Jars full! You earned ${res.got} tokens!` : "Jars full! Great thinking!");
+}
+
+function showBook() {
+  const nr = noRead(), all = LEVELS.every((_, i) => isCleared(i));
+  $ov.innerHTML = `<div class="ov"><div class="panel" role="dialog" aria-label="Jelly friend book">
+    <h2>📒 ${nr ? "" : "Jelly Friends"}</h2>
+    <div class="book">${FRIENDS.map((f, i) => {
+      const got = isCleared(i);
+      return `<div class="bslot ${got ? "" : "no"}">${got ? friendHTML(f, "happy") : `<span class="friendj">${jellySVG("zp3", "happy", { noface: true })}</span>`}<small>${LEVELS[i].scene} ${i + 1}</small></div>`; }).join("")}
+      <div class="bslot king ${all ? "" : "no"}">${all ? friendHTML(KING, "yay") : `<span class="friendj">${jellySVG("zp3", "happy", { noface: true })}</span>`}<small>👑</small></div></div>
+    <div class="row"><button class="btn" data-act="closeOv" aria-label="Close"><span class="ico">👍</span></button></div></div></div>`;
+}
+function showGrown() {
+  const k = kid();
+  $ov.innerHTML = `<div class="ov"><div class="panel left" role="dialog" aria-label="For grown-ups">
+    <h2 style="text-align:center">For grown-ups</h2>
+    <p><b>What it practices:</b> sorting and classifying by color, pattern, and size; following rules (badges, “NOT”, two rules at once); ordering (a size rule and a color pattern); planning ahead (only the top jelly moves, so you have to dig and park); and finding a hidden rule from examples. Every level is a fixed puzzle that has been checked to be solvable. There's no timer, and nothing depends on speed or luck.</p>
+    <p><b>Tokens:</b> earned only by solving puzzles. First solve +${ECON.firstClear}, first 3-star solve +${ECON.firstThreeStars}, replays +${ECON.replay} (up to ${ECON.replayPaidPerDay} a day). At most <b>${ECON.dailyCap} tokens a day</b> per kid. Hints cost a star, never tokens. Wrong drops just bounce back and cost nothing. No purchases, no ads, nothing lost for missing a day.</p>
+    <div class="note">Player: ${esc(me.avatar)} ${esc(me.name)} ${me.linked ? "(from Elzee)" : "(no Elzee player found on this device)"}<br>
+      Today: ${k.earnedToday}/${ECON.dailyCap} · Waiting to go into the Elzee jar: <b>${k.pending}</b> · All-time: ${k.lifetime}</div>
+    <p class="muted" style="font-size:16px">Tokens from this game move into the kid's Elzee jar the next time Elzee's home screen opens (up to ${ECON.dailyCap} a day). Picture mode hides all words; 🔈 reads the rules aloud with the device's own voice.</p>
+    <p class="muted" style="font-size:16px">Hold the button below for 2 seconds to reset this kid's puzzle progress and jelly friends. Today's token count is kept so the daily cap can't be reset.</p>
+    <div class="row"><button class="btn ghost holdbtn" data-hold="reset" aria-label="Hold to reset puzzle progress"><i></i>Hold to reset</button>
+      <button class="btn" data-act="closeOv">Close</button></div></div></div>`;
+}
+function toastNote(msg) {
+  if (!msg) return;
+  document.querySelectorAll(".toast").forEach(t => t.remove());
+  const el = document.createElement("div");
+  el.className = "note toast"; el.style.cssText = "position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:45;max-width:90vw;pointer-events:none";
+  el.textContent = msg; document.body.appendChild(el); setTimeout(() => el.remove(), 2000);
+}
+
+/* ---------- buttons ---------- */
+const ACTS = {
+  map() { clearTimeout(winTimer); $ov.innerHTML = ""; view = "map"; play = null; render(); },
+  start(el) { const li = +el.dataset.li; if (isUnlocked(li)) { Sound.tap(); startLevel(li); } },
+  locked() { Sound.boing(); },
+  toggleRead() { kid().noRead = !noRead(); Store.save(); render(); },
+  toggleSound() { kid().sound = !soundOn(); Store.save(); if (!soundOn()) Speech.stop(); render(); },
+  book() { showBook(); }, grown() { showGrown(); },
+  closeOv() { $ov.innerHTML = ""; render(); },
+  say() { if (play) Speech.say(levelSpeech(LEVELS[play.li])); },
+  sayTwist(el) { const T = TWISTS[el.dataset.tw]; if (T) Speech.say(T.say); },
+  undo() { undo(); }, hint() { hint(); },
+  restart() { if (!play || play.done || hold) return; const li = play.li, h = play.hints; startLevel(li); play.hints = h; Sound.pop(); },
+  replay() { clearTimeout(winTimer); $ov.innerHTML = ""; startLevel(play.li); },
+  next() { clearTimeout(winTimer); $ov.innerHTML = ""; startLevel(Math.min(LEVELS.length - 1, play.li + 1)); },
+};
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]");
+  if (el && !el.disabled && ACTS[el.dataset.act]) { ACTS[el.dataset.act](el); return; }
+  // tap anywhere during the shelf celebration skips to the prize card
+  if (view === "play" && play && play.done && winTimer && !$ov.innerHTML) showWin();
+});
+
+/* hold-to-confirm (grown-up reset) */
+let holdReset = null;
+document.addEventListener("pointerdown", e => {
+  const el = e.target.closest("[data-hold]"); if (!el) return;
+  const bar = el.querySelector("i"), t0 = Date.now();
+  holdReset = setInterval(() => {
+    const p = Math.min(1, (Date.now() - t0) / 2000); bar.style.width = (p * 100) + "%";
+    if (p >= 1) {
+      clearInterval(holdReset); holdReset = null;
+      const k = kid(); k.progress = {}; Store.save(); $ov.innerHTML = ""; render(); toastNote("Puzzle progress reset.");
+    }
+  }, 50);
+});
+["pointerup", "pointercancel", "pointerleave"].forEach(ev => document.addEventListener(ev, () => {
+  if (holdReset) { clearInterval(holdReset); holdReset = null; document.querySelectorAll("[data-hold] i").forEach(b => b.style.width = "0"); }
+}));
+
+/* keep in sync if Elzee switches player in another tab; re-fit jars on rotate */
+window.addEventListener("storage", e => { if (e.key === GAME.mainKey) { me = readMainProfile(); render(); } else if (e.key === GAME.storageKey) { Store.load(); render(); } });
+window.addEventListener("resize", () => { if (view === "play" && play && !hold) { stopDemo(); layoutJars(); scheduleDemo(); } if (FX.on) FX.size(); });
+
+/* Read-only peek for automated tests (QA only; changes nothing). */
+window.JellyJars = Object.freeze({
+  state: () => (play ? { li: play.li, jars: codesOf(), done: play.done, stuck: play.stuck, hints: play.hints, busy: !!hold } : { view }),
+  solution: () => (play ? solve(LEVELS[play.li], codesOf()) : null),
+  levels: LEVELS.length,
+});
+
+Store.load(); render();
+
+
+</script>
+</body>
+</html>
