@@ -13,7 +13,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="app-version" content="1.2.1">
+<meta name="app-version" content="1.2.2">
 <style>
 /* Fredoka (SIL Open Font License, see OFL-Fredoka.txt), self-hosted so the app never waits on a third-party server */
 @font-face{font-family:"Fredoka";font-style:normal;font-weight:300 700;font-display:swap;src:url("fredoka-latin.woff2") format("woff2")}
@@ -217,6 +217,7 @@ h1,h2,h3{margin:0;font-weight:700}
 .err{color:#e0424f;min-height:26px;font-size:18px;font-weight:600}
 .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
 .key{height:70px;border-radius:18px;border:none;background:#f1eefb;font-size:30px;font-weight:700;box-shadow:0 4px 0 var(--line)}
+.key.cancel{font-size:19px;color:var(--muted)}
 .key:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
 .shake{animation:wiggle .35s}
 
@@ -504,7 +505,7 @@ const APP = {
   mascot: "🦉",
   mascotName: "Professor Hoot",
   pinLength: 4,
-  version: "1.2.1",
+  version: "1.2.2",
 };
 const AVATARS = ["🦊","🐼","🦄","🐯","🐸","🐙","🦖","🐰","🐨","🦁","🐧","🐝","🐬","🦋","🐱","🐶"];
 const REWARDS = {
@@ -528,7 +529,7 @@ const GATE = {
   pinTriesBeforeLock: 3,   // wrong PINs in a row before a lockout
   lockBaseMs: 30000,       // first lockout; doubles each further miss
   lockMaxMs: 15 * 60000,
-  checkLockMs: 60000,      // after a wrong grown-up math answer; doubles each further miss
+  checkLockMs: 60000,      // after a wrong grown-up math answer (Forgot PIN only); never longer than this
 };
 const PRAISE = ["Great thinking!", "You got it!", "Brainy!", "Super sleuth!", "Hoot hoot, correct!", "Nailed it!", "Logic legend!"];
 const GENTLE = ["Not quite — good try!", "Ooh, a tricky one!", "Almost! Here's the secret:", "Good thinking, but not this time!"];
@@ -644,6 +645,8 @@ const Store = {
       d.pinSalt = uid(); d.pinHash = hashPin(d.pinSalt, raw.pin);
     }
     for (const k of ["pinFails", "pinLockUntil", "checkFails", "checkLockUntil"]) d[k] = num(raw[k]);
+    if (!d.pinHash) { d.pinFails = 0; d.pinLockUntil = 0; d.checkFails = 0; d.checkLockUntil = 0; } // no PIN yet: nothing to lock
+    d.checkLockUntil = Math.min(d.checkLockUntil, Date.now() + GATE.checkLockMs); // older builds could lock the math check for longer
     d.sound = typeof raw.sound === "boolean" ? raw.sound : true;
     return d;
   },
@@ -779,7 +782,7 @@ function pinPad({ title, msg = "", length = APP.pinLength, forgot = false, onSub
   const m = openModal(`<h3>${esc(title)}</h3>${msg ? `<p>${esc(msg)}</p>` : ""}
     <div class="dots">${"<i></i>".repeat(length)}</div><div class="err" data-m="err"></div>
     <div class="keypad">${[1,2,3,4,5,6,7,8,9].map(k => `<button class="key" data-k="${k}">${k}</button>`).join("")}
-      <button class="key" data-k="cancel" aria-label="Cancel">✕</button><button class="key" data-k="0">0</button>
+      <button class="key cancel" data-k="cancel" aria-label="Cancel">Cancel</button><button class="key" data-k="0">0</button>
       <button class="key" data-k="back" aria-label="Delete">⌫</button></div>
     ${forgot ? `<button class="linkbtn" data-k="forgot">Forgot PIN?</button>` : ""}`);
   m.classList.add("pinpad");
@@ -811,16 +814,16 @@ function grownUpCheck(title, onPass) {
   const st = state();
   if (st.checkLockUntil > Date.now()) { toast(`Please wait ${waitText(st.checkLockUntil)} and try again.`, 2600); return; }
   const a = randInt(24, 49), b = randInt(13, 29);
-  pinPad({ title, msg: `Grown-ups only: what is ${a} × ${b}?`, length: String(a * b).length, onSubmit(v, api) {
+  pinPad({ title, msg: `Grown-ups only: what is ${a} × ${b}? Type the answer, not a PIN.`, length: String(a * b).length, onSubmit(v, api) {
     api.close();
     if (Number(v) === a * b) { st.checkFails = 0; st.checkLockUntil = 0; Store.save(); onPass(); return; }
     st.checkFails += 1;
-    st.checkLockUntil = Date.now() + Math.min(GATE.lockMaxMs, GATE.checkLockMs * 2 ** (st.checkFails - 1));
+    st.checkLockUntil = Date.now() + GATE.checkLockMs; // one flat wait, never more than 60 s
     Store.save(); toast(`That's not right. Please wait ${waitText(st.checkLockUntil)} before trying again.`, 2600);
   }});
 }
 function createPin(onDone) {
-  pinPad({ title: "Grown-ups: make a PIN", msg: "Pick a 4-digit PIN to approve prizes and change settings. Keep it secret from the kids!",
+  pinPad({ title: "Grown-ups: make a PIN", msg: "Make a 4-digit PIN. You'll use it to approve prizes and open grown-up settings. Keep it secret from the kids!",
     onSubmit(first) {
       pinPad({ title: "Type it again", onSubmit(second, api) {
         if (second !== first) { api.error("Those didn't match — let's start over."); setTimeout(() => createPin(onDone), 900); return; }
@@ -831,18 +834,11 @@ function createPin(onDone) {
     }});
 }
 /** One-time parent setup: grown-up check first, then PIN. Never offered as a side effect of a kid-facing gate. */
-function startGrownUpSetup(onDone) { grownUpCheck("Grown-up setup 🔒", () => createPin(onDone)); }
+function startGrownUpSetup(onDone) { createPin(onDone); }
 
 function requireGrownUp(reason, onOk) {
   const st = state();
-  if (!hasPin()) {
-    const m = openModal(`<div class="bigicon">🔒</div><h3>Ask a grown-up</h3><p>A grown-up needs to set up a parent PIN first.</p>
-      <div class="acts"><button class="btn brand block" data-m="setup">I'm a grown-up: set it up</button>
-      <button class="btn ghost block" data-m="cancel">Not now</button></div>`);
-    m.querySelector('[data-m="setup"]').onclick = () => { closeModal(); startGrownUpSetup(() => toast("All set! Tap the button again to continue.", 2600)); };
-    m.querySelector('[data-m="cancel"]').onclick = closeModal;
-    return;
-  }
+  if (!hasPin()) { createPin(onOk); return; } // beta: no forced setup or math check; the first grown-up action makes the PIN once
   if (st.pinLockUntil > Date.now()) { toast(`Too many tries. Please wait ${waitText(st.pinLockUntil)}.`, 2600); return; }
   pinPad({ title: "Grown-up check 🔒", msg: reason, forgot: true, onSubmit(v, a) {
     if (checkPin(v)) { st.pinFails = 0; st.pinLockUntil = 0; Store.save(); a.close(); onOk(); return; }
@@ -901,15 +897,12 @@ function renderPicker() {
   const ps = state().profiles;
   $app.innerHTML = `<div class="hello" style="justify-content:center;margin-top:20px"><div class="mascot">${APP.mascot}</div></div>
     <h1 class="title">${esc(APP.name)}</h1>
-    <p class="subtitle">${!hasPin() && !ps.length ? `Hi! I'm ${APP.mascotName}. A grown-up needs to set things up first.` : ps.length ? "Who's playing today?" : `Hi! I'm ${APP.mascotName}. Let's make your player!`}</p>
-    ${!hasPin() ? `<div class="card" style="text-align:center"><h3>👋 Grown-ups: quick setup</h3>
-      <p class="muted" style="margin-top:0">Set a parent PIN so prizes and settings need your OK. Takes 30 seconds.</p>
-      <button class="btn brand" data-act="setup">Set up parent PIN</button></div>` : ""}
+    <p class="subtitle">${ps.length ? "Who's playing today?" : `Hi! I'm ${APP.mascotName}. Let's make your player!`}</p>
     <div class="players">
       ${ps.map(p => `<button class="playercard" data-act="choosePlayer" data-id="${p.id}">
         <span class="av">${p.avatar}</span><span class="nm">${esc(p.name)}</span>
         <span class="meta">🪙 ${p.tokens} · 🔥 ${liveStreak(p)}</span></button>`).join("")}
-      ${hasPin() || ps.length ? `<button class="playercard add" data-act="addPlayer"><span class="av">➕</span><span class="nm">Add player</span></button>` : ""}
+      <button class="playercard add" data-act="addPlayer"><span class="av">➕</span><span class="nm">Add player</span></button>
     </div>`;
 }
 
@@ -1237,7 +1230,7 @@ function onParentFieldChange(el) {
 const actions = {
   picker() { Speech.stop(); go("picker"); },
   addPlayer() { go("addPlayer"); },
-  setup() { if (hasPin()) return render(); startGrownUpSetup(() => go(state().profiles.length ? "picker" : "addPlayer")); },
+  setup() { render(); }, // the setup card was removed in 1.2.2; kept so a stale tap is harmless
   pickAvatar(el) { if (!view.form) return; view.form.avatar = el.dataset.v; render(); },
   pickPath(el) { if (!view.form) return; view.form.pathId = el.dataset.v; render(); },
   savePlayer() {
