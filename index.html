@@ -15,7 +15,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="app-version" content="1.4.0">
+<meta name="app-version" content="1.4.1">
 <style>
 /* Fredoka (SIL Open Font License, see OFL-Fredoka.txt), self-hosted so the app never waits on a third-party server */
 @font-face{font-family:"Fredoka";font-style:normal;font-weight:300 700;font-display:swap;src:url("fredoka-latin.woff2") format("woff2")}
@@ -307,7 +307,16 @@ h1,h2,h3{margin:0;font-weight:700}
 .iconbtn[disabled]{opacity:.4}
 .donebtn{min-width:120px;min-height:68px;font-size:30px;border-radius:18px;display:flex;align-items:center;gap:8px;justify-content:center}
 .donebtn .dw{font-size:22px}
-.iconbtn.big.gone{visibility:hidden} /* 1.4.0: nothing to undo -> no dead button */
+.iconbtn.big.gone{visibility:hidden}
+/* 1.4.1: NEW in the closet */
+.toast.newtoast{border:none;font-family:inherit;font-weight:700;cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.2);min-height:60px;animation:fade .2s,newpulse 1.4s ease-in-out .3s 3}
+@keyframes newpulse{50%{transform:translateX(-50%) scale(1.06)}}
+.top .iconbtn{position:relative}
+.newdot{position:absolute;top:-6px;right:-8px;background:#ff3d6e;color:#fff;border-radius:10px;font-size:11px;font-weight:800;padding:2px 5px;line-height:1.1;border:2px solid #fff;pointer-events:none}
+.ctab{position:relative}
+.ctab .newdot{top:-7px;right:-7px;width:14px;height:14px;padding:0}
+.newtag{position:absolute;top:3px;right:4px;background:#ff3d6e;color:#fff;border-radius:10px;font-size:13px;font-weight:800;padding:1px 6px;box-shadow:0 2px 0 #c42452}
+.ctile.focus{animation:hintp 1.2s ease-in-out 4} /* 1.4.0: nothing to undo -> no dead button */
 .bconfirm .bcav{display:flex;justify-content:center}
 .bconfirm .bcav .elzee-avatar{height:min(34vh,260px);width:auto}
 .bconfirm .bcprice{display:inline-flex;align-items:center;gap:8px;font-size:34px;font-weight:700;background:#fff7da;border-radius:16px;padding:4px 16px;margin:6px 0}
@@ -1893,7 +1902,7 @@ const APP = {
   mascot: "🦉",
   mascotName: "Professor Hoot",
   pinLength: 4,
-  version: "1.4.0",
+  version: "1.4.1",
 };
 const AVATARS = ["🦊","🐼","🦄","🐯","🐸","🐙","🦖","🐰","🐨","🦁","🐧","🐝","🐬","🦋","🐱","🐶"];
 const REWARDS = {
@@ -2137,7 +2146,7 @@ function closetLook(look, owned) {
   return AV.normalizeLook(L, { owned: Array.isArray(owned) ? owned : [] });
 }
 function closetStarterLook(emoji) { return AV ? closetLook(AV.starterLook(emoji), []) : null; }
-function closetDefaults(emoji) { return { look: closetStarterLook(emoji), closet: { owned: [], spent: 0, seen: [], firstVisit: true, climbSeen: [] } }; }
+function closetDefaults(emoji) { return { look: closetStarterLook(emoji), closet: { owned: [], spent: 0, seen: [], firstVisit: true, climbSeen: [], fresh: [] } }; }
 function readClosetBackup() { try { const b = JSON.parse(localStorage.getItem(CLOSET_BACKUP_KEY)); return b && typeof b === "object" && !Array.isArray(b) ? b : {}; } catch (e) { return {}; } }
 // Used by Store.sanitize(): rebuild look/closet field by field; restore from the backup key if an old build stripped them.
 function sanitizeClosetFields(p, backup) {
@@ -2146,7 +2155,8 @@ function sanitizeClosetFields(p, backup) {
   const c = src.closet && typeof src.closet === "object" && !Array.isArray(src.closet) ? src.closet : {};
   const list = v => [...new Set((Array.isArray(v) ? v : []).filter(closetKnownLocked))].slice(0, 500);
   const closet = { owned: list(c.owned), spent: typeof c.spent === "number" && isFinite(c.spent) ? Math.max(0, Math.round(c.spent)) : 0,
-    seen: list(c.seen), firstVisit: typeof c.firstVisit === "boolean" ? c.firstVisit : true, climbSeen: list(c.climbSeen) };
+    seen: list(c.seen), firstVisit: typeof c.firstVisit === "boolean" ? c.firstVisit : true, climbSeen: list(c.climbSeen), fresh: [] };
+  closet.fresh = list(c.fresh).filter(k => closet.owned.includes(k)); // 1.4.1: owned but not yet seen in the closet (NEW badges)
   const look = hasLookFields(src.look) ? closetLook(src.look, closet.owned) : closetStarterLook(p.avatar);
   return { look, closet };
 }
@@ -2160,7 +2170,9 @@ function spendTokens(pl, n, reason) {
 // Reward unlocks (R1a ledger, Climb floors): idempotent.
 function grantItem(pl, id, opts = {}) {
   if (!pl || !pl.closet || !closetKnownLocked(id) || pl.closet.owned.includes(id)) return false;
-  pl.closet.owned.push(id); if (opts.save !== false) Store.save(); return true;
+  pl.closet.owned.push(id);
+  if (opts.fresh !== false) { if (!Array.isArray(pl.closet.fresh)) pl.closet.fresh = []; if (!pl.closet.fresh.includes(id)) pl.closet.fresh.push(id); }
+  if (opts.save !== false) Store.save(); return true;
 }
 // 1.4.0: Climb the Quiz floor rewards ("New in your closet!") become real closet items.
 // Climb keeps its own list (logicquest.minigame.climb.v1 kids[id].unlocks, read only here). closet.climbSeen is the
@@ -2182,6 +2194,11 @@ function syncClimbRewards(pl) {
   if (fresh.length || nextSeen.length !== seen.length) { pl.closet.climbSeen = nextSeen; Store.save(); }
   return got;
 }
+// 1.4.1: one emoji per item, straight from ElzeeAvatar item data (toast, NEW bubble and closet all agree)
+const itemIcon = id => (AV && AV.item(id) && AV.item(id).icon) || "🎁";
+const closetFresh = pl => (pl && pl.closet && Array.isArray(pl.closet.fresh) ? pl.closet.fresh : []);
+const slotOfItem = id => { const it = AV && AV.item(id); return it ? it.slot : null; };
+const tabOfSlot = slot => (slot && slot.startsWith("acc.") ? "acc" : slot);
 let avSeq = 0;
 function avatarHTML(pl, opts = {}) {
   try {
@@ -2531,12 +2548,15 @@ function render() {
   if (NEEDS_PLAYER.includes(view.name) && !player()) view = { name: "picker" };
   if (view.name === "lesson" && !lesson) view = { name: player() ? "home" : "picker" };
   if (view.name === "results" && !view.result) view = { name: "home" };
-  if (view.name !== "closet" && closetSess) { closetSess = null; closetUndoStore.clear(); } // undo/refund only within one visit
+  if (view.name !== "closet" && closetSess) { closetCommitSeen(player()); closetSess = null; closetUndoStore.clear(); } // undo/refund only within one visit
   if (view.name === "home") {
     const paid = claimMiniGameTokens(player());
     const got = syncClimbRewards(player());
     const msg = paid.map(p => `+${p.n} 🪙 from ${p.game.name}!`).concat(got.length ? [`👚 New in your closet! ${got.map(id => (AV.item(id) || {}).icon || "🎁").join(" ")}`] : []);
-    if (msg.length) setTimeout(() => { toast(msg.join(" "), got.length ? 3200 : 1800); Sound.good(); if (got.length) closetSay("New in your closet!"); }, 250);
+    if (msg.length) setTimeout(() => {
+      if (got.length) closetNewToast(msg.join(" ") + " 👆", got[got.length - 1]); else toast(msg.join(" "));
+      Sound.good(); if (got.length) closetSay("New in your closet! Tap to see it.");
+    }, 250);
   }
   $app.classList.toggle("wide", view.name === "lesson");
   ({ picker: renderPicker, addPlayer: renderAddPlayer, home: renderHome, lesson: renderQuestion,
@@ -2605,7 +2625,7 @@ function topBar(pl, { back = false } = {}) {
     <div class="pill tok" title="Tokens">🪙 <b data-tokens>${pl.tokens}</b></div>
     <div class="spacer"></div>
     <button class="iconbtn" data-act="shop" aria-label="Prize shop">🎁</button>
-    ${AV ? `<button class="iconbtn" data-act="openCloset" aria-label="My closet">👚</button>` : ""}
+    ${AV ? `<button class="iconbtn" data-act="openCloset" aria-label="${closetFresh(pl).length ? "My closet. Something new!" : "My closet"}">👚${closetFresh(pl).length ? `<span class="newdot" aria-hidden="true">NEW</span>` : ""}</button>` : ""}
     <button class="iconbtn" data-act="parent" aria-label="Grown-ups">⚙️</button>
   </div>`;
 }
@@ -3119,9 +3139,10 @@ function applyChoice(look, tab, id, color) {
   if (tab === "top" || tab === "bottom") { L.dress = null; L.dressC = null; }
   return L;
 }
-function priceTag(st) {
+function priceTag(st, pl) {
   if (st.type === "tokens") return `<span class="ptag" aria-hidden="true">🪙 ${st.cost}</span><span class="plock" aria-hidden="true">🔒</span>`;
-  if (st.type === "reward") return `<span class="ptag reward" aria-hidden="true">🎗️ 🧗 ${st.count || ""}</span>`;
+  if (st.type === "reward") return isYoungerProfile(pl) ? `<span class="ptag reward" aria-hidden="true">🔒🧗</span>` // younger: no floor numbers
+    : `<span class="ptag reward" aria-hidden="true">🎗️ 🧗 ${st.count || ""}</span>`;
   return "";
 }
 // What read-aloud says about an item the kid does NOT own (owned items never get price talk).
@@ -3129,12 +3150,13 @@ function priceTag(st) {
 function unlockSay(st, pl) {
   const young = isYoungerProfile(pl);
   if (st.type === "tokens") {
-    if (young) return pl.tokens >= st.cost ? "You have enough tokens! Tap the bag to buy it." : "Keep playing to earn more!";
-    return pl.tokens >= st.cost ? `It costs ${st.cost} tokens.` : `It costs ${st.cost} tokens. You need ${st.cost - pl.tokens} more tokens.`;
+    if (young) return pl.tokens >= st.cost ? "You have enough tokens! Tap the bag to buy it." : closetNear(pl, st) ? "Almost there!" : "Keep playing to earn more!";
+    return pl.tokens >= st.cost ? `It costs ${st.cost} tokens.` : `It costs ${st.cost} tokens. ${closetNear(pl, st) ? "Almost there! " : ""}You need ${st.cost - pl.tokens} more tokens.`;
   }
   if (st.type === "reward") return st.event === "climb.floor" ? (young ? "Climb the tower to win it!" : `Win it on floor ${st.count} of the tower.`) : "It's a special prize.";
   return "";
 }
+const closetNear = (pl, st) => pl.tokens < st.cost && pl.tokens >= 0.8 * st.cost; // 1.4.1: 80%+ of the price = "Almost there!"
 const closetAbout = (pl, key) => (closetOwns(pl.closet.owned, key) ? "" : unlockSay(closetStatus(key), pl));
 function choiceName(tab, opt, color) {
   if (!opt.id) return opt.name;
@@ -3146,6 +3168,8 @@ function renderCloset() {
   const pl = player();
   if (!AV) { go("home", {}, { replace: true }); return; }
   closetSession(pl); syncClimbRewards(pl);
+  if (!closetSess.shown) closetSess.shown = new Set();
+  const fresh = closetFresh(pl), freshTabs = new Set(fresh.map(id => slotOfItem(id)).filter(Boolean).flatMap(sl => [sl, tabOfSlot(sl)]));
   const tab = view.tab || "top", sub = view.sub || "acc.head";
   const slot = tab === "acc" ? sub : tab;
   const pv = view.preview; // {tab, key, id, color}
@@ -3155,12 +3179,13 @@ function renderCloset() {
   const tiles = opts.map((o, i) => {
     const st = closetStatus(o.key), owned = closetOwns(pl.closet.owned, o.key);
     const worn = lookValue(pl.look, slot) === o.id, prev = pv && pv.tab === slot && pv.key === o.key;
+    if (fresh.includes(o.key)) closetSess.shown.add(o.key); // seen once the kid moves on (tab change, tap, leaving)
     const tl = applyChoice(pl.look, slot, o.id, worn ? lookColor(pl.look, slot) : null);
     const pic = o.id === null ? `<span class="hanger" aria-hidden="true">🪝</span>` :
       AV.render(tl, { crop: head ? "head" : "full", size: head ? 80 : 86, idPrefix: "tl" + i });
     const name = choiceName(slot, o, lookColor(tl, slot));
-    return `<button class="ctile ${worn ? "worn" : ""} ${prev ? "prev" : ""} ${owned ? "" : "locked"}" data-act="closetTry" data-k="${esc(o.key)}"
-      aria-pressed="${worn}" aria-label="${esc(name + (owned ? "" : ". " + unlockSay(st, pl)))}">${pic}${worn ? `<span class="wornck" aria-hidden="true">✓</span>` : ""}${owned ? "" : priceTag(st)}</button>`;
+    return `<button class="ctile ${worn ? "worn" : ""} ${prev ? "prev" : ""} ${owned ? "" : "locked"} ${view.focus === o.key ? "focus" : ""}" data-act="closetTry" data-k="${esc(o.key)}"
+      aria-pressed="${worn}" aria-label="${esc((fresh.includes(o.key) ? "New! " : "") + name + (owned ? "" : ". " + unlockSay(st, pl)))}">${pic}${worn ? `<span class="wornck" aria-hidden="true">✓</span>` : ""}${owned ? "" : priceTag(st, pl)}${fresh.includes(o.key) ? `<span class="newtag" aria-hidden="true">NEW</span>` : ""}</button>`;
   }).join("");
   // color swatches for the item being previewed or worn in this tab
   const swId = pv && pv.tab === slot ? pv.id : (["skin", "eyes", "hairColor", "hair"].includes(slot) ? null : lookValue(pl.look, slot));
@@ -3176,24 +3201,27 @@ function renderCloset() {
     const st = closetStatus(pv.key);
     if (st.type === "tokens") {
       if (pl.tokens >= st.cost) buy = `<button class="btn buybtn" data-act="closetBuy" aria-label="Buy it for ${st.cost} tokens"><span class="bag" aria-hidden="true">🛍️</span><span class="bw" aria-hidden="true">Buy</span><span class="bp" aria-hidden="true">🪙 ${st.cost}</span></button>`;
-      else { const need = st.cost - pl.tokens, fill = Math.round(100 * pl.tokens / st.cost);
+      else { const need = st.cost - pl.tokens, fill = Math.round(100 * pl.tokens / st.cost), near = closetNear(pl, st);
         // "need more", not a price: a lock, a part-full token bar and "Need N more" (younger: no number at all, just 🎮 ➕🪙)
-        buy = `<div class="needbox" role="img" aria-label="${esc(isYoungerProfile(pl) ? "Not enough tokens yet. Keep playing to earn more!" : `Not enough tokens yet. You need ${need} more tokens.`)}">
+        buy = `<div class="needbox ${near ? "near" : ""}" role="img" aria-label="${esc(isYoungerProfile(pl) ? (near ? "Almost there!" : "Not enough tokens yet. Keep playing to earn more!") : `${near ? "Almost there! " : "Not enough tokens yet. "}You need ${need} more tokens.`)}">
           <span aria-hidden="true">🔒</span><span class="needbar" aria-hidden="true"><i style="width:${fill}%"></i></span>
-          ${isYoungerProfile(pl) ? `<span class="more" aria-hidden="true">🎮 ➕🪙</span>` : `<span class="needtxt" aria-hidden="true">Need <b>${need}</b> more 🪙</span>`}</div>`; }
-    } else if (st.type === "reward") buy = `<div class="needbox" role="img" aria-label="${esc(unlockSay(st, pl))}">🎗️ <span class="mini">🧗</span><b>${st.count || ""}</b></div>`;
+          ${isYoungerProfile(pl) ? (near ? `<span class="needtxt" aria-hidden="true">Almost there! ✨</span>` : `<span class="more" aria-hidden="true">🎮 ➕🪙</span>`)
+            : `<span class="needtxt" aria-hidden="true">${near ? "Almost there! " : ""}Need <b>${need}</b> more 🪙</span>`}</div>`; }
+    } else if (st.type === "reward") buy = isYoungerProfile(pl) ? `<div class="needbox" role="img" aria-label="${esc(unlockSay(st, pl))}">🔒 <span class="more">🧗</span></div>`
+      : `<div class="needbox" role="img" aria-label="${esc(unlockSay(st, pl))}">🎗️ <span class="mini">🧗</span><b>${st.count || ""}</b></div>`;
   }
   const first = pl.closet.firstVisit;
   $app.innerHTML = topBar(pl, { back: true }) + `<div class="closet">
     <div class="cstage ${pv ? "previewing" : ""}" id="cstage">
-      ${first ? `<div class="hello cfirst"><div class="mascot">${APP.mascot}</div><div class="bubble">Make it look like you! 👆</div></div>` : ""}
+      ${first ? `<div class="hello cfirst"><div class="mascot">${APP.mascot}</div><div class="bubble">Make it look like you! 👆</div></div>`
+        : view.focus && !pv ? `<div class="hello cfirst newbubble"><div class="mascot">${APP.mascot}</div><div class="bubble">New! ${itemIcon(view.focus)} 👇</div></div>` : ""}
       <div class="cav" id="cav">${AV.render(shown, { crop: "full", size: 300, mood: pv ? "yay" : "happy", idPrefix: "stage", label: pl.name, describe: true })}</div>
       ${pv ? `<div class="sparkles" aria-hidden="true">✨</div>` : ""}
       <div class="buybar">${buy}</div>
     </div>
     <div class="cpanel">
-      <div class="ctabs" role="tablist">${CLOSET_TABS.map(k => `<button class="ctab ${k === tab ? "on" : ""} ${first && k === tab ? "hint" : ""}" role="tab" aria-selected="${k === tab}" data-act="closetTab" data-v="${k}" aria-label="${esc(closetLabel(k).say)}">${closetLabel(k).icon}</button>`).join("")}</div>
-      ${tab === "acc" ? `<div class="ctabs sub">${ACC_TABS.map(k => `<button class="ctab ${k === sub ? "on" : ""}" data-act="closetSub" data-v="${k}" aria-label="${esc(closetLabel(k).say)}">${closetLabel(k).icon}</button>`).join("")}</div>` : ""}
+      <div class="ctabs" role="tablist">${CLOSET_TABS.map(k => `<button class="ctab ${k === tab ? "on" : ""} ${first && k === tab ? "hint" : ""}" role="tab" aria-selected="${k === tab}" data-act="closetTab" data-v="${k}" aria-label="${esc((freshTabs.has(k) ? "New! " : "") + closetLabel(k).say)}">${closetLabel(k).icon}${freshTabs.has(k) ? `<span class="newdot" aria-hidden="true"></span>` : ""}</button>`).join("")}</div>
+      ${tab === "acc" ? `<div class="ctabs sub">${ACC_TABS.map(k => `<button class="ctab ${k === sub ? "on" : ""}" data-act="closetSub" data-v="${k}" aria-label="${esc((freshTabs.has(k) ? "New! " : "") + closetLabel(k).say)}">${closetLabel(k).icon}${freshTabs.has(k) ? `<span class="newdot" aria-hidden="true"></span>` : ""}</button>`).join("")}</div>` : ""}
       <div class="cgrid">${tiles}</div>
       ${swatches}
     </div>
@@ -3233,6 +3261,17 @@ function coinFlight(n) {
   }
 }
 Object.assign(actions, {
+  // 1.4.1: the "👚 New in your closet!" toast opens the closet right on the new item
+  openClosetNew(el) {
+    const pl = player(), id = el && el.dataset.k; document.querySelectorAll(".toast").forEach(t => t.remove());
+    if (!pl || !AV) return actions.openCloset();
+    const slot = slotOfItem(id); if (!slot) return actions.openCloset();
+    if (pl.closet.firstVisit) { pl.closet.firstVisit = false; Store.save(); }
+    closetSession(pl); Sound.tap();
+    go("closet", { from: view.name === "closet" ? "home" : (view.name || "home"), tab: tabOfSlot(slot), sub: slot.startsWith("acc.") ? slot : undefined, focus: id });
+    const t = document.querySelector(`.ctile[data-k="${CSS.escape(id)}"]`); if (t) t.scrollIntoView({ block: "center" });
+    closetSay("New! " + (AV.describeItem(id) || "") + "! Tap it to wear it.");
+  },
   openCloset() {
     const pl = player(); if (!pl) return go("picker");
     if (!AV) { toast("The closet isn't ready yet."); return; }
@@ -3240,12 +3279,13 @@ Object.assign(actions, {
     go("closet", { from: view.name === "closet" ? "home" : (view.name || "home"), tab: pl.closet.firstVisit ? "skin" : "top" });
     if (pl.closet.firstVisit) closetSay("Make it look like you! Tap a picture to try it on.");
   },
-  closetTab(el) { view.tab = el.dataset.v; view.preview = null; Sound.tap(); renderCloset(); closetSay(closetLabel(el.dataset.v === "acc" ? (view.sub || "acc.head") : el.dataset.v).say); },
-  closetSub(el) { view.sub = el.dataset.v; view.preview = null; Sound.tap(); renderCloset(); closetSay(closetLabel(el.dataset.v).say); },
+  closetTab(el) { closetCommitSeen(player()); view.focus = null; view.tab = el.dataset.v; view.preview = null; Sound.tap(); renderCloset(); closetSay(closetLabel(el.dataset.v === "acc" ? (view.sub || "acc.head") : el.dataset.v).say); },
+  closetSub(el) { closetCommitSeen(player()); view.focus = null; view.sub = el.dataset.v; view.preview = null; Sound.tap(); renderCloset(); closetSay(closetLabel(el.dataset.v).say); },
   closetTry(el) {
     const pl = player(), tab = view.tab === "acc" ? (view.sub || "acc.head") : view.tab;
     const o = closetOptions(tab).find(x => x.key === el.dataset.k); if (!o) return;
     if (pl.closet.firstVisit) { pl.closet.firstVisit = false; Store.save(); }
+    view.focus = null; if (closetFresh(pl).includes(o.key)) { pl.closet.fresh = closetFresh(pl).filter(k => k !== o.key); Store.save(); }
     if (closetOwns(pl.closet.owned, o.key)) {
       view.preview = null;
       const nl = applyChoice(pl.look, tab, o.id);
@@ -3301,7 +3341,7 @@ Object.assign(actions, {
   },
   closetDone() {
     const pl = player(), from = view.from && view.from !== "closet" && view.from !== "lesson" ? view.from : "home";
-    closetSess = null; closetUndoStore.clear(); view.preview = null;
+    closetCommitSeen(pl); closetSess = null; closetUndoStore.clear(); view.preview = null; view.focus = null;
     if (pl.closet.firstVisit) { pl.closet.firstVisit = false; Store.save(); }
     const c = pick1(COMPLIMENTS);
     const a = document.getElementById("cav");
@@ -3312,6 +3352,17 @@ Object.assign(actions, {
   },
 });
 const pick1 = a => a[Math.floor(Math.random() * a.length)];
+function closetCommitSeen(pl) { // NEW tiles the kid has looked at stop being new
+  if (!pl || !pl.closet || !closetSess || !closetSess.shown || !closetSess.shown.size) return;
+  const before = closetFresh(pl).length; pl.closet.fresh = closetFresh(pl).filter(k => !closetSess.shown.has(k)); closetSess.shown.clear();
+  if (pl.closet.fresh.length !== before) Store.save();
+}
+function closetNewToast(text, id) {
+  document.querySelectorAll(".toast").forEach(t => t.remove());
+  const t = document.createElement("button"); t.className = "toast newtoast"; t.dataset.act = "openClosetNew"; t.dataset.k = id;
+  t.setAttribute("aria-label", "New in your closet! Tap to see it."); t.textContent = text;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 6000);
+}
 function closetDoBuy(pl, pv, st) {
   if (view.name !== "closet" || pl.closet.owned.includes(pv.key)) return false;
   const before = cloneLook(pl.look);
