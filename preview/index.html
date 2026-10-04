@@ -15,7 +15,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="app-version" content="1.4.4-preview">
+<meta name="app-version" content="1.4.5-preview">
 <style>
 /* Fredoka (SIL Open Font License, see OFL-Fredoka.txt), self-hosted so the app never waits on a third-party server */
 @font-face{font-family:"Fredoka";font-style:normal;font-weight:300 700;font-display:swap;src:url("fredoka-latin.woff2") format("woff2")}
@@ -207,8 +207,8 @@ h1,h2,h3{margin:0;font-weight:700}
 .plrow{border:2px solid var(--line);border-radius:18px;padding:12px;margin:12px 0}
 .plrow .line{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:6px 0}
 .plrow select,.prow select{font-size:20px;padding:10px;border-radius:14px;border:3px solid var(--line);background:#fff}
-.toggle{display:flex;align-items:center;gap:10px;font-size:19px}
-.toggle input{width:28px;height:28px}
+.toggle{display:flex;align-items:center;gap:10px;font-size:19px;min-height:48px;cursor:pointer}
+.toggle input{width:44px;height:44px;margin:0;flex:none} /* 1.4.5: ≥44px tap target */
 
 /* ---------- modal / pin pad ---------- */
 .overlay{position:fixed;inset:0;background:rgba(45,42,74,.55);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;animation:fade .15s}
@@ -1991,7 +1991,7 @@ const APP = {
   mascot: "🦉",
   mascotName: "Professor Hoot",
   pinLength: 4,
-  version: "1.4.4-preview",
+  version: "1.4.5-preview",
 };
 const AVATARS = ["🦊","🐼","🦄","🐯","🐸","🐙","🦖","🐰","🐨","🦁","🐧","🐝","🐬","🦋","🐱","🐶"];
 const REWARDS = {
@@ -2033,6 +2033,7 @@ const GATE = {
 const PRICE_X = { big: 3, little: 1, choices: [1, 2, 3, 4] };
 const bigRules = pl => !!pl && !isYoungerProfile(pl);
 const priceX = pl => (pl && PRICE_X.choices.includes(pl.priceX) ? pl.priceX : bigRules(pl) ? PRICE_X.big : PRICE_X.little);
+const fmtN = n => Number(n || 0).toLocaleString("en-US"); // 1.4.5: 1500 -> "1,500"
 const prizeCost = (prize, pl) => Math.max(1, Math.round((prize ? prize.cost : 0) * priceX(pl)));
 const lessonStars = (pl, mistakes) => bigRules(pl) ? Math.max(0, 3 - mistakes) : mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1;
 const SHOW_ME_MAX = 3; // reveals per lesson; running out disables the button and never blocks answering
@@ -2106,10 +2107,15 @@ const Store = {
       sound: true,
     };
   },
+  // 1.4.5 (Ted): never let a stale tab or page roll back newer data. We remember what storage held when we last
+  // synced (diskStr + base). save() re-reads storage first; if another tab or a game return wrote since, our changes
+  // are merged onto theirs (3-way: token counters add up, the prize log is a union, untouched fields keep theirs).
+  diskStr: null, base: null,
   load() {
-    let raw = null;
-    try { raw = JSON.parse(localStorage.getItem(APP.storageKey)); } catch (e) { raw = null; }
+    let raw = null, str = null;
+    try { str = localStorage.getItem(APP.storageKey); raw = JSON.parse(str); } catch (e) { raw = null; }
     this.data = this.sanitize(raw);
+    this.diskStr = str; this.base = JSON.parse(JSON.stringify(this.data));
     const catalogDirty = !!(this.data && this.data._saveSoon);
     if (this.data) delete this.data._saveSoon;
     const closetMigrated = !!(raw && Array.isArray(raw.profiles) && raw.profiles.some(p => p && typeof p === "object" && !hasLookFields(p.look)));
@@ -2187,13 +2193,80 @@ const Store = {
     d.sound = typeof raw.sound === "boolean" ? raw.sound : true;
     return d;
   },
+  /* Pull in newer data written elsewhere (keeps our unsaved edits and every object identity). Returns true if anything changed. */
+  sync() {
+    let str = null; try { str = localStorage.getItem(APP.storageKey); } catch (e) { return false; }
+    if (str === this.diskStr || str === null) return false;
+    let theirs = null; try { theirs = this.sanitize(JSON.parse(str)); } catch (e) { return false; }
+    const ours = JSON.parse(JSON.stringify(this.data)), merged = merge3(this.base || ours, ours, theirs);
+    adoptInto(this.data, merged);
+    this.diskStr = str; this.base = JSON.parse(JSON.stringify(theirs));
+    return stableStr(ours) !== stableStr(this.data);
+  },
   save() {
-    try { localStorage.setItem(APP.storageKey, JSON.stringify(this.data)); } catch (e) { /* storage full / private mode */ }
+    this.sync(); // 1.4.5: re-read before every write
+    try { const out = JSON.stringify(this.data); localStorage.setItem(APP.storageKey, out); this.diskStr = out; this.base = JSON.parse(out); } catch (e) { /* storage full / private mode */ }
     // Downgrade protection: an old cached build drops look/closet; load() restores them from here.
     try { const b = {}; for (const p of this.data.profiles) if (p.look) b[p.id] = { look: p.look, closet: p.closet }; localStorage.setItem(CLOSET_BACKUP_KEY, JSON.stringify(b)); } catch (e) {}
   },
 };
 const state = () => Store.data;
+/* ---------- 1.4.5: stale-tab merge helpers ---------- */
+const stableStr = v => JSON.stringify(v, (k, x) => x && typeof x === "object" && !Array.isArray(x) ? Object.keys(x).sort().reduce((o, key) => (o[key] = x[key], o), {}) : x);
+const MERGE_COUNTERS = new Set(["tokens", "totalEarned", "lessonsDone", "spent"]); // our change is a delta on top of theirs
+const isPlain = v => v && typeof v === "object" && !Array.isArray(v);
+function merge3(base, ours, theirs, key) {
+  const so = stableStr(ours), sb = stableStr(base), st = stableStr(theirs);
+  if (so === sb || so === st) return theirs;          // we changed nothing (or the same thing)
+  if (st === sb) return ours;                         // they changed nothing
+  if (typeof ours === "number" && typeof theirs === "number" && typeof base === "number" && MERGE_COUNTERS.has(key)) return Math.max(0, theirs + (ours - base));
+  if (Array.isArray(ours) && Array.isArray(theirs)) {
+    const b = Array.isArray(base) ? base : [], all = [...ours, ...theirs, ...b];
+    if (all.length && all.every(x => isPlain(x) && typeof x.id === "string")) { // profiles / prizes: merge by id
+      const byId = a => new Map(a.map(x => [x.id, x])), O = byId(ours), T = byId(theirs), B = byId(b), out = [];
+      for (const x of theirs) { if (B.has(x.id) && !O.has(x.id) && stableStr(B.get(x.id)) === stableStr(x)) continue; // we deleted it
+        out.push(O.has(x.id) ? merge3(B.get(x.id) || x, O.get(x.id), x) : x); }
+      for (const x of ours) if (!T.has(x.id) && !B.has(x.id)) out.push(x); // we added it
+      return out;
+    }
+    if (all.length && all.every(x => isPlain(x) && typeof x.ts === "number")) { // prize log: union, newest first
+      const seen = new Set(), out = [];
+      for (const x of [...ours, ...theirs].sort((p, q) => q.ts - p.ts)) { const k = stableStr(x); if (!seen.has(k)) { seen.add(k); out.push(x); } }
+      return out.slice(0, 500);
+    }
+    if (all.every(x => typeof x !== "object")) { // owned lists etc.: theirs + our additions - our removals
+      const bs = new Set(b), os = new Set(ours), out = theirs.filter(x => !(bs.has(x) && !os.has(x)));
+      for (const x of ours) if (!bs.has(x) && !out.includes(x)) out.push(x);
+      return out;
+    }
+    return ours;
+  }
+  if (isPlain(ours) && isPlain(theirs)) {
+    const b = isPlain(base) ? base : {}, out = {};
+    for (const k of new Set([...Object.keys(theirs), ...Object.keys(ours)])) {
+      if (!(k in ours) && k in b) continue;                       // we removed it
+      if (!(k in theirs)) { if (!(k in b)) out[k] = ours[k]; continue; } // they removed it (keep only our new keys)
+      out[k] = k in ours ? merge3(b[k], ours[k], theirs[k], k) : theirs[k];
+    }
+    return out;
+  }
+  return ours;
+}
+/* Copy merged values into the live state without replacing profile objects, so code holding `pl` stays valid. */
+function adoptInto(target, src) {
+  for (const k of Object.keys(target)) if (!(k in src)) delete target[k];
+  for (const [k, v] of Object.entries(src)) {
+    if (k === "profiles" && Array.isArray(target.profiles)) {
+      const old = new Map(target.profiles.map(p => [p.id, p]));
+      target.profiles = v.map(p => { const o = old.get(p.id); if (!o) return p; for (const kk of Object.keys(o)) if (!(kk in p)) delete o[kk]; Object.assign(o, p); return o; });
+    } else target[k] = v;
+  }
+}
+function syncFromStorage() { // another tab / a game return wrote newer data: adopt it and redraw a calm screen
+  if (!Store.data || !Store.sync()) return;
+  if (!state().profiles.some(p => p.id === state().activeId) && view.name !== "picker") { go("picker", {}, { replace: true }); return; }
+  if (["home", "picker", "shop", "parent"].includes(view.name) && !document.getElementById("overlay")) render();
+}
 const player = () => state().profiles.find(p => p.id === state().activeId) || null;
 const getPath = id => PATHS.find(p => p.id === id) || PATHS[0];
 
@@ -2262,6 +2335,7 @@ function sanitizeClosetFields(p, backup) {
 // One wallet. Checks, subtracts, records closet spend, one save. Never changes totalEarned.
 function spendTokens(pl, n, reason) {
   n = Math.round(Number(n));
+  Store.sync(); // 1.4.5: check against the newest balance, not a stale tab's
   if (!pl || !(n > 0) || pl.tokens < n) return false;
   pl.tokens -= n; pl.closet.spent += n; Store.save();
   return true;
@@ -2350,6 +2424,10 @@ const MINIGAMES = [
   { id: "peek-a-rule", name: "Peek-a-Rule", emoji: "📦", blurb: "Peek in the box: must be, can't be, or can't tell?",
     href: "games/peek-a-rule.html", key: "logicquest.minigame.peek-a-rule.v1",
     interlude: true, role: "interlude", roundLabel: "1 parade (3–4 buddies)", minutes: 3, enabled: true },
+  // Balloon or Sandbag? (1.4.5, Bob): strengthen/weaken reasoning. 🧠 thinking group; reads the kid's 🔈 voice (profiles[i].voice).
+  { id: "balloon-or-sandbag", name: "Balloon or Sandbag?", emoji: "🎈", blurb: "Does the clue lift the claim or sink it?",
+    href: "games/balloon-or-sandbag.html", key: "logicquest.minigame.balloon-or-sandbag.v1",
+    interlude: true, role: "interlude", roundLabel: "1 round", minutes: 3, enabled: true },
 ];
 // 1.4.3: the home splits the games into two icon tabs a non-reader can tell apart: 🧠 thinking games and 🔤 word games.
 const GAME_GROUPS = [{ id: "think", emoji: "🧠", name: "Thinking games" }, { id: "words", emoji: "🔤", name: "Word games" }];
@@ -3061,20 +3139,20 @@ function renderShop() {
     ${st.prizes.length ? `<div class="shopgrid">${st.prizes.map(p => {
       const cost = prizeCost(p, pl), can = pl.tokens >= cost; // 1.4.4: each kid sees their own price
       return `<div class="prize"><div class="pe">${esc(p.emoji || "🎁")}</div><div class="pn">${esc(p.name)}</div>
-        <div class="pc" data-cost="${cost}">🪙 ${cost}</div>
+        <div class="pc" data-cost="${cost}">🪙 ${fmtN(cost)}</div>
         ${can ? `<button class="btn block" data-act="redeem" data-id="${p.id}">Get it!</button>`
-              : `<button class="btn block" disabled>Need ${cost - pl.tokens} more</button>`}</div>`;
+              : `<button class="btn block" disabled>Need ${fmtN(cost - pl.tokens)} more</button>`}</div>`;
     }).join("")}</div>` : `<div class="card"><p>No prizes yet! Ask a grown-up to add some in ⚙️.</p></div>`}
     <div class="card"><h3>My prizes</h3>${mine.length ? `<ul class="list">${mine.map(l =>
-      `<li><span>${esc(l.emoji)} ${esc(l.name)}</span><span class="muted">${fmtDate(l.ts)} · 🪙 ${l.cost}</span></li>`).join("")}</ul>`
+      `<li><span>${esc(l.emoji)} ${esc(l.name)}</span><span class="muted">${fmtDate(l.ts)} · 🪙 ${fmtN(l.cost)}</span></li>`).join("")}</ul>`
       : `<p class="muted">Nothing yet — keep solving puzzles!</p>`}</div>`;
 }
 function redeem(id) {
   const pl = player(), prize = state().prizes.find(p => p.id === id);
   const cost = prizeCost(prize, pl);
   if (!prize || pl.tokens < cost) return;
-  requireGrownUp(`${pl.name} wants “${prize.name}” for ${cost} tokens. Grown-up, enter your PIN to say yes.`, () => {
-    const c = prizeCost(prize, pl);
+  requireGrownUp(`${pl.name} wants “${prize.name}” for ${fmtN(cost)} tokens. Grown-up, enter your PIN to say yes.`, () => {
+    Store.sync(); const c = prizeCost(prize, pl); // 1.4.5: fresh balance and price
     if (player() !== pl || pl.tokens < c) { toast("Not enough tokens for that one yet!"); render(); return; }
     pl.tokens -= c;
     state().log.unshift({ ts: Date.now(), profileId: pl.id, who: pl.name, avatar: pl.avatar, emoji: prize.emoji, name: prize.name, cost: c });
@@ -3101,7 +3179,7 @@ function renderParent() {
         <div class="line"><b>🪙 ${p.tokens}</b>
           <span class="muted">· 🔥 ${liveStreak(p)} · ${done(p)}/${totalLessons} lessons · ${p.totalEarned} earned all-time · 👚 ${p.closet ? p.closet.spent : 0} closet spent</span></div>
         <div class="line pxrow"><span class="muted">🎁 Prize prices:</span> ${PRICE_X.choices.map(x => `<button class="btn small ${priceX(p) === x ? "brand" : "ghost"}" data-act="setPriceX" data-id="${p.id}" data-x="${x}" aria-pressed="${priceX(p) === x}">${x}×</button>`).join(" ")}
-          <span class="muted">(grand prize ${prizeCost({ cost: 500 }, p)} for ${esc(p.name)}${p.priceX ? "" : ", default"})</span></div>
+          <span class="muted">(grand prize ${fmtN(prizeCost({ cost: 500 }, p))} for ${esc(p.name)}${p.priceX ? "" : ", default"})</span></div>
         ${window.ElzeeVoice ? `<div class="line"><button class="btn small ghost" data-act="voicePick" data-id="${p.id}">🔈 Voice</button> <span class="muted">${esc(p.voice || "Calm default")} (kids can pick on their own with 🔈 on the top bar)</span></div>` : ""}
         <div class="line"><button class="btn small ghost" data-act="resetPlayer" data-id="${p.id}">Reset progress</button>
           <button class="btn small danger" data-act="deletePlayer" data-id="${p.id}">Delete player</button></div>
@@ -3121,7 +3199,7 @@ function renderParent() {
     </div>
 
     <div class="card"><h3>Prize history</h3>${st.log.length ? `<ul class="list">${st.log.slice(0, 50).map(l =>
-      `<li><span>${esc(l.avatar)} ${esc(l.who)}: ${esc(l.emoji)} ${esc(l.name)}</span><span class="muted">${fmtDate(l.ts)} · 🪙 ${l.cost}</span></li>`).join("")}</ul>`
+      `<li><span>${esc(l.avatar)} ${esc(l.who)}: ${esc(l.emoji)} ${esc(l.name)}</span><span class="muted">${fmtDate(l.ts)} · 🪙 ${fmtN(l.cost)}</span></li>`).join("")}</ul>`
       : `<p class="muted">No prizes redeemed yet.</p>`}</div>
 
     <div class="card"><h3>Settings</h3>
@@ -3617,8 +3695,10 @@ function maybeApplyUpdate() {
 }
 window.addEventListener("popstate", onPopState);
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible") checkForUpdate();
+  if (document.visibilityState === "visible") { syncFromStorage(); checkForUpdate(); }
 });
+window.addEventListener("storage", e => { if (e.key === APP.storageKey || e.key === null) syncFromStorage(); }); // 1.4.5: other tabs
+window.addEventListener("pageshow", e => { if (e.persisted) syncFromStorage(); }); // back/forward cache (game return via Back)
 Store.load();
 Speech.pickVoice();
 const resumed = LessonSave.load();

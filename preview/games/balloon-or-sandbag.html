@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Offline-only: the page may not load anything from anywhere (no fonts, images, scripts, or fetches). Same CSP as every Elzee game. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; media-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#7c4dff">
+<link rel="icon" href="data:,">
+<title>Balloon or Sandbag? · Elzee</title>
+<style>
+:root{
+  --bg:#fff8e7; --ink:#2d2a4a; --muted:#7a7699; --card:#fff; --line:#e7e2f5;
+  --brand:#7c4dff; --brand-d:#5a2fd6; --brand-l:#efe9ff;
+  --good:#3ccf4e; --good-d:#2a9d38; --good-l:#e6fbe9;
+  --oops:#ff9f43; --oops-d:#e07b15; --oops-l:#fff3e3;
+  --gold:#ffc83d; --gold-d:#e0a400;
+  --radius:22px;
+  --font:"Fredoka","Chalkboard SE","Comic Sans MS","Arial Rounded MT Bold",system-ui,sans-serif;
+  /* game-specific */
+  --box:#e7a35c; --box-d:#b8743a; --lawn:#d9f2c9; --lawn-d:#a9dc8f; --sign:#fff4d4;
+  --cs:360px; --st:112px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:20px;line-height:1.3;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%;overscroll-behavior:none}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2,h3{margin:0}
+#app{max-width:1180px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 10px) calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 14px) calc(env(safe-area-inset-left) + 16px)}
+.btn{border:none;border-radius:18px;padding:12px 24px;min-height:64px;min-width:64px;font-size:23px;font-weight:600;text-decoration:none;
+  background:var(--good);color:#fff;box-shadow:0 5px 0 var(--good-d);display:inline-flex;align-items:center;justify-content:center;gap:10px}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--good-d)}
+.btn.ghost{background:#fff;color:var(--ink);box-shadow:0 5px 0 var(--line);border:2px solid var(--line)}
+.btn .ico{font-size:30px;line-height:1}
+.iconbtn{border:none;background:#fff;border-radius:18px;width:64px;height:64px;font-size:30px;flex:none;text-decoration:none;
+  box-shadow:0 4px 0 var(--line);display:inline-flex;align-items:center;justify-content:center;position:relative}
+.iconbtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.iconbtn.on{background:var(--good-l);box-shadow:0 4px 0 #bfe9c6}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex:none}
+.pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:6px 16px;min-height:56px;font-size:22px;font-weight:700;box-shadow:0 4px 0 var(--line)}
+.pill .av{font-size:30px}
+.pill .nm{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.spacer{flex:1}
+[data-say]{cursor:pointer}
+.muted{color:var(--muted)}
+
+/* menu */
+.menu{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:16px}
+.hero{display:flex;align-items:center;gap:14px;background:#fff;border-radius:var(--radius);box-shadow:0 6px 0 var(--line);padding:14px 16px}
+.hero .judge{width:96px;height:96px;flex:none;animation:bob 2.4s ease-in-out infinite}
+.hero .judge svg{width:100%;height:100%}
+.hero .txt{flex:1;min-width:0;font-size:21px}
+.hero .demo{display:flex;align-items:center;gap:8px;font-size:44px;flex-wrap:wrap}
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.tier{border:none;background:linear-gradient(#bfe9a8,#8fd16a);border-radius:26px;box-shadow:0 7px 0 #6cb14a;color:var(--ink);min-height:180px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:14px;position:relative}
+.tier:active{transform:translateY(4px);box-shadow:0 3px 0 #6cb14a}
+.tier .mini{font-size:46px;letter-spacing:4px}
+.tier b{font-size:24px}
+.tier .resume{position:absolute;top:10px;right:14px;font-size:30px}
+.tier.rec{outline:5px solid var(--gold);outline-offset:-5px}
+
+/* play */
+.play{flex:1;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:12px}
+.prompt{display:flex;align-items:center;gap:12px;background:var(--sign);border:3px solid #f0dca0;border-radius:var(--radius);box-shadow:0 6px 0 #ead18a;padding:10px 12px}
+.prompt .judge{width:64px;height:64px;flex:none}
+.prompt .judge svg{width:100%;height:100%}
+.prompt .rule{flex:1;min-width:0}
+.rulepics{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:40px;line-height:1.1}
+.rulepics .arrow{font-size:30px;color:var(--good-d);font-weight:700}
+.rulewords{font-size:19px;margin-top:4px}
+.rulewords b{font-weight:700}
+.prompt .tools{display:flex;gap:8px;flex:none;align-self:flex-start}
+.prompt.glow{animation:glow 1s ease-in-out 3}
+.stage{min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.dots{display:flex;gap:8px;align-items:center;flex:none}
+.dots i{display:block;width:22px;height:22px;border-radius:50%;background:#eceaf3;border:3px solid #dcd8ea}
+.dots i.done{background:var(--good);border-color:var(--good-d)}
+.dots i.cur{background:var(--gold);border-color:var(--gold-d)}
+.sky{width:var(--cs);height:calc(var(--cs) * var(--sr,.5));position:relative;border-radius:26px;overflow:hidden;flex:none;
+  background:linear-gradient(#ffd9a8 0%,#fff1d6 62%,var(--lawn) 62%,var(--lawn) 100%);box-shadow:0 6px 0 var(--lawn-d)}
+.sky .cloud{position:absolute;font-size:calc(var(--cs) * .09);opacity:.8;animation:bob 4s ease-in-out infinite}
+.sky .c1{left:6%;top:8%} .sky .c2{right:30%;top:4%;animation-delay:1.4s}
+.basket{position:absolute;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;transition:top .8s cubic-bezier(.3,1.5,.5,1)}
+.balloons{display:flex;gap:2px;font-size:calc(var(--cs) * .075);line-height:1;min-height:calc(var(--cs) * .02)}
+.balloons span{animation:bob 2.2s ease-in-out infinite}
+.balloons span:nth-child(2n){animation-delay:.6s}
+.balloons .new{animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+.bsk{position:relative;font-size:calc(var(--cs) * .12);line-height:1}
+.bsk .sign{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);font-size:calc(var(--cs) * .032);background:#fff;border-radius:10px;padding:1px 5px;white-space:nowrap}
+.bags{display:flex;gap:2px}
+.bags svg{width:calc(var(--cs) * .055);height:calc(var(--cs) * .055)}
+.bags .new{animation:squish .45s ease-out}
+.puddle{position:absolute;right:4%;bottom:5%;font-size:calc(var(--cs) * .07);background:#fff8;border-radius:50%;padding:2px 10px;display:flex;align-items:center;gap:4px}
+.puddle b{font-size:calc(var(--cs) * .04)}
+.puddle.splash{animation:splash .6s ease-out}
+.sky.dance .basket .bsk{animation:dance .5s ease-in-out infinite alternate}
+.clue{width:min(640px,100%);position:relative;background:#fff;border-radius:24px;box-shadow:0 6px 0 var(--line);padding:10px 12px 10px 16px;
+  display:flex;align-items:center;gap:12px;touch-action:none;flex:none;transition:transform .28s cubic-bezier(.3,1.4,.5,1),opacity .28s;cursor:grab}
+.clue.enter{transform:translateX(50%) scale(.85);opacity:0}
+.clue.leave{transform:translateY(-40%) scale(.85);opacity:0}
+.clue.lifted{opacity:.35}
+.clue.done{cursor:default;box-shadow:0 6px 0 var(--good-l),0 0 0 3px var(--good) inset}
+.cpics{display:flex;align-items:center;gap:6px;font-size:40px;line-height:1.1;flex:none;white-space:nowrap}
+.cpics .arrow{font-size:28px;color:var(--good-d);font-weight:700}
+.cpics .eq{font-size:30px;font-weight:700;color:var(--muted)}
+.cpics .n{font-size:22px}
+.ctext{flex:1;min-width:0;font-size:20px}
+.clue .badge{position:absolute;right:-8px;top:-14px;width:46px;height:46px;border-radius:50%;background:#fff;box-shadow:0 3px 0 var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:28px;animation:pop .4s cubic-bezier(.2,1.6,.4,1)}
+.badge svg,.stamp .face svg,.explain .pic svg{width:1em;height:1em;vertical-align:-0.12em}
+.noitem{position:relative;display:inline-flex}
+.noitem .it{opacity:.35;filter:grayscale(.6)}
+.noitem .x{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.85em}
+.stamp.hot{transform:scale(1.1);box-shadow:0 0 0 6px var(--gold),0 6px 0 var(--line)}
+.stamp.z-balloon{background:#fff0f3} .stamp.z-sandbag{background:#fbf1e4} .stamp.z-puddle{background:#eef7f2}
+.clueghost{width:auto!important;height:auto!important;padding:10px 16px;font-size:40px!important;gap:6px;white-space:nowrap}
+.clueghost .arrow{font-size:28px;color:var(--good-d)}
+.hero .txt svg,.tier svg{width:1.1em;height:1.1em;vertical-align:-0.15em}
+.below{min-height:76px;display:flex;align-items:center;justify-content:center;gap:12px;flex:none;width:100%}
+.say-line{font-size:20px;text-align:center;max-width:640px}
+.explain{display:flex;align-items:center;gap:12px;background:#fff;border-radius:20px;box-shadow:0 5px 0 var(--line);padding:6px 10px 6px 16px;max-width:760px}
+.explain .pic{font-size:34px;white-space:nowrap;flex:none}
+.explain .txt{min-width:0}
+.explain .txt{font-size:19px}
+.explain.oops{background:var(--oops-l)}
+.stamps{display:flex;gap:14px;justify-content:center;align-items:stretch}
+.stamp{border:none;background:#fff;border-radius:26px;width:var(--st);min-height:var(--st);box-shadow:0 6px 0 var(--line);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 6px;touch-action:none;position:relative}
+.stamp .face{font-size:calc(var(--st) * .36);line-height:1}
+.stamp .sub{font-size:calc(var(--st) * .24);line-height:1;display:inline-flex}
+.stamp .sub .noitem .x{font-size:calc(var(--st) * .22)}
+.stamp small{font-size:16px;font-weight:600;color:var(--muted)}
+.stamp:active{transform:translateY(3px)}
+.stamp.lifted{opacity:.3}
+.stamp.glow{animation:glow 1s ease-in-out infinite alternate}
+.stamp[disabled]{opacity:.45}
+.dragghost{position:fixed;left:0;top:0;z-index:50;pointer-events:none;width:var(--st);height:var(--st);border-radius:26px;background:#fff;
+  box-shadow:0 14px 18px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-size:calc(var(--st) * .4);will-change:transform}
+.dragghost.back{transition:transform .3s cubic-bezier(.3,.8,.4,1)}
+.dragghost.fly{transition:transform .2s ease-out}
+.dragghost.wiggle span{display:inline-block;animation:wiggle .45s ease-in-out}
+.banner{background:var(--gold);color:var(--ink);border-radius:16px;padding:8px 14px;text-align:center;font-weight:600;margin-bottom:8px;flex:none}
+@media (orientation:landscape) and (min-aspect-ratio:5/4){
+  .play{grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto minmax(0,1fr)}
+  .play .prompt{grid-column:1;grid-row:1}
+  .play .stage{grid-column:1;grid-row:2}
+  .play .stamps{grid-column:2;grid-row:1 / 3;flex-direction:column;justify-content:center}
+}
+
+/* overlays */
+.ov{position:fixed;inset:0;background:rgba(45,42,74,.45);z-index:40;display:flex;align-items:center;justify-content:center;padding:16px}
+.panel{background:var(--bg);border-radius:28px;padding:22px;max-width:620px;width:100%;max-height:94vh;overflow:auto;text-align:center;
+  box-shadow:0 10px 0 rgba(0,0,0,.12);animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+.panel h2{font-size:30px;margin-bottom:8px}
+.panel.grown{text-align:left}
+.panel.grown h2{text-align:center}
+.panel p{font-size:18px}
+.cheer{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:18px 0 8px}
+.cheer svg{width:72px;height:72px;animation:dance .55s ease-in-out infinite alternate}
+.cheer svg:nth-child(2n){animation-delay:.27s}
+.bigstars{font-size:40px;letter-spacing:4px}
+.bigstars .no{filter:grayscale(1);opacity:.3}
+.coins{font-size:34px;font-weight:700;color:var(--gold-d);animation:pop .5s .3s both}
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.gate .judge{width:150px;height:150px;margin:0 auto;animation:bob 2.4s ease-in-out infinite}
+.gate .judge svg{width:100%;height:100%}
+.gate .go{width:140px;height:140px;border-radius:50%;font-size:64px;margin-top:10px}
+.confetti{position:fixed;top:-20px;z-index:60;width:12px;height:16px;border-radius:3px;pointer-events:none;animation:fall linear forwards}
+
+/* shared motion vocabulary (contract §8) */
+@keyframes pop{0%{transform:scale(.4)}100%{transform:scale(1)}}
+@keyframes wiggle{20%{transform:rotate(-12deg)}40%{transform:rotate(10deg)}60%{transform:rotate(-7deg)}80%{transform:rotate(4deg)}100%{transform:none}}
+@keyframes bob{50%{transform:translateY(-6px)}}
+@keyframes dance{0%{transform:translateY(0) rotate(-7deg)}100%{transform:translateY(-12px) rotate(7deg)}}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+@keyframes pulse{50%{transform:scale(1.06)}}
+@keyframes glow{from{box-shadow:0 0 0 0 rgba(255,200,61,0)}to{box-shadow:0 0 0 8px rgba(255,200,61,.95)}}
+@keyframes squish{0%{transform:scale(1.3,.7)}50%{transform:scale(.9,1.1)}100%{transform:none}}
+@keyframes splash{0%{transform:scale(1)}30%{transform:scale(1.35,.7)}60%{transform:scale(.9,1.15)}100%{transform:none}}
+
+@media (max-width:600px){
+  .top{gap:6px} .iconbtn{width:56px;height:56px;font-size:26px} .pill{min-height:50px;font-size:19px;padding:4px 12px} .pill .nm{display:none}
+  .rulepics{font-size:32px} .prompt .judge{display:none}
+}
+/* Respect "reduce motion": nothing bounces, wiggles, flies or falls. Feedback stays as colour, glow outline and sound. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;animation-delay:0s!important;transition-duration:.001ms!important}
+  .confetti{display:none}
+  .stamp.glow,.prompt.glow,.box.target{outline:5px solid var(--gold);outline-offset:3px}
+}
+</style>
+</head>
+<body>
+<div id="app" role="main"></div>
+<div id="ov"></div>
+<script>
+/*VOICE-START v1.0.0*/
+/* ElzeeVoice v1.0.0 - one shared read-aloud voice for Elzee and its games (1.4.2).
+   Source of truth: workspace/build142/elzee-voice.js, pasted unchanged between the VOICE markers of
+   index.html and games/*.html (the pages are offline single files, so no <script src>).
+   - Calm, natural voices first (iPad Safari: Ava Premium/Enhanced, Samantha Enhanced, Allison, Susan, Karen, Samantha).
+   - Novelty voices (Fred, Zarvox, Bubbles, ...) are never used.
+   - One calm rate (0.9) and normal pitch (1.0) everywhere, younger mode included.
+   - Each kid picks their own voice in Elzee (🔈 on the top bar). It is saved on their profile as profile.voice
+     in logicquest.v1; games only READ it (active profile). No network, on-device voices only. */
+(function (root) {
+  "use strict";
+  var VERSION = "1.0.0", RATE = 0.9, PITCH = 1.0, MAIN_KEY = "logicquest.v1";
+  var NOVELTY = /(^|[\s.\-_(])(Fred|Albert|Bad News|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Pipe Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Bahh|Junior|Ralph|Kathy|Deranged|Hysterical)($|[\s.\-_)])/i;
+  var PREFER = [/^Ava\b.*\((Premium|Enhanced)\)/i, /^Samantha\b.*\(Enhanced\)/i, /^Allison\b/i, /^Susan\b/i, /^Karen\b/i, /^Samantha\b/i];
+  // Friendly characters for the kids' voice cards (picture-only; no reading needed).
+  var CHARS = [{ e: "🦉", n: "Owl" }, { e: "🐻", n: "Bear" }, { e: "🐰", n: "Bunny" }, { e: "🐢", n: "Turtle" }, { e: "🐳", n: "Whale" }];
+  function isNovelty(v) { return !!v && (NOVELTY.test(String(v.name || "")) || NOVELTY.test(String(v.voiceURI || ""))); }
+  function score(v) {
+    var name = String(v.name || ""), i;
+    for (i = 0; i < PREFER.length; i++) if (PREFER[i].test(name)) return i;
+    return /^en[-_]US/i.test(v.lang || "") ? 20 : 30;
+  }
+  function voices() {
+    var all = [];
+    try { all = (root.speechSynthesis && root.speechSynthesis.getVoices && root.speechSynthesis.getVoices()) || []; } catch (e) { all = []; }
+    var seen = {}, out = [];
+    for (var i = 0; i < all.length; i++) {
+      var v = all[i];
+      if (!v || !/^en/i.test(v.lang || "") || v.localService === false || isNovelty(v) || seen[v.name]) continue; // on-device English only
+      seen[v.name] = 1; out.push(v);
+    }
+    return out.map(function (v, i) { return { v: v, s: score(v), i: i }; })
+      .sort(function (a, b) { return a.s - b.s || a.i - b.i; }).map(function (x) { return x.v; });
+  }
+  // Active Elzee profile, read only (games never write logicquest.v1).
+  function activeProfile() {
+    try {
+      var d = JSON.parse(root.localStorage.getItem(MAIN_KEY));
+      if (!d || !Array.isArray(d.profiles)) return null;
+      for (var i = 0; i < d.profiles.length; i++) if (d.profiles[i] && d.profiles[i].id === d.activeId) return d.profiles[i];
+    } catch (e) {}
+    return null;
+  }
+  function prefFor(p) { return p && typeof p.voice === "string" && p.voice ? p.voice.slice(0, 100) : null; }
+  function pick(name) {
+    var list = voices();
+    if (name) for (var i = 0; i < list.length; i++) if (list[i].name === name) return list[i];
+    return list[0] || null; // calm default
+  }
+  // Voice cards for the kid picker: the best few voices, each with a friendly character.
+  function choices(max) {
+    var list = voices().slice(0, Math.min(max || CHARS.length, CHARS.length));
+    return list.map(function (v, i) { return { name: v.name, lang: v.lang, emoji: CHARS[i].e, char: CHARS[i].n }; });
+  }
+  // Set voice, calm rate and normal pitch on an utterance. name undefined = the active profile's pick.
+  function apply(u, name) {
+    if (name === undefined) name = prefFor(activeProfile());
+    var v = pick(name);
+    if (v) { try { u.voice = v; } catch (e) { /* not a real voice object */ } u.lang = v.lang || "en-US"; } else u.lang = "en-US";
+    u.rate = RATE; u.pitch = PITCH;
+    api.last = v ? v.name : null;
+    return u;
+  }
+  var api = { version: VERSION, RATE: RATE, PITCH: PITCH, CHARS: CHARS, isNovelty: isNovelty, voices: voices, pick: pick,
+    choices: choices, apply: apply, prefFor: prefFor, activeProfile: activeProfile, last: null };
+  root.ElzeeVoice = api;
+})(typeof window !== "undefined" ? window : this);
+/*VOICE-END*/
+</script>
+<script>
+"use strict";
+/* ==========================================================================
+   BALLOON OR SANDBAG?: an Elzee reasoning game (strengthen vs weaken).
+   A buddy makes a cause ➜ effect claim ("Eating carrots makes you run fast!"). Clue cards arrive one by one;
+   the kid drags each clue to 🎈 (makes the claim stronger: the basket rises), a sandbag (weaker: it sinks),
+   or the 💧 puddle (doesn't matter). Every clue's verdict comes from classify(structure) in the generator,
+   and the hand-written clue sentences are reviewed in balloon-or-sandbag-dev/bank-review.md.
+   Interlude contract v1 (logic-app/interlude-contract.md): launch params, ret, result record,
+   no caps, rates from §6, never writes logicquest.v1.
+   ========================================================================== */
+const GAME = {
+  id: "balloon-or-sandbag",
+  storageKey: "logicquest.minigame.balloon-or-sandbag.v1", // this game's own key
+  mainKey: "logicquest.v1",                                 // main app key: READ ONLY, never written here
+  resultKey: "logicquest.interlude.result.v1",
+};
+const ECON = { round: 2, newTier: 2, perPuzzle: 0 }; // contract §6 generated-puzzle rates; no caps of any kind
+const RM = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- clue bank + classifier (same file is benchmarked in balloon-or-sandbag-dev/bench.js) ---------- */
+/*GEN-START*/
+/* Balloon or Sandbag? clue bank + classifier + round generator.
+   Every claim is a cause → effect claim ("eating carrots makes you run fast").
+   Every clue is built from a STRUCTURE, never free text:
+     group   : "C" (had the cause) | "notC" (did not) | "both"
+     outcome : "E" (the effect happened) | "notE" (the opposite happened) | "other" (something unrelated)
+     timing  : "before" = the effect was already there before the cause | null
+     same    : true = with and without the cause came out the same
+   classify() turns the structure into exactly one verdict with one fixed rule (a comparison of
+   "with the cause" vs "without the cause", the kid-sized version of a controlled comparison):
+     outcome "other"            → "puddle"  (doesn't matter)
+     timing "before"            → "sandbag" (it happened before the cause, so the cause didn't make it)
+     group "both" + same        → "sandbag" (with or without the cause, no difference)
+     C + E  or notC + notE      → "balloon" (strengthens)
+     C + notE or notC + E       → "sandbag" (weakens)
+   The sentences are hand-written per claim and reviewed (see bank-review.md); each sentence is tied to
+   one structure, and the bench re-checks that every clue's verdict equals classify(structure). */
+const CLAIMS = [
+  { id: "carrot", who: "B", say: "Eating carrots makes you run fast!", q: "carrots make you run fast", cause: "carrots",
+    C: "🥕", E: "💨", N: "🐢", withS: "The buddies who ate carrots", withoutS: "The buddies who did not eat carrots",
+    yes: "ran fast", no: "ran slowly",
+    before: "The buddies were already fast runners before they ever ate a carrot.",
+    same: "The buddies who ate carrots and the ones who did not ran just as fast.",
+    irr: [{ e: "🎨", s: "The buddies who ate carrots liked to paint." }, { e: "🧦", s: "The buddies who did not eat carrots wore striped socks." }] },
+  { id: "umbrella", who: "F", say: "An umbrella keeps you dry in the rain!", q: "an umbrella keeps you dry", cause: "an umbrella",
+    C: "☂️", E: "🙂", N: "💦", withS: "In the rain, the buddies with umbrellas", withoutS: "In the rain, the buddies without umbrellas",
+    yes: "stayed dry", no: "got soaked",
+    before: null,
+    same: "In the rain, the buddies with umbrellas and the ones without stayed just as dry.",
+    irr: [{ e: "🎵", s: "In the rain, the buddies with umbrellas sang a song." }, { e: "🐟", s: "The buddies without umbrellas have a pet fish at home." }] },
+  { id: "water", who: "A", say: "Watering a sunflower makes it grow tall!", q: "water makes a sunflower grow tall", cause: "water",
+    C: "🚿", E: "🌻", N: "🥀", withS: "The sunflowers that got water", withoutS: "The sunflowers that got no water",
+    yes: "grew tall", no: "drooped and stayed small",
+    before: "The sunflowers were already tall before anyone watered them.",
+    same: "The sunflowers that got water and the ones that got none grew just as tall.",
+    irr: [{ e: "🏷️", s: "The sunflowers that got water had name tags." }, { e: "📅", s: "The sunflowers that got no water were planted on a Tuesday." }] },
+  { id: "sleep", who: "D", say: "Going to bed early gives you lots of energy!", q: "going to bed early gives you energy", cause: "going to bed early",
+    C: "🛏️", E: "⚡", N: "🥱", withS: "The buddies who went to bed early", withoutS: "The buddies who stayed up late",
+    yes: "had lots of energy the next day", no: "felt sleepy the next day",
+    before: "The buddies already had lots of energy before they started going to bed early.",
+    same: "The buddies who went to bed early and the ones who stayed up late had just as much energy.",
+    irr: [{ e: "🧩", s: "The buddies who went to bed early like puzzles." }, { e: "🌟", s: "The buddies who stayed up late have star stickers on their door." }] },
+  { id: "piano", who: "C", say: "Practicing every day helps you play the piano well!", q: "practicing helps you play the piano well", cause: "practicing",
+    C: "🎹", E: "🌟", N: "😖", withS: "The buddies who practiced every day", withoutS: "The buddies who never practiced",
+    yes: "played their songs well", no: "still made lots of mistakes", noWithout: "made lots of mistakes",
+    before: "The buddies already played well before they started practicing every day.",
+    same: "The buddies who practiced every day and the ones who never practiced played just as well.",
+    irr: [{ e: "🎒", s: "The buddies who practiced every day have red backpacks." }, { e: "🥞", s: "The buddies who never practiced like pancakes." }] },
+  { id: "kite", who: "F", say: "Wind makes a kite fly high!", q: "wind makes a kite fly high", cause: "wind",
+    C: "🌬️", E: "🪁", N: "⬇️", withS: "On windy days, the kites", withoutS: "On days with no wind, the kites",
+    yes: "flew high", no: "fell to the ground",
+    before: "The kites were already flying high before the wind started to blow.",
+    same: "The kites flew just as high on windy days as on days with no wind.",
+    irr: [{ e: "🍲", s: "On windy days, the kite flyers ate soup for lunch." }, { e: "🧢", s: "On days with no wind, the kite flyers wore caps." }] },
+];
+/* Clue kinds → structure. The sentence for each kind comes from the claim's own hand-written parts. */
+const KINDS = {
+  withYes:    { group: "C",    outcome: "E",     timing: null,     same: false },
+  withNo:     { group: "C",    outcome: "notE",  timing: null,     same: false },
+  withoutYes: { group: "notC", outcome: "E",     timing: null,     same: false },
+  withoutNo:  { group: "notC", outcome: "notE",  timing: null,     same: false },
+  before:     { group: "C",    outcome: "E",     timing: "before", same: false },
+  same:       { group: "both", outcome: "E",     timing: null,     same: true },
+  irr0:       { group: "C",    outcome: "other", timing: null,     same: false },
+  irr1:       { group: "notC", outcome: "other", timing: null,     same: false },
+};
+function classify(st) {
+  if (!st) return null;
+  if (st.outcome === "other") return "puddle";
+  if (st.timing === "before") return "sandbag";
+  if (st.group === "both") return st.same ? "sandbag" : null;
+  const sign = (st.group === "C" ? 1 : -1) * (st.outcome === "E" ? 1 : -1);
+  return sign > 0 ? "balloon" : "sandbag";
+}
+function sentence(cl, kind) {
+  switch (kind) {
+    case "withYes": return `${cl.withS} ${cl.yes}.`;
+    case "withNo": return `${cl.withS} ${cl.no}.`;
+    case "withoutYes": return `${cl.withoutS} ${cl.yes} too.`;
+    case "withoutNo": return `${cl.withoutS} ${cl.noWithout || cl.no}.`;
+    case "before": return cl.before;
+    case "same": return cl.same;
+    case "irr0": return cl.irr[0].s;
+    case "irr1": return cl.irr[1].s;
+    default: return null;
+  }
+}
+/* Picture version of a clue (Fin + Parker): [cause or no-cause] → [what happened]. */
+function picture(cl, kind) {
+  const c = { has: true, e: cl.C }, nc = { has: false, e: cl.C };
+  switch (kind) {
+    case "withYes": return { a: c, b: cl.E };
+    case "withNo": return { a: c, b: cl.N };
+    case "withoutYes": return { a: nc, b: cl.E };
+    case "withoutNo": return { a: nc, b: cl.N };
+    case "before": return { a: { has: true, e: cl.E }, b: cl.C, order: true };
+    case "same": return { a: c, b: cl.E, a2: nc, b2: cl.E };
+    case "irr0": return { a: c, b: cl.irr[0].e };
+    case "irr1": return { a: nc, b: cl.irr[1].e };
+    default: return null;
+  }
+}
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+/* Rounds. young = Fin: 3 clues, one of each verdict, the plainest kinds. */
+const TIERS = { 1: { cards: 4 }, 2: { cards: 5 } };
+function genRound(tier, seed, young) {
+  if (!TIERS[tier]) return null;
+  const rnd = mulberry32(seed >>> 0), pick = a => a[Math.floor(rnd() * a.length)];
+  const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const claims = tier === 2 ? CLAIMS.filter(c => c.before) : CLAIMS;
+  const cl = pick(claims);
+  let kinds;
+  if (young) kinds = ["withYes", "withNo", pick(["irr0", "irr1"])];
+  else if (tier === 1) kinds = ["withYes", "withNo", pick(["withoutYes", "withoutNo"]), pick(["irr0", "irr1"])];
+  else kinds = [pick(["before", "same"]), pick(["withYes", "withoutNo"]), pick(["withNo", "withoutYes"]), pick(["irr0", "irr1"]), pick(["before", "same", "withoutYes", "withoutNo"])];   // tricky + balloon + sandbag + puddle + one more
+  kinds = [...new Set(kinds)];
+  const pool = ["withYes", "withNo", "withoutYes", "withoutNo", "before", "same"].filter(k => !kinds.includes(k) && (k !== "before" || cl.before));
+  while (kinds.length < (young ? 3 : TIERS[tier].cards)) kinds.push(pick(pool.filter(k => !kinds.includes(k))));
+  shuffle(kinds);
+  const cards = kinds.map(kind => ({ kind, s: sentence(cl, kind), pic: picture(cl, kind), answer: classify(KINDS[kind]) }));
+  return { tier, young: !!young, seed, claim: cl.id, cards };
+}
+const claimById = id => CLAIMS.find(c => c.id === id);
+/*GEN-END*/
+
+/* ---------- buddies art ---------- */
+/*BUDDIES-START v1*/
+function face(ey, mood, opt = {}) {
+  const sp = opt.sp || 12, cx = 50;
+  const eyes = mood === "yay"
+    ? `<path d="M${cx-sp-5} ${ey+1} q5 -7 10 0 M${cx+sp-5} ${ey+1} q5 -7 10 0" stroke="#2d2a4a" stroke-width="3.5" fill="none" stroke-linecap="round"/>`
+    : `<circle cx="${cx-sp}" cy="${ey}" r="4.8" fill="#2d2a4a"/><circle cx="${cx+sp}" cy="${ey}" r="4.8" fill="#2d2a4a"/>
+       <circle cx="${cx-sp+1.6}" cy="${ey-1.8}" r="1.6" fill="#fff"/><circle cx="${cx+sp+1.6}" cy="${ey-1.8}" r="1.6" fill="#fff"/>`;
+  const m = ey + (opt.my || 9);
+  const mouth = mood === "sad" ? `<path d="M${cx-5} ${m+4} q5 -6 10 0" stroke="#2d2a4a" stroke-width="3" fill="none" stroke-linecap="round"/>`
+    : mood === "yay" ? `<path d="M${cx-6} ${m-1} q6 10 12 0 z" fill="#e35d7a" stroke="#2d2a4a" stroke-width="2.5" stroke-linejoin="round"/>`
+    : `<path d="M${cx-5} ${m} q5 5 10 0" stroke="#2d2a4a" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  const brow = mood === "sad" ? `<path d="M${cx-sp-6} ${ey-9} l9 3 M${cx+sp+6} ${ey-9} l-9 3" stroke="#2d2a4a" stroke-width="2.5" stroke-linecap="round"/>` : "";
+  return `${eyes}${brow}<ellipse cx="${cx-sp-9}" cy="${ey+8}" rx="6" ry="3.6" fill="#ff8fab" opacity=".55"/>
+    <ellipse cx="${cx+sp+9}" cy="${ey+8}" rx="6" ry="3.6" fill="#ff8fab" opacity=".55"/>${mouth}`;
+}
+function buddySVG(id, mood = "happy") {
+  let body = "";
+  if (id === "D") body = `
+    <path d="M10 72 Q10 40 50 32 Q90 40 90 72 Q90 88 50 88 Q10 88 10 72Z" fill="#fff3dc" stroke="#e5c995" stroke-width="3"/>
+    <path d="M34 37 q4 -7 8 0 M46 33 q4 -7 8 0 M58 37 q4 -7 8 0" stroke="#e5c995" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M30 34 Q34 12 52 12 Q68 13 72 30 Z" fill="#9b6b43"/><path d="M24 33 Q50 24 80 31 Q52 38 24 33Z" fill="#7a5233"/>
+    <path d="M40 18 l10 -6 l3 4" stroke="#c99b6b" stroke-width="3" fill="none"/>${face(60, mood)}`;
+  else if (id === "C") body = `
+    <circle cx="26" cy="30" r="7" fill="#a86f42"/><circle cx="74" cy="30" r="7" fill="#a86f42"/>
+    <rect x="12" y="26" width="76" height="64" rx="30" fill="#c48a5a"/>
+    <g fill="#fff" stroke="#ddd" stroke-width="2"><circle cx="38" cy="24" r="9"/><circle cx="50" cy="20" r="9.5"/><circle cx="62" cy="24" r="9"/>
+    <circle cx="15" cy="48" r="8"/><circle cx="13" cy="62" r="8"/><circle cx="85" cy="48" r="8"/><circle cx="87" cy="62" r="8"/></g>
+    <ellipse cx="50" cy="71" rx="19" ry="12" fill="#a86f42"/>
+    <ellipse cx="44" cy="66" rx="2.5" ry="1.6" fill="#5b3a22"/><ellipse cx="56" cy="66" rx="2.5" ry="1.6" fill="#5b3a22"/>
+    ${face(50, mood, { my: 24, sp: 14 })}`;
+  else if (id === "A") body = `
+    <g fill="#ff7aa2"><rect x="2" y="34" width="22" height="9" rx="4.5" transform="rotate(-25 13 38)"/><rect x="0" y="49" width="22" height="9" rx="4.5"/>
+    <rect x="2" y="63" width="22" height="9" rx="4.5" transform="rotate(25 13 67)"/>
+    <rect x="76" y="34" width="22" height="9" rx="4.5" transform="rotate(25 87 38)"/><rect x="78" y="49" width="22" height="9" rx="4.5"/>
+    <rect x="76" y="63" width="22" height="9" rx="4.5" transform="rotate(-25 87 67)"/></g>
+    <ellipse cx="50" cy="60" rx="35" ry="29" fill="#ffc2d4" stroke="#f59ab8" stroke-width="3"/>${face(56, mood, { sp: 14 })}`;
+  else if (id === "B") body = `
+    <ellipse cx="36" cy="26" rx="9" ry="21" fill="#ffe6d6" stroke="#f2b99b" stroke-width="3"/><ellipse cx="36" cy="28" rx="4" ry="13" fill="#ffc2d4"/>
+    <ellipse cx="64" cy="26" rx="9" ry="21" fill="#ffe6d6" stroke="#f2b99b" stroke-width="3"/><ellipse cx="64" cy="28" rx="4" ry="13" fill="#ffc2d4"/>
+    <ellipse cx="50" cy="64" rx="36" ry="27" fill="#ffe6d6" stroke="#f2b99b" stroke-width="3"/>${face(60, mood)}`;
+  else if (id === "F") body = `
+    <circle cx="32" cy="38" r="14" fill="#8fd16a" stroke="#6cb14a" stroke-width="3"/><circle cx="68" cy="38" r="14" fill="#8fd16a" stroke="#6cb14a" stroke-width="3"/>
+    <ellipse cx="50" cy="64" rx="38" ry="26" fill="#8fd16a" stroke="#6cb14a" stroke-width="3"/>
+    <ellipse cx="50" cy="74" rx="22" ry="12" fill="#c9efb0"/>
+    <circle cx="44" cy="78" r="3" fill="#5b3a22"/><circle cx="52" cy="80" r="3" fill="#5b3a22"/><circle cx="58" cy="76" r="3" fill="#5b3a22"/>
+    ${face(38, mood, { sp: 18, my: 20 })}`;
+  return `<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">${body}</svg>`;
+}
+/*BUDDIES-END*/
+const BUDDY_NAMES = { D: "Dumpling", C: "Capybara", A: "Axolotl", B: "Bunny", F: "Frog" };
+const SANDBAG = `<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false"><path d="M15 5 h10 l-2 7 q11 4 11 15 q0 9 -14 9 q-14 0 -14 -9 q0 -11 11 -15 z" fill="#c9965c" stroke="#8a5f30" stroke-width="3" stroke-linejoin="round"/><path d="M14 12 h12" stroke="#6b4522" stroke-width="3.5" stroke-linecap="round"/><path d="M14 25 q6 3 12 0" stroke="#a87a45" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>`;
+const FACE = { balloon: "🎈", sandbag: SANDBAG, puddle: "💧" };
+/* ---------- small utilities ---------- */
+const $app = document.getElementById("app"), $ov = document.getElementById("ov");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+const num = (v, d = 0) => (typeof v === "number" && isFinite(v) ? Math.max(0, Math.floor(v)) : d);
+const isObj = v => !!v && typeof v === "object" && !Array.isArray(v);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function ymd(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+const todayStr = () => ymd(new Date());
+function newSeed() { try { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] || 1; } catch (e) { return ((Date.now() ^ (Math.random() * 4294967296)) >>> 0) || 1; } }
+
+/* ---------- launch params (interlude contract §3) ---------- */
+const Q = new URLSearchParams(location.search);
+function safeRet(r) { return typeof r === "string" && r.startsWith("../index.html") && !/[\\]|\/\//.test(r) ? r : "../index.html#home"; }
+const LAUNCH = {
+  elzee: Q.get("elzee") === "1",
+  mode: Q.get("mode") === "interlude" ? "interlude" : "free",
+  sid: Q.get("sid") || "", step: parseInt(Q.get("step"), 10) || 0,
+  min: Math.max(1, parseInt(Q.get("min"), 10) || 4),
+  ret: safeRet(Q.get("ret") || (Q.get("mode") === "interlude" ? "../index.html#session" : "../index.html#home")),
+};
+const INTERLUDE = LAUNCH.elzee && LAUNCH.mode === "interlude";
+
+/* ---------- main app profile (read only) ---------- */
+function readMainProfile() {
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem(GAME.mainKey)); } catch (e) { raw = null; }
+  const base = { id: "guest", name: "Guest", avatar: "🙂", little: false, sound: true, linked: false };
+  if (!isObj(raw) || !Array.isArray(raw.profiles)) return base;
+  const p = raw.profiles.find(x => isObj(x) && x.id === raw.activeId);
+  const sound = typeof raw.sound === "boolean" ? raw.sound : true;
+  if (!p) return { ...base, sound };
+  return { id: String(p.id).slice(0, 40), name: typeof p.name === "string" && p.name.trim() ? p.name.slice(0, 40) : "Player",
+    avatar: typeof p.avatar === "string" && p.avatar ? p.avatar.slice(0, 16) : "🙂", little: p.pathId === "little", sound, linked: true };
+}
+
+/* ---------- this game's own store ---------- */
+function cleanCur(c) {
+  if (!isObj(c) || ![1, 2].includes(c.tier) || !num(c.seed)) return null;
+  const young = c.young === true && c.tier === 1, r = genRound(c.tier, num(c.seed), young);
+  if (!r) return null;
+  const i = Math.min(num(c.i), r.cards.length - 1);
+  return { tier: c.tier, young, seed: num(c.seed), i, stars: Math.min(r.cards.length, num(c.stars)), tries: Math.min(9, num(c.tries)), revealed: c.revealed === true };
+}
+const Store = {
+  data: null,
+  load() {
+    let raw = null;
+    try { raw = JSON.parse(localStorage.getItem(GAME.storageKey)); } catch (e) { raw = null; }
+    const d = { version: 1, kids: {} };
+    if (isObj(raw) && isObj(raw.kids)) for (const [id, k] of Object.entries(raw.kids)) {
+      if (!isObj(k)) continue;
+      const tiers = {}; if (isObj(k.tiers)) for (const t of ["1", "2"]) if (k.tiers[t] === true) tiers[t] = true;
+      d.kids[String(id).slice(0, 40)] = {
+        day: typeof k.day === "string" ? k.day : null, earnedToday: num(k.earnedToday), pending: num(k.pending), lifetime: num(k.lifetime),
+        rounds: num(k.rounds), cards: num(k.cards), tiers, tier: [1, 2].includes(k.tier) ? k.tier : null,
+        young: typeof k.young === "boolean" ? k.young : null, sound: typeof k.sound === "boolean" ? k.sound : null, cur: cleanCur(k.cur),
+      };
+    }
+    this.data = d;
+  },
+  save() {
+    try {
+      let disk = null; try { disk = JSON.parse(localStorage.getItem(GAME.storageKey)); } catch (e) { disk = null; }
+      if (isObj(disk) && isObj(disk.kids)) for (const [id, k] of Object.entries(this.data.kids)) {
+        const o = disk.kids[id]; if (isObj(o)) k.lifetime = Math.max(k.lifetime, num(o.lifetime));   // lifetime never goes down (claim ledger)
+      }
+      localStorage.setItem(GAME.storageKey, JSON.stringify(this.data));
+    } catch (e) { /* private mode / storage full */ }
+  },
+};
+let me = readMainProfile();
+function kid() {
+  const d = Store.data;
+  if (!d.kids[me.id]) d.kids[me.id] = { day: null, earnedToday: 0, pending: 0, lifetime: 0, rounds: 0, cards: 0, tiers: {}, tier: null, young: null, sound: null, cur: null };
+  const k = d.kids[me.id];
+  if (k.day !== todayStr()) { k.day = todayStr(); k.earnedToday = 0; }
+  return k;
+}
+/* 🐣 Younger mode (Fin): on by default for little-path profiles, switchable per kid. Pictures only, everything talks,
+   3 clues, no fail state. 🦁 full version (Parker): words + 🔊, 4 clues, then tricky clues. */
+const young = () => { const k = kid(); return k.young === null ? me.little : k.young; };
+const soundOn = () => { const k = kid(); return k.sound === null ? me.sound : k.sound; };
+const curTier = () => (young() ? 1 : kid().tier || 1);
+/* Tokens (contract §6): +2 per finished round, +2 the first round ever on a tier, 0 per puzzle, no cap. lifetime only grows. */
+function award(tier) {
+  const k = kid(), first = !k.tiers[String(tier)];
+  const got = ECON.round + (first ? ECON.newTier : 0);
+  k.tiers[String(tier)] = true; k.rounds++; k.earnedToday += got; k.pending += got; k.lifetime += got; k.cur = null;
+  Store.save();
+  return got;
+}
+
+/* ---------- sound (Web Audio, created on the first tap only; same chimes as the main app) ---------- */
+let started = false;
+const Sound = {
+  ctx: null,
+  tone(f0, f1, dur, type = "triangle", vol = 0.18, delay = 0) {
+    if (!soundOn() || !started) return;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      this.ctx = this.ctx || new AC();
+      if (this.ctx.state === "suspended" && this.ctx.resume) this.ctx.resume().catch(() => {});
+      const t = this.ctx.currentTime + delay, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(this.ctx.destination); o.start(t); o.stop(t + dur + 0.03);
+    } catch (e) { /* no audio */ }
+  },
+  pick() { this.tone(300, 720, 0.13, "sine"); },
+  good() { this.tone(660, 660, 0.12); this.tone(880, 880, 0.18, "triangle", 0.18, 0.11); },
+  oops() { this.tone(330, 330, 0.14, "triangle", 0.14); this.tone(294, 294, 0.2, "triangle", 0.12, 0.13); },
+  stamp() { this.tone(180, 90, 0.12, "square", 0.12); },
+  win() { [523, 659, 784, 1047, 1319].forEach((f, i) => this.tone(f, f * 1.01, 0.22, "triangle", 0.18, i * 0.11)); },
+  chime() { this.tone(660, 990, 0.25, "sine", 0.14); },
+};
+
+/* ---------- read-aloud: the shared ElzeeVoice (calm voice, rate 0.9, pitch 1.0, the kid's own voice pick) ----------
+   iPad Safari rule: nothing is spoken until the first tap (the ▶️ gate), which also unlocks speechSynthesis.
+   Anything asked before that is queued. With no voice at all, 🔈 answers with a chime and a glow instead. */
+const Speech = {
+  get ok() { try { return !!(window.speechSynthesis && typeof window.speechSynthesis.speak === "function" && typeof window.SpeechSynthesisUtterance === "function"); } catch (e) { return false; } },
+  unlocked: false, queued: null,
+  utter(text) {
+    const u = new SpeechSynthesisUtterance(text);
+    chooseVoice(u);
+    return u;
+  },
+  unlock() {
+    this.unlocked = true;
+    if (!this.ok) return;
+    try { speechSynthesis.cancel(); const u = this.utter(" "); u.volume = 0; speechSynthesis.speak(u); } catch (e) { /* ignore */ }
+  },
+  /* Returns true if the words went to a voice. force = the kid pressed 🔈 (speak even with game sounds off). */
+  say(text, force = false) {
+    if (!text) return false;
+    if (!this.unlocked) { this.queued = [text, force]; return false; }
+    if (!this.ok || (!soundOn() && !force)) return false;
+    try { speechSynthesis.cancel(); if (speechSynthesis.paused) speechSynthesis.resume(); const u = this.utter(text); u.onerror = () => {}; speechSynthesis.speak(u); return true; } catch (e) { return false; }
+  },
+  flush() { const q = this.queued; this.queued = null; if (q) this.say(q[0], q[1]); },
+  stop() { this.queued = null; if (this.ok && this.unlocked) try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } },
+};
+function sayBtn(text, cls = "iconbtn") { return `<button class="${cls} saybtn" data-act="sayZone" data-say="${esc(text)}" aria-label="Read aloud">🔈</button>`; }
+function speakOrNudge(text, el) {
+  if (Speech.say(text, true)) return;
+  Sound.chime();
+  const z = el && el.closest(".sayzone, .panel, .pill, .card"); if (!z) return;
+  z.classList.remove("nudged"); void z.offsetWidth; z.classList.add("nudged"); z.style.boxShadow = "0 0 0 6px var(--gold)"; setTimeout(() => { z.style.boxShadow = ""; z.classList.remove("nudged"); }, 1200);
+}
+
+/* ---------- VOICE CHOICE: the ONE place a read-aloud voice is picked ----------
+   TODO(Riker, after Elzee 1.4.2 ships): set VOICE_PREF_KEY to the per-player voice localStorage key you send,
+   and fill in readVoicePref() to return that player's voice name (READ ONLY; never write it here).
+   Until then ElzeeVoice uses the active profile's `voice` field in logicquest.v1, or its calm default.
+   Rate 0.9 and pitch 1.0 are always applied, younger mode included. */
+const VOICE_PREF_KEY = "logicquest.v1"; // Elzee 1.4.2+: profiles[i].voice = voice NAME (string <= 100) or null; read only
+function readVoicePref() {
+  try {
+    const d = JSON.parse(localStorage.getItem(VOICE_PREF_KEY));
+    const p = d && Array.isArray(d.profiles) ? d.profiles.find(x => x && x.id === d.activeId) : null;
+    return p && typeof p.voice === "string" && p.voice ? p.voice.slice(0, 100) : null; // null = calm default
+  } catch (e) { return null; }
+}
+function chooseVoice(u) {
+  const name = readVoicePref();
+  if (window.ElzeeVoice) window.ElzeeVoice.apply(u, name); else u.lang = "en-US";
+  u.rate = 0.9; u.pitch = 1.0;
+}
+
+/* ---------- words for the read-aloud and Parker's text ---------- */
+const CL = () => claimById(R.claim);
+const claimSay = () => `${BUDDY_NAMES[CL().who]} says: ${CL().say}`;
+const ASK = "Does it make the claim stronger, like a balloon? Weaker, like a sandbag? Or does it not matter, like the puddle?";
+const promptSay = (R, c) => `${claimSay()} Here is a clue. ${c.s} ${ASK}`;
+function explainSay(R, c) {
+  const cl = CL(), cause = cl.cause;
+  switch (c.kind) {
+    case "withYes": return `Balloon! ${c.s} That is just what the claim says should happen, so the claim looks stronger.`;
+    case "withoutNo": return `Balloon! ${c.s} Without ${cause}, it did not happen. So ${cause} seems to matter. Stronger!`;
+    case "withNo": return `Sandbag! ${c.s} The claim says that should not happen, so the claim looks weaker.`;
+    case "withoutYes": return `Sandbag! ${c.s} It happened even without ${cause}. So maybe ${cause} is not what did it. Weaker!`;
+    case "before": return `Sandbag! ${c.s} It was already true before ${cause} came along, so ${cause} did not make it happen. Weaker!`;
+    case "same": return `Sandbag! ${c.s} With or without ${cause}, it came out the same. So ${cause} does not seem to matter. Weaker!`;
+    default: return `Puddle! ${c.s} That has nothing to do with whether ${cl.q}. It does not matter!`;
+  }
+}
+function oopsSay(c) {
+  if (c.answer === "balloon") return "Hmm, look again! Does this clue make the claim easier to believe?";
+  if (c.answer === "sandbag") return "Hmm, look again! Does this clue make you doubt the claim?";
+  return `Hmm, look again! Does this clue tell us anything about whether ${CL().q}?`;
+}
+/* ---------- state ---------- */
+let view = "menu", R = null, cur = null, busy = false, oops = false;
+const session = { startedAt: Date.now(), solved: 0, tokens: 0, bannerShown: false, offerShown: false, finished: false };
+try { const s = JSON.parse(sessionStorage.getItem("bs.session." + LAUNCH.sid)); if (INTERLUDE && s && s.startedAt) Object.assign(session, { startedAt: num(s.startedAt), solved: num(s.solved), tokens: num(s.tokens) }); } catch (e) { /* ignore */ }
+const saveSession = () => { try { sessionStorage.setItem("bs.session." + LAUNCH.sid, JSON.stringify({ startedAt: session.startedAt, solved: session.solved, tokens: session.tokens })); } catch (e) { /* ignore */ } };
+const card = () => R.cards[cur.i];
+const afterStart = [];
+function whenStarted(fn, ms = 300) { if (started) setTimeout(fn, ms); else afterStart.push(fn); }
+
+function startRound(tier, resume) {
+  Speech.stop();
+  const k = kid(), y = young() && tier === 1;
+  if (resume && k.cur && k.cur.tier === tier && k.cur.young === y) cur = { ...k.cur };
+  else { cur = { tier, young: y, seed: newSeed(), i: 0, stars: 0, tries: 0, revealed: false }; }
+  R = genRound(cur.tier, cur.seed, cur.young);
+  if (!young()) k.tier = tier;
+  k.cur = { ...cur }; Store.save();
+  view = "play"; oops = false; busy = false; render();
+  announce();
+}
+function announce() { if (young()) whenStarted(() => { if (view === "play" && !cur.revealed) Speech.say(promptSay(R, card())); }, 350); }
+function saveCur() { if (cur) { kid().cur = { ...cur }; Store.save(); } }
+
+/* ---------- rendering ---------- */
+function topBar() {
+  const k = kid(), y = young();
+  let home = "";
+  if (INTERLUDE || LAUNCH.elzee) home = `<button class="iconbtn" data-act="home" aria-label="Back to Elzee">🏠</button>`;
+  else if (view === "play") home = `<button class="iconbtn" data-act="menu" aria-label="Back to the start">⬅️</button>`;
+  else if (me.linked) home = `<a class="iconbtn" href="../index.html#home" aria-label="Back to Elzee">🏠</a>`;
+  return `<div class="top">${home}
+    <div class="pill" aria-label="Player ${esc(me.name)}" data-say="${esc(`This is you, ${me.name}!`)}"><span class="av">${esc(me.avatar)}</span>${y ? "" : `<span class="nm">${esc(me.name)}</span>`}</div>
+    <div class="pill" aria-label="Tokens earned today ${k.earnedToday}" data-say="${esc(`You earned ${k.earnedToday} tokens today.`)}">🪙 <b>${k.earnedToday}</b></div>
+    <div class="spacer"></div>
+    ${INTERLUDE ? "" : `<button class="iconbtn ${y ? "on" : ""}" data-act="toggleYoung" aria-label="${y ? "Younger mode is on: pictures and talking. Tap for the big version" : "Big version. Tap for younger mode: pictures and talking"}" aria-pressed="${y}">${y ? "🐣" : "🦁"}</button>`}
+    <button class="iconbtn" data-act="toggleSound" aria-label="Sound ${soundOn() ? "on" : "off"}" aria-pressed="${soundOn()}">${soundOn() ? "🔊" : "🔇"}</button>
+    ${view === "menu" && !INTERLUDE ? `<button class="iconbtn" data-act="grown" aria-label="For grown-ups">ⓘ</button>` : ""}
+  </div>`;
+}
+function bannerHTML() {
+  if (!INTERLUDE || !session.bannerShown || session.finished) return "";
+  return `<div class="banner sayzone" aria-label="Last clue, then back to the trail">${young() ? "🕐 ➜ 🗺️" : "Last clue, then back to the trail! 🗺️"} ${sayBtn("Last clue, then back to the trail!", "iconbtn")}</div>`;
+}
+const menuSay = () => `Balloon or Sandbag! A buddy makes a claim. Drag each clue to the balloon if it makes the claim stronger, to the sandbag if it makes the claim weaker, or to the puddle if it does not matter. ${young() ? "Tap the big green button to play!" : "Pick a game to play."}`;
+function renderMenu() {
+  const k = kid(), y = young(), c = k.cur;
+  const tiles = (y ? [1] : [1, 2]).map(t => {
+    const resume = c && c.tier === t && c.young === (y && t === 1);
+    const label = y ? "Play Balloon or Sandbag" : t === 1 ? "Clue sorting" : "Tricky clues";
+    return `<button class="tier ${t === curTier() ? "rec" : ""}" data-act="tier" data-tier="${t}" aria-label="${label}${resume ? ", keep going" : ""}">
+      ${resume ? `<span class="resume" aria-hidden="true">▶️</span>` : ""}<span class="mini" aria-hidden="true">${t === 1 ? "🎈🧺💧" : "🎈🧺🔍"}</span>
+      ${y ? "" : `<b>${label}</b><span class="muted">${t === 1 ? "4 clues" : "5 clues · watch for sneaky ones"}</span>`}</button>`;
+  }).join("");
+  $app.innerHTML = `${topBar()}<div class="menu">
+    <div class="hero sayzone"><div class="judge" aria-hidden="true">${buddySVG("B", "happy")}</div>
+      <div class="txt">${y ? `<div class="demo" aria-hidden="true">🥕 ➜ 💨 · 🎈 ${SANDBAG} 💧</div>`
+        : `<b>Balloon or Sandbag?</b> A buddy makes a claim. Drag each clue to <b>🎈 stronger</b>, <b>${SANDBAG} weaker</b>, or <b>💧 doesn't matter</b>.`}</div>
+      ${sayBtn(menuSay())}</div>
+    <div class="tiers">${tiles}</div>
+    ${k.rounds ? `<div class="hero sayzone"><span style="font-size:34px" aria-hidden="true">🏆 × ${k.rounds}</span>${y ? "" : `<span class="txt">Rounds finished</span>`}${sayBtn(`You finished ${k.rounds} round${k.rounds === 1 ? "" : "s"}!`)}</div>` : ""}
+  </div>`;
+  whenStarted(() => { if (view === "menu" && !$ov.innerHTML && young()) Speech.say(menuSay()); }, 300);
+}
+function itm(has, e) { return has ? `<span class="it">${e}</span>` : `<span class="noitem"><span class="it">${e}</span><span class="x">🚫</span></span>`; }
+const ARROW = `<span class="arrow">➜</span>`;
+function picHTML(p) {
+  if (p.order) return `<span class="n">1️⃣</span>${itm(true, p.a.e)}<span class="n">2️⃣</span>${itm(true, p.b)}`;
+  if (p.a2) return `${itm(p.a.has, p.a.e)}${ARROW}${itm(true, p.b)}<span class="eq">=</span>${itm(p.a2.has, p.a2.e)}${ARROW}${itm(true, p.b2)}`;
+  return `${itm(p.a.has, p.a.e)}${ARROW}${itm(true, p.b)}`;
+}
+let lastTop = 28;
+function tally() {
+  const done = R.cards.slice(0, cur.i + (cur.revealed ? 1 : 0)).map(c => c.answer);
+  const n = a => done.filter(x => x === a).length;
+  return { b: n("balloon"), s: n("sandbag"), p: n("puddle") };
+}
+function skyHTML() {
+  const t = tally(), cl = CL(), justNow = cur.revealed ? card().answer : null;
+  const balloons = Array.from({ length: t.b }, (_, i) => `<span class="${justNow === "balloon" && i === t.b - 1 ? "new" : ""}">🎈</span>`).join("");
+  const bags = Array.from({ length: t.s }, (_, i) => `<span class="${justNow === "sandbag" && i === t.s - 1 ? "new" : ""}">${SANDBAG}</span>`).join("");
+  const say = `The basket has ${t.b} balloon${t.b === 1 ? "" : "s"} and ${t.s} sandbag${t.s === 1 ? "" : "s"}. ${t.p} clue${t.p === 1 ? "" : "s"} went in the puddle.`;
+  return `<div class="sky ${cur.revealed ? "dance" : ""}" id="sky" aria-label="${esc(say)}"${young() ? ` data-say="${esc(say)}"` : ""}>
+    <span class="cloud c1" aria-hidden="true">☁️</span><span class="cloud c2" aria-hidden="true">☁️</span>
+    <div class="basket" id="basket" style="top:${lastTop}%" aria-hidden="true"><div class="balloons">${balloons}</div>
+      <div class="bsk"><span class="sign">${cl.C}➜${cl.E}</span>🧺</div><div class="bags">${bags}</div></div>
+    <div class="puddle ${justNow === "puddle" ? "splash" : ""}" aria-hidden="true">💧${t.p ? `<b>×${t.p}</b>` : ""}</div></div>`;
+}
+function basketTop() { const t = tally(); return Math.max(3, Math.min(50, 28 - (t.b - t.s) * 12)); }
+function clueHTML() {
+  const c = card(), y = young();
+  return `<div class="clue enter sayzone ${cur.revealed ? "done" : ""}" id="clue" aria-label="${esc("Clue: " + c.s)}"${y ? ` data-say="${esc(c.s)}"` : ""}>
+    <div class="cpics" aria-hidden="true">${picHTML(c.pic)}</div>${y ? "" : `<div class="ctext">${esc(c.s)}</div>`}
+    ${sayBtn(c.s)}${cur.revealed ? `<span class="badge" aria-hidden="true">${FACE[c.answer]}</span>` : ""}</div>`;
+}
+const ZONES = [
+  ["balloon", "Makes it stronger", "Balloon: this clue makes the claim stronger"],
+  ["sandbag", "Makes it weaker", "Sandbag: this clue makes the claim weaker"],
+  ["puddle", "Doesn't matter", "Puddle: this clue does not matter"],
+];
+function zonesHTML() {
+  const y = young(), dis = cur.revealed || busy ? "disabled" : "";
+  return `<div class="stamps">${ZONES.map(([id, word, label]) => `<button class="stamp z-${id}" data-act="zone" data-stamp="${id}" aria-label="${label}" ${dis}><span class="face" aria-hidden="true">${FACE[id]}</span>${y ? "" : `<small>${word}</small>`}</button>`).join("")}</div>`;
+}
+function promptHTML() {
+  const cl = CL(), y = young();
+  return `<div class="prompt sayzone" id="prompt"><div class="judge" aria-hidden="true">${buddySVG(cl.who)}</div>
+    <div class="rule"><div class="rulepics" aria-label="${esc(claimSay())}"><span>${cl.C}</span>${ARROW}<span>${cl.E}</span></div>
+    ${y ? "" : `<div class="rulewords"><b>${esc(BUDDY_NAMES[cl.who])} says:</b> “${esc(cl.say)}”</div>`}</div>
+    <div class="tools"><button class="iconbtn" data-act="hint" aria-label="Hint">💡</button>${sayBtn(promptSay(R, card()))}</div></div>`;
+}
+function belowHTML() {
+  const c = card(), y = young();
+  if (cur.revealed) return `<div class="explain sayzone"><span class="pic" aria-hidden="true">${FACE[c.answer]}</span>${y ? "" : `<span class="txt">${esc(explainSay(R, c))}</span>`}
+      ${sayBtn(explainSay(R, c))}<button class="btn" data-act="next" aria-label="${cur.i + 1 >= R.cards.length ? "Finish" : "Next clue"}"><span class="ico">▶️</span></button></div>`;
+  if (oops) return `<div class="explain oops sayzone"><span class="pic" aria-hidden="true">🤔</span>${y ? "" : `<span class="txt">${esc(oopsSay(c))}</span>`}${sayBtn(oopsSay(c))}</div>`;
+  return "";
+}
+function renderPlay() {
+  $app.innerHTML = `${topBar()}${bannerHTML()}<div class="play">
+    ${promptHTML()}
+    <div class="stage" id="stage"><div class="dots" aria-label="Clue ${cur.i + 1} of ${R.cards.length}">${R.cards.map((_, i) => `<i class="${i < cur.i || (i === cur.i && cur.revealed) ? "done" : i === cur.i ? "cur" : ""}"></i>`).join("")}</div>
+      ${skyHTML()}${clueHTML()}<div class="below">${belowHTML()}</div></div>
+    ${zonesHTML()}</div>`;
+  fitCard();
+  const cd = document.getElementById("clue"), bk = document.getElementById("basket"), top = basketTop();
+  requestAnimationFrame(() => requestAnimationFrame(() => { if (cd) cd.classList.remove("enter"); if (bk) bk.style.top = top + "%"; }));
+  lastTop = top;
+  if (cur.tries >= 2 && !cur.revealed) glowRight();
+}
+function render() { if (view === "play" && R) renderPlay(); else { view = "menu"; renderMenu(); } }
+/* Largest sky that fits the stage next to the dots, the clue card and the line below it. */
+function fitCard() {
+  const stage = document.getElementById("stage"); if (!stage) return;
+  const land = window.matchMedia("(orientation:landscape) and (min-aspect-ratio:5/4)").matches;
+  const st = Math.round(Math.max(84, Math.min(128, land ? (window.innerHeight - 120) / 3.6 : (window.innerWidth - 60) / 3.4)));
+  document.documentElement.style.setProperty("--st", st + "px");
+  const clue = stage.querySelector(".clue"), below = stage.querySelector(".below");
+  const ch = clue ? clue.offsetHeight : 0, bh = Math.max(76, below ? below.offsetHeight : 0);
+  const sr = land ? 0.5 : 0.62;   // sky height / width: taller sky in portrait
+  const cs = Math.floor(Math.max(220, Math.min(680, stage.clientWidth - 8, (stage.clientHeight - 22 - ch - bh - 36) / sr)));
+  document.documentElement.style.setProperty("--cs", cs + "px"); document.documentElement.style.setProperty("--sr", sr);
+}
+/* ---------- play ---------- */
+function glowRight() { document.querySelector(`.stamp[data-stamp="${card().answer}"]`)?.classList.add("glow"); }
+function zoneCenter(id) { const r = document.querySelector(`.stamp[data-stamp="${id}"]`)?.getBoundingClientRect(); return r ? [r.left + r.width / 2, r.top + r.height / 2] : null; }
+function placeGhost(g, x, y, extra = "") { const r = g.getBoundingClientRect(); g.style.transform = `translate(${x - r.width / 2}px,${y - r.height / 2}px) ${extra}`; }
+async function judge(zone, ghost) {
+  if (busy || cur.revealed || view !== "play") { if (ghost) ghost.remove(); return; }
+  busy = true;
+  const c = card(), zc = zoneCenter(zone);
+  if (ghost && zc && !RM()) { ghost.classList.add("fly"); placeGhost(ghost, zc[0], zc[1], "scale(.6)"); await sleep(220); }
+  if (zone === c.answer) {
+    if (ghost) ghost.remove();
+    if (zone === "balloon") { Sound.tone(392, 880, 0.32, "sine", 0.16); } else if (zone === "sandbag") { Sound.stamp(); } else { Sound.tone(900, 260, 0.22, "sine", 0.12); }
+    setTimeout(() => Sound.good(), 160);
+    if (cur.tries === 0) cur.stars++;
+    cur.revealed = true; session.solved++; kid().cards++; saveSession(); saveCur();
+    oops = false; busy = false; renderPlay();
+    document.getElementById("clue")?.classList.remove("enter");
+    Speech.say(explainSay(R, c));
+    return;
+  }
+  // wrong: the clue wiggles and slides back; the claim glows; after 2 misses the right zone glows. No fail state.
+  cur.tries++; saveCur(); Sound.oops(); oops = true;
+  if (ghost && !RM()) {
+    ghost.classList.remove("fly"); ghost.classList.add("wiggle"); await sleep(450);
+    const home = document.getElementById("clue")?.getBoundingClientRect();
+    if (home) { ghost.classList.add("back"); placeGhost(ghost, home.left + home.width / 2, home.top + home.height / 2); await sleep(300); }
+  }
+  if (ghost) ghost.remove();
+  busy = false; renderPlay();
+  document.getElementById("clue")?.classList.remove("enter");
+  document.getElementById("prompt")?.classList.add("glow");
+  if (cur.tries >= 2) glowRight();
+  Speech.say(oopsSay(c));
+}
+async function nextCard() {
+  if (!cur.revealed || busy) return;
+  busy = true;
+  const cd = document.getElementById("clue"); if (cd && !RM()) { cd.classList.add("leave"); await sleep(260); }
+  busy = false;
+  if (cur.i + 1 >= R.cards.length) return finishRound();
+  cur.i++; cur.revealed = false; cur.tries = 0; oops = false; saveCur(); renderPlay(); announce();
+}
+function finishRound() {
+  const stars = cur.stars, total = R.cards.length, tier = cur.tier;
+  const got = award(tier);
+  session.tokens += got; if (INTERLUDE) session.finished = true; saveSession();
+  cur = null; Sound.win(); confetti(70);
+  const y = young();
+  const lines = [`Hooray! You sorted every clue!`, `You got ${stars} star${stars === 1 ? "" : "s"}.`, got ? `You earned ${got} tokens!` : "",
+    INTERLUDE ? "Tap the big button to go back to your adventure." : "Tap the circle arrows to play again, or the back arrow to go back."].filter(Boolean).join(" ");
+  const buttons = INTERLUDE
+    ? `<button class="btn" data-act="back" aria-label="Back to my adventure"><span class="ico">▶️</span>${y ? "" : "Back to my adventure"}</button>`
+    : `<button class="btn ghost" data-act="menu" aria-label="Back to the start"><span class="ico">⬅️</span></button>
+       <button class="btn" data-act="again" aria-label="Play again"><span class="ico">🔁</span>${y ? "" : "Again"}</button>`;
+  $ov.innerHTML = `<div class="ov"><div class="panel win sayzone" role="dialog" aria-label="Round complete">
+    <h2>🎉${y ? "" : " Clues sorted!"}</h2>
+    <div class="cheer" aria-hidden="true">${"BFDAC".split("").map(b => buddySVG(b, "yay")).join("")}</div>
+    <div class="bigstars" aria-label="${stars} of ${total} stars">${Array.from({ length: total }, (_, i) => `<span class="${i < stars ? "" : "no"}">⭐</span>`).join("")}</div>
+    ${got ? `<div class="coins">+${got} 🪙</div>` : ""}
+    <div class="row">${sayBtn(lines, "btn ghost")}${buttons}</div></div></div>`;
+  view = "menu"; R = null;
+  setTimeout(() => { if ($ov.querySelector(".win")) Speech.say(lines); }, 300);
+}
+function hint() {
+  if (!R || cur.revealed || busy) return;
+  glowRight(); document.getElementById("prompt")?.classList.add("glow");
+  Speech.say(young() ? `${oopsSay(card())} Look at the glowing button!` : oopsSay(card()), true);
+}
+function confetti(n) {
+  if (RM()) return;
+  const colors = ["#3ccf4e", "#ffc83d", "#ff6b3d", "#ff8fab", "#2a9d8f", "#e7a35c"];
+  for (let i = 0; i < n; i++) {
+    const c = document.createElement("div"); c.className = "confetti";
+    c.style.left = Math.random() * 100 + "vw"; c.style.background = colors[i % colors.length];
+    c.style.animationDuration = (1.4 + Math.random() * 1.4) + "s"; c.style.animationDelay = (Math.random() * 0.3) + "s";
+    document.body.appendChild(c); setTimeout(() => c.remove(), 3200);
+  }
+}
+function showGrown() {
+  const k = kid();
+  $ov.innerHTML = `<div class="ov"><div class="panel grown sayzone" role="dialog" aria-label="For grown-ups"><h2>ⓘ For grown-ups</h2>
+    <p><b>Balloon or Sandbag?</b> practices judging evidence: does a clue make a claim <b>stronger</b> (🎈), <b>weaker</b> (sandbag), or <b>not matter</b> (💧)? Every claim is "cause ➜ effect". Clues compare buddies <i>with</i> and <i>without</i> the cause: it happened with the cause, or didn't happen without it → stronger; it didn't happen with the cause, happened anyway without it, was already true before, or came out the same either way → weaker; something unrelated → doesn't matter.</p>
+    <p>Each clue's answer comes from one fixed rule applied to the clue's structure, and the clue sentences were hand-written and reviewed. Wrong answers just slide back; after two tries the right spot glows. Hints are free.</p>
+    <p><b>Tokens:</b> +${ECON.round} for each finished round of clues, +${ECON.newTier} extra the first time on each game. No daily limits, no purchases, no ads, no timer.</p>
+    <p>Today: ${k.earnedToday} · Waiting to go into the Elzee jar: <b>${k.pending}</b> · All-time: ${k.lifetime} · Rounds: ${k.rounds}</p>
+    <p>🐣 Younger mode (on for the Little path): pictures only, everything talks, 3 clues. 🦁 is the big version with words and tricky clues. 🔈 uses the device's own calm voice.</p>
+    <div class="row"><button class="btn ghost saybtn" data-act="sayZone" aria-label="Read aloud">🔈</button><button class="btn" data-act="closeOv" aria-label="Close"><span class="ico">👍</span></button></div></div></div>`;
+  const b = $ov.querySelector(".saybtn"); b.dataset.say = $ov.querySelector(".panel").innerText.replace(/🔈|👍$/g, "").replace(/\s+/g, " ").trim();
+}
+/* ---------- start gate: one big ▶️ tap (unlocks speech and sound on iPad) ---------- */
+function startScreen() {
+  $ov.innerHTML = `<div class="ov"><div class="panel gate" role="dialog" aria-label="Start">
+    <div class="judge" aria-hidden="true">${buddySVG("C", "yay")}</div>
+    <button class="btn go" data-act="go" aria-label="Start">▶️</button></div></div>`;
+}
+function go() {
+  started = true; Speech.unlock(); $ov.innerHTML = ""; Sound.pick();
+  if (view === "play") fitCard();
+  afterStart.splice(0).forEach(fn => setTimeout(fn, 300));
+  Speech.flush();
+}
+
+/* ---------- navigation and exit (contract §4, §5) ---------- */
+function toMenu() { Speech.stop(); $ov.innerHTML = ""; if (cur) saveCur(); view = "menu"; R = null; cur = null; render(); }
+window.addEventListener("popstate", () => {
+  if (INTERLUDE) { exitGame(session.solved ? "done" : "quit"); return; }
+  if (view === "play" || $ov.innerHTML) toMenu();
+});
+function exitGame(status) {
+  Speech.stop(); if (cur) saveCur();
+  if (LAUNCH.elzee) {
+    const now = Date.now();
+    const rec = { v: 1, gameId: GAME.id, sid: LAUNCH.sid, step: LAUNCH.step, profileId: me.id, status: status === "done" ? "done" : "quit",
+      rounds: INTERLUDE ? (session.finished ? 1 : 0) : kid().rounds, solved: session.solved, startedAt: session.startedAt, endedAt: now,
+      durationMs: Math.max(0, now - session.startedAt), tokensEarned: session.tokens };
+    try { localStorage.setItem(GAME.resultKey, JSON.stringify(rec)); } catch (e) { /* ignore */ }
+    try { sessionStorage.removeItem("bs.session." + LAUNCH.sid); } catch (e) { /* ignore */ }
+  }
+  window.__bsExit = LAUNCH.ret; // for tests
+  if (!window.__bsNoNav) location.replace(LAUNCH.ret);
+}
+
+/* ---------- input: buttons ---------- */
+const ACTS = {
+  go() { go(); },
+  tier(el) { const t = +el.dataset.tier; Sound.pick(); if (!INTERLUDE) try { history.pushState({ pr: "play" }, ""); } catch (e) { /* ignore */ } startRound(t, true); },
+  menu() { if (!INTERLUDE && history.state && history.state.pr === "play") history.back(); else toMenu(); },
+  home() { exitGame(session.finished || session.solved ? "done" : "quit"); },
+  back() { exitGame(session.solved ? "done" : "quit"); },
+  again() { $ov.innerHTML = ""; if (!INTERLUDE) try { history.pushState({ pr: "play" }, ""); } catch (e) { /* ignore */ } startRound(curTier(), false); },
+  next() { nextCard(); },
+  hint() { hint(); },
+  zone(el) { tapZone(el.dataset.stamp); },
+  keep() { $ov.innerHTML = ""; },
+  toggleYoung() { const k = kid(); k.young = !young(); Store.save(); if (view === "play" && cur && cur.young !== (young() && cur.tier === 1)) { toMenu(); } else render(); Speech.say(young() ? "Younger mode on! Pictures and talking." : "Big version! Words and tricky clues.", true); },
+  toggleSound() { const k = kid(); k.sound = !soundOn(); Store.save(); if (!soundOn()) Speech.stop(); render(); },
+  grown() { showGrown(); },
+  closeOv() { $ov.innerHTML = ""; render(); },
+  sayZone(el) { speakOrNudge(el.dataset.say, el); },
+};
+const NAV = ["tier", "menu", "home", "back", "again", "next", "go", "closeOv", "grown"];
+let lastNav = 0;
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]");
+  if (!el || el.disabled || !ACTS[el.dataset.act]) return;
+  if (NAV.includes(el.dataset.act)) { if (Date.now() - lastNav < 350) return; lastNav = Date.now(); }   // a double tap must not hit the next screen too
+  if (young() && started && !["sayZone", "toggleYoung", "go", "hint", "next", "zone"].includes(el.dataset.act) && el.getAttribute("aria-label")) Speech.say(el.getAttribute("aria-label"));   // talking buttons
+  ACTS[el.dataset.act](el);
+});
+/* Tap any picture with data-say (avatar, tokens, buddy card) to hear it. Pointer events: iOS sends no click for plain divs. */
+document.addEventListener("pointerup", e => { const el = e.target.closest("[data-say]"); if (el && !el.closest("button, a") && !drag) speakOrNudge(el.dataset.say, el); });
+
+/* ---------- input: drag the clue card onto 🎈 / sandbag / 💧 (finger, pencil, or mouse); tapping a spot works too ---------- */
+let drag = null;
+function clueGhost() {
+  const s = document.getElementById("clue"); if (!s) return null;
+  const g = document.createElement("div"); g.className = "dragghost clueghost"; g.innerHTML = s.querySelector(".cpics").innerHTML;
+  document.body.appendChild(g); return g;
+}
+document.addEventListener("pointerdown", e => {
+  const s = e.target.closest("#clue");
+  if (!s || e.target.closest("button") || busy || !cur || cur.revealed || view !== "play" || $ov.innerHTML) return;
+  e.preventDefault();
+  drag = { id: e.pointerId, el: s, x0: e.clientX, y0: e.clientY, moving: false, ghost: null, hot: null };
+  try { s.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+});
+document.addEventListener("pointermove", e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  if (!drag.moving && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) > 8) {
+    drag.moving = true; Sound.pick(); drag.ghost = clueGhost(); drag.el.classList.add("lifted");
+  }
+  if (!drag.moving || !drag.ghost) return;
+  const lift = e.pointerType === "touch" ? 40 : 0;
+  placeGhost(drag.ghost, e.clientX, e.clientY - lift, "rotate(-4deg) scale(1.05)");
+  let best = null, bd = Infinity;
+  for (const z of document.querySelectorAll(".stamp[data-stamp]")) {
+    const r = z.getBoundingClientRect(), d = Math.hypot(r.left + r.width / 2 - e.clientX, r.top + r.height / 2 - (e.clientY - lift));
+    if (d < Math.max(r.width, r.height) * 0.95 && d < bd) { bd = d; best = z; }
+  }
+  if (best !== drag.hot) { drag.hot?.classList.remove("hot"); best?.classList.add("hot"); drag.hot = best; }
+});
+function endDrag(e, cancelled) {
+  if (!drag || e.pointerId !== drag.id) return;
+  const d = drag; drag = null;
+  d.el.classList.remove("lifted"); d.hot?.classList.remove("hot");
+  if (!d.moving) return;   // a plain tap on the clue: younger mode hears it (data-say), nothing else happens
+  if (!cancelled && d.hot) { judge(d.hot.dataset.stamp, d.ghost); return; }
+  const g = d.ghost; if (!g) return;
+  if (RM()) { g.remove(); return; }
+  const home = d.el.getBoundingClientRect();
+  g.classList.add("back"); placeGhost(g, home.left + home.width / 2, home.top + home.height / 2);
+  setTimeout(() => g.remove(), 320);
+}
+function tapZone(zone) {   // a tap on a spot: the clue flies there by itself
+  const s = document.getElementById("clue"); if (!s || busy || !cur || cur.revealed) return;
+  const r = s.getBoundingClientRect(), g = clueGhost(); if (!g) return;
+  placeGhost(g, r.left + r.width / 2, r.top + r.height / 2); void g.offsetWidth; judge(zone, g);
+}
+document.addEventListener("pointerup", e => endDrag(e, false));
+document.addEventListener("pointercancel", e => endDrag(e, true));
+/* ---------- soft time budget (contract §4.3) ---------- */
+function tickBudget() {
+  if (!INTERLUDE || session.finished || !started) return;
+  const m = (Date.now() - session.startedAt) / 60000;
+  if (m >= LAUNCH.min && !session.bannerShown) { session.bannerShown = true; if (view === "play" && !drag && !busy) renderPlay(); Speech.say("Last clue, then back to the trail!"); }
+  if (m >= LAUNCH.min + 3 && !session.offerShown && !$ov.firstChild) {
+    session.offerShown = true; const y = young();
+    $ov.innerHTML = `<div class="ov"><div class="panel sayzone" role="dialog" aria-label="Back to the trail?"><h2>🗺️${y ? "" : " Time for the trail?"}</h2>
+      <div class="row">${sayBtn("Time for the trail? Tap the roller coaster to keep playing, or the big button to go back to your adventure.", "btn ghost")}
+      <button class="btn ghost" data-act="keep" aria-label="Keep playing"><span class="ico">🎢</span></button>
+      <button class="btn" data-act="back" aria-label="Back to my adventure"><span class="ico">▶️</span>${y ? "" : "Back to my adventure"}</button></div></div></div>`;
+    Speech.say("Time for the trail?");
+  }
+}
+setInterval(tickBudget, 5000);
+
+/* ---------- boot ---------- */
+Store.load();
+window.addEventListener("pagehide", () => { if (cur) saveCur(); });
+window.addEventListener("storage", ev => { if (ev.key === GAME.mainKey) { me = readMainProfile(); if (!busy && !drag) render(); } });
+let rz = 0; window.addEventListener("resize", () => { cancelAnimationFrame(rz); rz = requestAnimationFrame(() => { if (view === "play" && !drag && !busy) renderPlay(); }); });
+(function boot() {
+  const k = kid(); Store.save();
+  if (INTERLUDE) {
+    try { history.replaceState({ pr: "base" }, ""); history.pushState({ pr: "game" }, ""); } catch (e) { /* ignore */ }
+    startRound(curTier(), true);
+  } else if (k.cur) { try { history.pushState({ pr: "play" }, ""); } catch (e) { /* ignore */ } startRound(k.cur.tier, true); }
+  else render();
+  startScreen(); // every boot: one big ▶️ tap, which unlocks speech on iPad
+})();
+
+/* Read-only hooks for automated tests (cannot change game state). */
+window.BalloonSandbag = Object.freeze({
+  classify, genRound, CLAIMS,
+  state: () => JSON.parse(JSON.stringify({ view, R, cur, session, kid: kid(), launch: LAUNCH, started, young: young() })),
+});
+</script>
+</body>
+</html>
