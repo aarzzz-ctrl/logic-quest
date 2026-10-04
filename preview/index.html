@@ -15,7 +15,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="app-version" content="1.4.1-preview">
+<meta name="app-version" content="1.4.2-preview">
 <style>
 /* Fredoka (SIL Open Font License, see OFL-Fredoka.txt), self-hosted so the app never waits on a third-party server */
 @font-face{font-family:"Fredoka";font-style:normal;font-weight:300 700;font-display:swap;src:url("fredoka-latin.woff2") format("woff2")}
@@ -311,6 +311,15 @@ h1,h2,h3{margin:0;font-weight:700}
 .donebtn{min-width:120px;min-height:68px;font-size:30px;border-radius:18px;display:flex;align-items:center;gap:8px;justify-content:center}
 .donebtn .dw{font-size:22px}
 .iconbtn.big.gone{visibility:hidden}
+/* 1.4.2: kid voice picker */
+.vmodal{max-width:620px}
+.vcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;margin:10px 0 16px}
+.vcard{position:relative;border:4px solid var(--line);background:#fff;border-radius:26px;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px;box-shadow:0 6px 0 var(--line)}
+.vcard .ve{font-size:66px;line-height:1}.vcard .vw{font-size:24px;opacity:.7}
+.vcard.on{border-color:var(--gold);box-shadow:0 0 0 4px var(--gold),0 6px 0 var(--gold-d)}
+.vcard .vck{position:absolute;top:6px;right:8px;background:var(--good);color:#fff;border-radius:50%;width:30px;height:30px;line-height:30px;font-weight:700}
+.vcard.hop{animation:cpop .3s ease-out}
+.vdone{font-size:32px}
 /* 1.4.1: NEW in the closet */
 .toast.newtoast{border:none;font-family:inherit;font-weight:700;cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.2);min-height:60px;animation:fade .2s,newpulse 1.4s ease-in-out .3s 3}
 @keyframes newpulse{50%{transform:translateX(-50%) scale(1.06)}}
@@ -353,6 +362,76 @@ h1,h2,h3{margin:0;font-weight:700}
 <body>
 <div class="preview-tag" aria-hidden="true">PREVIEW</div>
 <div id="app"></div>
+<script>
+/*VOICE-START v1.0.0*/
+/* ElzeeVoice v1.0.0 - one shared read-aloud voice for Elzee and its games (1.4.2).
+   Source of truth: workspace/build142/elzee-voice.js, pasted unchanged between the VOICE markers of
+   index.html and games/*.html (the pages are offline single files, so no <script src>).
+   - Calm, natural voices first (iPad Safari: Ava Premium/Enhanced, Samantha Enhanced, Allison, Susan, Karen, Samantha).
+   - Novelty voices (Fred, Zarvox, Bubbles, ...) are never used.
+   - One calm rate (0.9) and normal pitch (1.0) everywhere, younger mode included.
+   - Each kid picks their own voice in Elzee (🔈 on the top bar). It is saved on their profile as profile.voice
+     in logicquest.v1; games only READ it (active profile). No network, on-device voices only. */
+(function (root) {
+  "use strict";
+  var VERSION = "1.0.0", RATE = 0.9, PITCH = 1.0, MAIN_KEY = "logicquest.v1";
+  var NOVELTY = /(^|[\s.\-_(])(Fred|Albert|Bad News|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Pipe Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Bahh|Junior|Ralph|Kathy|Deranged|Hysterical)($|[\s.\-_)])/i;
+  var PREFER = [/^Ava\b.*\((Premium|Enhanced)\)/i, /^Samantha\b.*\(Enhanced\)/i, /^Allison\b/i, /^Susan\b/i, /^Karen\b/i, /^Samantha\b/i];
+  // Friendly characters for the kids' voice cards (picture-only; no reading needed).
+  var CHARS = [{ e: "🦉", n: "Owl" }, { e: "🐻", n: "Bear" }, { e: "🐰", n: "Bunny" }, { e: "🐢", n: "Turtle" }, { e: "🐳", n: "Whale" }];
+  function isNovelty(v) { return !!v && (NOVELTY.test(String(v.name || "")) || NOVELTY.test(String(v.voiceURI || ""))); }
+  function score(v) {
+    var name = String(v.name || ""), i;
+    for (i = 0; i < PREFER.length; i++) if (PREFER[i].test(name)) return i;
+    return /^en[-_]US/i.test(v.lang || "") ? 20 : 30;
+  }
+  function voices() {
+    var all = [];
+    try { all = (root.speechSynthesis && root.speechSynthesis.getVoices && root.speechSynthesis.getVoices()) || []; } catch (e) { all = []; }
+    var seen = {}, out = [];
+    for (var i = 0; i < all.length; i++) {
+      var v = all[i];
+      if (!v || !/^en/i.test(v.lang || "") || v.localService === false || isNovelty(v) || seen[v.name]) continue; // on-device English only
+      seen[v.name] = 1; out.push(v);
+    }
+    return out.map(function (v, i) { return { v: v, s: score(v), i: i }; })
+      .sort(function (a, b) { return a.s - b.s || a.i - b.i; }).map(function (x) { return x.v; });
+  }
+  // Active Elzee profile, read only (games never write logicquest.v1).
+  function activeProfile() {
+    try {
+      var d = JSON.parse(root.localStorage.getItem(MAIN_KEY));
+      if (!d || !Array.isArray(d.profiles)) return null;
+      for (var i = 0; i < d.profiles.length; i++) if (d.profiles[i] && d.profiles[i].id === d.activeId) return d.profiles[i];
+    } catch (e) {}
+    return null;
+  }
+  function prefFor(p) { return p && typeof p.voice === "string" && p.voice ? p.voice.slice(0, 100) : null; }
+  function pick(name) {
+    var list = voices();
+    if (name) for (var i = 0; i < list.length; i++) if (list[i].name === name) return list[i];
+    return list[0] || null; // calm default
+  }
+  // Voice cards for the kid picker: the best few voices, each with a friendly character.
+  function choices(max) {
+    var list = voices().slice(0, Math.min(max || CHARS.length, CHARS.length));
+    return list.map(function (v, i) { return { name: v.name, lang: v.lang, emoji: CHARS[i].e, char: CHARS[i].n }; });
+  }
+  // Set voice, calm rate and normal pitch on an utterance. name undefined = the active profile's pick.
+  function apply(u, name) {
+    if (name === undefined) name = prefFor(activeProfile());
+    var v = pick(name);
+    if (v) { try { u.voice = v; } catch (e) { /* not a real voice object */ } u.lang = v.lang || "en-US"; } else u.lang = "en-US";
+    u.rate = RATE; u.pitch = PITCH;
+    api.last = v ? v.name : null;
+    return u;
+  }
+  var api = { version: VERSION, RATE: RATE, PITCH: PITCH, CHARS: CHARS, isNovelty: isNovelty, voices: voices, pick: pick,
+    choices: choices, apply: apply, prefFor: prefFor, activeProfile: activeProfile, last: null };
+  root.ElzeeVoice = api;
+})(typeof window !== "undefined" ? window : this);
+/*VOICE-END*/
+</script>
 <script>
 /*AVATAR-START v1.2.0*/
 /* ElzeeAvatar v1.2.0 - shared avatar renderer for Elzee (closet + Climb the Quiz).
@@ -1906,7 +1985,7 @@ const APP = {
   mascot: "🦉",
   mascotName: "Professor Hoot",
   pinLength: 4,
-  version: "1.4.1-preview",
+  version: "1.4.2-preview",
 };
 const AVATARS = ["🦊","🐼","🦄","🐯","🐸","🐙","🦖","🐰","🐨","🦁","🐧","🐝","🐬","🦋","🐱","🐶"];
 const REWARDS = {
@@ -2044,6 +2123,7 @@ const Store = {
         progress, lessonsDone: num(p.lessonsDone),
         replayDay: typeof p.replayDay === "string" ? p.replayDay : null, replayCount: num(p.replayCount),
         readAloud: typeof p.readAloud === "boolean" ? p.readAloud : getPath(pathId).readAloudDefault,
+        voice: typeof p.voice === "string" && p.voice ? p.voice.slice(0, 100) : null, // 1.4.2: this kid's read-aloud voice (ElzeeVoice)
         created: num(p.created, Date.now()),
       };
     }).map(p => Object.assign(p, sanitizeClosetFields(raw.profiles.find(r => r && r.id === p.id) || p, closetBackup)));
@@ -2232,6 +2312,10 @@ const MINIGAMES = [
     href: "games/climb-the-quiz.html?elzee=1&mode=free&ret=..%2Findex.html%23home",
     key: "logicquest.minigame.climb.v1", act: "launchClimb",
     interlude: true, role: "challenge", flagship: true, roundLabel: "3 floors", minutes: 4, enabled: true },
+  // Lily Bridge (1.4.2, Bob): spatial building. No daily cap (every bridge pays, replays too); younger mode is automatic
+  // for Little Thinkers. The game's kids[id].lifetime is paid through the claim ledger; Reset progress clears it.
+  { id: "lilybridge", name: "Lily Bridge", emoji: "🌉", blurb: "Build a bridge for Boba Frog!", href: "games/lily-bridge.html",
+    key: "logicquest.minigame.lilybridge.v1", clearOnReset: true },
 ];
 const isYoungerProfile = pl => !!pl && pl.pathId === "little";
 const homeGames = pl => MINIGAMES.filter(g => !(g.hideForYounger && isYoungerProfile(pl)));
@@ -2334,9 +2418,9 @@ function claimMiniGameTokens(pl) {
   }
   return paid;
 }
-function forgetMiniGameData(profileId) {
+function forgetMiniGameData(profileId, which = () => true) {
   const claims = readJSON(CLAIM_KEY);
-  for (const g of MINIGAMES) {
+  for (const g of MINIGAMES.filter(which)) {
     const raw = readJSON(g.key);
     if (isObj(raw) && isObj(raw.kids) && raw.kids[profileId]) { delete raw.kids[profileId]; writeJSON(g.key, raw); }
     if (isObj(claims) && isObj(claims[g.id]) && claims[g.id][profileId]) delete claims[g.id][profileId];
@@ -2391,7 +2475,7 @@ const Speech = {
   clean(text) {
     return String(text).replace(/[0-9#*]\uFE0F?\u20E3/gu, " ").replace(/\p{Extended_Pictographic}|\uFE0F|\u200D|[❔☆]/gu, " ").replace(/[“”]/g, "").replace(/\s+/g, " ").trim();
   },
-  say(text) {
+  say(text, voiceName) {
     if (!this.supported) return;
     try {
       if (typeof SpeechSynthesisUtterance !== "function") return;
@@ -2399,10 +2483,9 @@ const Speech = {
       if (busy) speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(this.clean(text));
       this.current = u; // keep a reference so the utterance isn't garbage-collected mid-speech
-      if (!this.voice) this.pickVoice();
-      if (this.voice) u.voice = this.voice;
-      u.lang = (this.voice && this.voice.lang) || "en-US";
-      u.rate = 0.88; u.pitch = 1.1;
+      // 1.4.2: ElzeeVoice = the shared calm voice (rate 0.9, pitch 1.0, no novelty voices), each kid's own pick
+      if (window.ElzeeVoice) ElzeeVoice.apply(u, voiceName !== undefined ? voiceName : (player() ? player().voice : null));
+      else { if (!this.voice) this.pickVoice(); if (this.voice) u.voice = this.voice; u.lang = (this.voice && this.voice.lang) || "en-US"; u.rate = 0.9; u.pitch = 1; }
       u.onerror = () => {};
       if (busy) setTimeout(() => { try { speechSynthesis.speak(u); } catch (e) {} }, 80); // Safari drops speak() right after cancel()
       else speechSynthesis.speak(u);
@@ -2630,6 +2713,7 @@ function topBar(pl, { back = false } = {}) {
     <div class="spacer"></div>
     <button class="iconbtn" data-act="shop" aria-label="Prize shop">🎁</button>
     ${AV ? `<button class="iconbtn" data-act="openCloset" aria-label="${closetFresh(pl).length ? "My closet. Something new!" : "My closet"}">👚${closetFresh(pl).length ? `<span class="newdot" aria-hidden="true">NEW</span>` : ""}</button>` : ""}
+    ${window.ElzeeVoice ? `<button class="iconbtn" data-act="voicePick" aria-label="Pick a voice">🔈</button>` : ""}
     <button class="iconbtn" data-act="parent" aria-label="Grown-ups">⚙️</button>
   </div>`;
 }
@@ -2972,6 +3056,7 @@ function renderParent() {
         <div class="line">${pathSelect(p)}<label class="toggle"><input type="checkbox" ${p.readAloud ? "checked" : ""} data-field="readAloud" data-kind="player" data-id="${p.id}"> Read questions aloud</label></div>
         <div class="line"><b>🪙 ${p.tokens}</b>
           <span class="muted">· 🔥 ${liveStreak(p)} · ${done(p)}/${totalLessons} lessons · ${p.totalEarned} earned all-time · 👚 ${p.closet ? p.closet.spent : 0} closet spent</span></div>
+        ${window.ElzeeVoice ? `<div class="line"><button class="btn small ghost" data-act="voicePick" data-id="${p.id}">🔈 Voice</button> <span class="muted">${esc(p.voice || "Calm default")} (kids can pick on their own with 🔈 on the top bar)</span></div>` : ""}
         <div class="line"><button class="btn small ghost" data-act="resetPlayer" data-id="${p.id}">Reset progress</button>
           <button class="btn small danger" data-act="deletePlayer" data-id="${p.id}">Delete player</button></div>
       </div>`).join("") || `<p class="muted">No players yet.</p>`}
@@ -3065,7 +3150,7 @@ const actions = {
     confirmBox(`Reset ${p.name}?`, "This clears their lessons, stars, streak, and tokens.", "Reset", () => {
       Object.assign(p, { tokens: 0, totalEarned: 0, streak: 0, lastPlay: null, progress: {}, lessonsDone: 0, replayDay: null, replayCount: 0 }, closetDefaults(p.avatar));
       p.closet.climbSeen = climbUnlocksFor(p.id); // Climb rewards won before the reset are not handed back
-      closetForget(p.id, { keepProfile: true }); LessonSave.clear(); Store.save(); render();
+      closetForget(p.id, { keepProfile: true }); forgetMiniGameData(p.id, g => g.clearOnReset); LessonSave.clear(); Store.save(); render();
     }, true);
   },
   deletePlayer(el) {
@@ -3080,6 +3165,7 @@ const actions = {
     confirmBox("Delete this prize?", `“${p.name}”`, "Delete", () => { st.prizes = st.prizes.filter(x => x.id !== p.id); Store.save(); render(); }, true);
   },
   changePin() { createPin(() => {}); },
+  voicePick(el) { voicePicker(el.dataset.id || (player() ? player().id : null)); },
 };
 /* ---------- Avatar closet screen ---------- */
 const CLOSET_TABS = ["skin", "hair", "hairColor", "eyes", "top", "dress", "bottom", "shoes", "acc"];
@@ -3356,6 +3442,30 @@ Object.assign(actions, {
   },
 });
 const pick1 = a => a[Math.floor(Math.random() * a.length)];
+/* 1.4.2: kid voice picker (no reading needed): big friendly cards, tap = hear a sample + pick it. Saved per player. */
+function voicePicker(pid, quiet) {
+  const pl = state().profiles.find(p => p.id === pid) || player(); if (!pl || !window.ElzeeVoice) return;
+  const cards = ElzeeVoice.choices(5), list = cards.length ? cards : [{ name: "", emoji: ElzeeVoice.CHARS[0].e, char: ElzeeVoice.CHARS[0].n }];
+  const cur = ElzeeVoice.pick(pl.voice), curName = cur ? cur.name : "";
+  const m = openModal(`<div class="vpick"><h3 aria-label="Pick a voice"><span aria-hidden="true">🔈 ${esc(pl.avatar)}</span></h3>
+    <div class="vcards">${list.map(c => { const on = (c.name || "") === curName;
+      return `<button class="vcard ${on ? "on" : ""}" data-v="${esc(c.name || "")}" aria-pressed="${on}" aria-label="${esc(c.char)} voice"><span class="ve" aria-hidden="true">${c.emoji}</span><span class="vw" aria-hidden="true">🔈</span>${on ? `<span class="vck" aria-hidden="true">✓</span>` : ""}</button>`; }).join("")}</div>
+    <button class="btn block vdone" data-m="done" aria-label="Done">✓</button></div>`);
+  m.classList.add("vmodal");
+  if (!cards.length && window.speechSynthesis && speechSynthesis.addEventListener) { // iPad loads voices late: redraw when they arrive
+    const again = () => { speechSynthesis.removeEventListener("voiceschanged", again); if (m.isConnected && ElzeeVoice.choices(5).length) voicePicker(pid, true); };
+    speechSynthesis.addEventListener("voiceschanged", again);
+  }
+  m.querySelectorAll(".vcard").forEach(b => { b.onclick = () => {
+    const name = b.dataset.v || null; pl.voice = name; Store.save();
+    m.querySelectorAll(".vcard").forEach(x => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-pressed", on); const ck = x.querySelector(".vck"); if (on && !ck) x.insertAdjacentHTML("beforeend", `<span class="vck" aria-hidden="true">✓</span>`); if (!on && ck) ck.remove(); });
+    const c = list.find(x => (x.name || null) === name) || list[0];
+    b.classList.remove("hop"); void b.offsetWidth; b.classList.add("hop");
+    Speech.say(`Hi ${pl.name}! I'm ${c.char}. I can read to you.`, name);
+  }; });
+  m.querySelector('[data-m="done"]').onclick = () => { closeModal(); Sound.tap(); };
+  if (!quiet) { Sound.tap(); Speech.say("Pick a voice! Tap a friend to hear them.", pl.voice || null); }
+}
 function closetCommitSeen(pl) { // NEW tiles the kid has looked at stop being new
   if (!pl || !pl.closet || !closetSess || !closetSess.shown || !closetSess.shown.size) return;
   const before = closetFresh(pl).length; pl.closet.fresh = closetFresh(pl).filter(k => !closetSess.shown.has(k)); closetSess.shown.clear();

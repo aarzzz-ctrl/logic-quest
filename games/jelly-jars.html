@@ -235,6 +235,76 @@ h1,h2,h3{margin:0}
 <div id="ov"></div>
 <canvas id="fx" aria-hidden="true"></canvas>
 <script>
+/*VOICE-START v1.0.0*/
+/* ElzeeVoice v1.0.0 - one shared read-aloud voice for Elzee and its games (1.4.2).
+   Source of truth: workspace/build142/elzee-voice.js, pasted unchanged between the VOICE markers of
+   index.html and games/*.html (the pages are offline single files, so no <script src>).
+   - Calm, natural voices first (iPad Safari: Ava Premium/Enhanced, Samantha Enhanced, Allison, Susan, Karen, Samantha).
+   - Novelty voices (Fred, Zarvox, Bubbles, ...) are never used.
+   - One calm rate (0.9) and normal pitch (1.0) everywhere, younger mode included.
+   - Each kid picks their own voice in Elzee (🔈 on the top bar). It is saved on their profile as profile.voice
+     in logicquest.v1; games only READ it (active profile). No network, on-device voices only. */
+(function (root) {
+  "use strict";
+  var VERSION = "1.0.0", RATE = 0.9, PITCH = 1.0, MAIN_KEY = "logicquest.v1";
+  var NOVELTY = /(^|[\s.\-_(])(Fred|Albert|Bad News|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Pipe Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Bahh|Junior|Ralph|Kathy|Deranged|Hysterical)($|[\s.\-_)])/i;
+  var PREFER = [/^Ava\b.*\((Premium|Enhanced)\)/i, /^Samantha\b.*\(Enhanced\)/i, /^Allison\b/i, /^Susan\b/i, /^Karen\b/i, /^Samantha\b/i];
+  // Friendly characters for the kids' voice cards (picture-only; no reading needed).
+  var CHARS = [{ e: "🦉", n: "Owl" }, { e: "🐻", n: "Bear" }, { e: "🐰", n: "Bunny" }, { e: "🐢", n: "Turtle" }, { e: "🐳", n: "Whale" }];
+  function isNovelty(v) { return !!v && (NOVELTY.test(String(v.name || "")) || NOVELTY.test(String(v.voiceURI || ""))); }
+  function score(v) {
+    var name = String(v.name || ""), i;
+    for (i = 0; i < PREFER.length; i++) if (PREFER[i].test(name)) return i;
+    return /^en[-_]US/i.test(v.lang || "") ? 20 : 30;
+  }
+  function voices() {
+    var all = [];
+    try { all = (root.speechSynthesis && root.speechSynthesis.getVoices && root.speechSynthesis.getVoices()) || []; } catch (e) { all = []; }
+    var seen = {}, out = [];
+    for (var i = 0; i < all.length; i++) {
+      var v = all[i];
+      if (!v || !/^en/i.test(v.lang || "") || v.localService === false || isNovelty(v) || seen[v.name]) continue; // on-device English only
+      seen[v.name] = 1; out.push(v);
+    }
+    return out.map(function (v, i) { return { v: v, s: score(v), i: i }; })
+      .sort(function (a, b) { return a.s - b.s || a.i - b.i; }).map(function (x) { return x.v; });
+  }
+  // Active Elzee profile, read only (games never write logicquest.v1).
+  function activeProfile() {
+    try {
+      var d = JSON.parse(root.localStorage.getItem(MAIN_KEY));
+      if (!d || !Array.isArray(d.profiles)) return null;
+      for (var i = 0; i < d.profiles.length; i++) if (d.profiles[i] && d.profiles[i].id === d.activeId) return d.profiles[i];
+    } catch (e) {}
+    return null;
+  }
+  function prefFor(p) { return p && typeof p.voice === "string" && p.voice ? p.voice.slice(0, 100) : null; }
+  function pick(name) {
+    var list = voices();
+    if (name) for (var i = 0; i < list.length; i++) if (list[i].name === name) return list[i];
+    return list[0] || null; // calm default
+  }
+  // Voice cards for the kid picker: the best few voices, each with a friendly character.
+  function choices(max) {
+    var list = voices().slice(0, Math.min(max || CHARS.length, CHARS.length));
+    return list.map(function (v, i) { return { name: v.name, lang: v.lang, emoji: CHARS[i].e, char: CHARS[i].n }; });
+  }
+  // Set voice, calm rate and normal pitch on an utterance. name undefined = the active profile's pick.
+  function apply(u, name) {
+    if (name === undefined) name = prefFor(activeProfile());
+    var v = pick(name);
+    if (v) { try { u.voice = v; } catch (e) { /* not a real voice object */ } u.lang = v.lang || "en-US"; } else u.lang = "en-US";
+    u.rate = RATE; u.pitch = PITCH;
+    api.last = v ? v.name : null;
+    return u;
+  }
+  var api = { version: VERSION, RATE: RATE, PITCH: PITCH, CHARS: CHARS, isNovelty: isNovelty, voices: voices, pick: pick,
+    choices: choices, apply: apply, prefFor: prefFor, activeProfile: activeProfile, last: null };
+  root.ElzeeVoice = api;
+})(typeof window !== "undefined" ? window : this);
+/*VOICE-END*/
+</script>
+<script>
 "use strict";
 /* ==========================================================================
    JELLY JARS: a hands-on sorting-logic interlude for Elzee.
@@ -548,9 +618,8 @@ const Speech = {
     try {
       speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
-      const vs = (speechSynthesis.getVoices() || []).filter(v => v.localService !== false && /^en/i.test(v.lang)); // on-device voices only
-      if (vs.length) u.voice = vs[0];
-      u.rate = 0.88; u.pitch = 1.1; u.onerror = () => {};
+      if (window.ElzeeVoice) ElzeeVoice.apply(u); else { u.lang = "en-US"; u.rate = 0.9; u.pitch = 1; } // 1.4.2: shared calm voice (kid's pick)
+      u.onerror = () => {};
       this.cur = u; speechSynthesis.speak(u);
     } catch (e) { /* no speech */ }
   },

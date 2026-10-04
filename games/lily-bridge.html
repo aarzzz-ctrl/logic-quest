@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Offline-only backstop: this page may not load anything from anywhere (no fonts, images, scripts, or fetches). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; media-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2a9d8f">
+<link rel="icon" href="data:,">
+<title>Lily Bridge · Elzee</title>
+<style>
+:root{
+  --bg:#fff8e7; --ink:#2d2a4a; --muted:#6f6b8a; --line:#e7e2f5;
+  --good:#3ccf4e; --good-d:#2a9d38; --gold:#ffc83d; --gold-d:#e0a400; --oops:#ff9f43;
+  --water:#3fb5a6; --water-d:#2a8f84; --sand:#f3d9a4; --sand-d:#dcb878;
+  --font:"Fredoka","Chalkboard SE","Comic Sans MS","Arial Rounded MT Bold",system-ui,sans-serif;
+  --p:72px;   /* board cell size (set from JS to fit the screen) */
+  --t:72px;   /* tray piece size */
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;overflow-x:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:20px;line-height:1.3;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-text-size-adjust:100%;overscroll-behavior:none}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2{margin:0}
+#app{max-width:1180px;margin:0 auto;
+  padding:calc(env(safe-area-inset-top) + 8px) calc(env(safe-area-inset-right) + 12px) calc(env(safe-area-inset-bottom) + 12px) calc(env(safe-area-inset-left) + 12px)}
+.btn{border:none;border-radius:18px;padding:10px 20px;min-height:64px;min-width:64px;font-size:22px;font-weight:600;
+  background:var(--good);color:#fff;box-shadow:0 5px 0 var(--good-d);display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--good-d)}
+.btn.ghost{background:#fff;color:var(--ink);box-shadow:0 5px 0 var(--line);border:2px solid var(--line)}
+.btn .ico{font-size:30px;line-height:1}
+.iconbtn{border:none;background:#fff;border-radius:16px;width:56px;height:56px;font-size:28px;flex:none;
+  box-shadow:0 4px 0 var(--line);display:inline-flex;align-items:center;justify-content:center}
+.iconbtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.iconbtn.on{background:#e3f6f3;box-shadow:0 4px 0 #b9e3dc}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:8px;margin-bottom:10px;min-height:56px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:#fff;border-radius:999px;padding:4px 14px;min-height:52px;
+  font-size:21px;font-weight:700;box-shadow:0 4px 0 var(--line);min-width:0}
+.pill .av{font-size:30px}
+.pill .nm{max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jar b{color:var(--gold-d)}
+.jarbar{width:80px;height:14px;border-radius:99px;background:#f1edfa;overflow:hidden;flex:none}
+.jarbar i{display:block;height:100%;background:var(--gold);border-radius:99px}
+.spacer{flex:1;min-width:0}
+
+/* start screen */
+.hero{display:flex;align-items:center;gap:12px;margin:4px 0 14px}
+.hero .frog{width:92px;height:92px;flex:none;animation:bob 2.2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.bubble{background:#fff;border-radius:20px;padding:12px 16px;box-shadow:0 4px 0 var(--line);font-size:20px;flex:1;min-width:0}
+.bubble.sayzone{display:flex;align-items:center;gap:10px}
+.bubble .btxt{flex:1;min-width:0}
+.zonehead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.zonehead h2{margin:0 0 0 4px!important}
+[data-say]{cursor:pointer}
+.sayzone.nudge,.story.nudge{animation:nudge .6s ease-in-out 2}
+@keyframes nudge{50%{box-shadow:0 0 0 6px var(--gold)}}
+.piece.glow,.cell.glow{animation:glow 1s ease-in-out infinite alternate}
+@keyframes glow{from{box-shadow:0 0 0 0 rgba(255,200,61,.0)}to{box-shadow:0 0 0 7px rgba(255,200,61,.95)}}
+.tiers.one{grid-template-columns:minmax(0,1fr)}
+.tiers.one .tier{min-height:150px}
+.bubble .demo{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.bubble .demo svg{width:46px;height:46px}
+.tiers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.tier{border:none;background:linear-gradient(var(--water),var(--water-d));border-radius:24px;box-shadow:0 6px 0 #1f6e66;color:#fff;
+  min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:12px 6px;position:relative}
+.tier:active{transform:translateY(4px);box-shadow:0 2px 0 #1f6e66}
+.tier.rec{outline:5px solid var(--gold);outline-offset:-5px}
+.tier .mini{display:flex;gap:2px}
+.tier .mini svg{width:30px;height:30px}
+@media (min-width:700px){ .tier .mini svg{width:46px;height:46px} .tier .mini{gap:4px} }
+.tier b{font-size:19px}
+.tier .resume{position:absolute;top:8px;right:10px;font-size:26px}
+.shelf{background:#fff;border-radius:24px;box-shadow:0 6px 0 var(--line);padding:12px;margin-top:18px}
+.shelf h2{font-size:22px;margin:0 0 8px 4px}
+.stk{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:10px}
+.stk span{height:64px;border-radius:16px;background:#e3f6f3;display:flex;align-items:center;justify-content:center;font-size:38px}
+.stk span.no{background:#f1eff6;filter:grayscale(1);opacity:.35;font-size:26px}
+
+/* play layout */
+.playwrap{display:grid;gap:12px;justify-items:center}
+.side{display:grid;gap:10px;width:100%;max-width:700px;align-content:start}
+.story{display:flex;align-items:center;gap:8px;background:#fff;border-radius:20px;box-shadow:0 5px 0 var(--line);padding:6px 10px;min-height:64px;flex-wrap:nowrap}
+.story .who{display:flex;align-items:center;gap:2px;flex:none}
+.story .who svg{width:44px;height:44px}
+.story .arrow{font-size:22px;color:var(--water-d);font-weight:700}
+.tripdots{display:flex;gap:6px;align-items:center;flex:none}
+.tripdots i{display:block;width:22px;height:22px;border-radius:50%;background:#e2ede9;border:3px solid #cfe3dd}
+.tripdots i.done{background:#7cc96b;border-color:#58a84a}
+.tripdots i.cur{background:#fff4d4;border-color:var(--gold)}
+.story .ctrls{display:flex;gap:8px;margin-left:auto;flex:none}
+.say-line{font-size:17px;color:var(--muted);text-align:center}
+.boardcell{display:flex;justify-content:center;width:100%}
+.board{display:grid;gap:4px;background:radial-gradient(circle at 30% 20%,#6fd0c2,var(--water) 55%,var(--water-d));border-radius:24px;
+  padding:8px;box-shadow:0 6px 0 #1f6e66;position:relative}
+.board.sunset{background:radial-gradient(circle at 70% 15%,#ffc98a,#e99a7a 35%,var(--water-d) 80%)}
+.board.night{background:radial-gradient(circle at 50% 0%,#3b5a7a,#24425a 60%,#16303f)}
+.shore{grid-row:1 / -1;background:var(--sand);border-radius:14px;box-shadow:inset 0 -4px 0 var(--sand-d);position:relative}
+.shore .spot{position:absolute;left:0;right:0;height:var(--p);display:flex;align-items:center;justify-content:center}
+.shore .spot svg{width:92%;height:92%}
+.shore .spot .cup{position:absolute;top:-4px;right:-2px;font-size:calc(var(--p) * .3)}
+.shore .spot .think{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:calc(var(--p) * .28);background:#fff;border-radius:999px;padding:0 5px;box-shadow:0 2px 0 var(--line)}
+.cell{width:var(--p);height:var(--p);border-radius:12px;position:relative;display:flex;align-items:center;justify-content:center}
+.cell.rock svg,.cell.lily svg{width:78%;height:78%}
+.cell.slot{border:3px dashed rgba(255,255,255,.85);background:rgba(255,255,255,.12)}
+.cell.slot.target{background:rgba(255,236,160,.55);border-color:#ffe066;border-style:solid;transform:scale(1.06)}
+.cell.slot.sel-target{background:rgba(255,255,255,.28)}
+.cell.flash{background:rgba(255,159,67,.55)!important;border-color:var(--oops)!important}
+.plank{width:100%;height:100%;display:block;position:relative}
+.plank svg{width:100%;height:100%;display:block;pointer-events:none}
+.cell.fixed .plank svg{filter:drop-shadow(0 3px 0 rgba(0,0,0,.18))}
+.cell .piece{position:absolute;inset:0;border:none;background:none;padding:0;touch-action:none;border-radius:10px}
+.cell .piece svg{width:100%;height:100%;pointer-events:none;filter:drop-shadow(0 4px 0 rgba(0,0,0,.2))}
+.lit::after{content:"";position:absolute;inset:-2px;border-radius:12px;box-shadow:0 0 0 3px #ffe066,0 0 14px #ffe9a8;pointer-events:none}
+.squish{animation:squish .42s cubic-bezier(.3,1.6,.5,1)}
+@keyframes squish{0%{transform:scale(1.18,.82)}45%{transform:scale(.92,1.1)}75%{transform:scale(1.04,.97)}100%{transform:none}}
+.wobble{animation:wobble .42s ease-in-out}
+@keyframes wobble{20%{rotate:-10deg}40%{rotate:9deg}60%{rotate:-6deg}80%{rotate:4deg}100%{rotate:0deg}}
+.tray{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;background:#fff;border-radius:22px;box-shadow:0 6px 0 var(--line);padding:10px;
+  min-height:calc(var(--t) + 20px);width:100%}
+.tray .slotbox{width:var(--t);height:var(--t);position:relative;flex:none}
+.tray .piece{width:100%;height:100%;border:none;padding:0;border-radius:14px;background:#f6efe2;box-shadow:0 4px 0 #e2d4b8;touch-action:none;position:relative}
+.tray .piece svg{width:100%;height:100%;pointer-events:none;transition:transform .22s ease-out}
+.tray .piece.sel{outline:4px solid var(--gold);background:#fff4d4;transform:translateY(-4px)}
+.tray .piece.lifted{opacity:.25}
+.tray .rot{position:absolute;right:-8px;bottom:-8px;width:44px;height:44px;border-radius:50%;border:none;background:#fff;box-shadow:0 3px 0 var(--line);
+  font-size:22px;display:flex;align-items:center;justify-content:center;z-index:2}
+.tray .rot:active{transform:translateY(2px)}
+.tray.turny .slotbox{width:calc(var(--t) + 48px);height:var(--t);display:flex;flex-direction:row;gap:4px}
+.tray.turny .piece{width:var(--t);height:var(--t);flex:none}
+.tray.turny .rot{position:static;width:44px;height:100%;border-radius:14px;flex:none}
+.tray .empty{align-self:center;font-size:30px;color:var(--muted)}
+.dragghost{position:fixed;z-index:50;pointer-events:none;left:0;top:0;will-change:transform}
+.dragghost svg{width:100%;height:100%;filter:drop-shadow(0 10px 6px rgba(0,0,0,.25))}
+.dragghost.back{transition:transform .32s cubic-bezier(.3,.8,.4,1)}
+.dragghost.snap{transition:transform .14s ease-out}
+.frogger{position:absolute;z-index:5;pointer-events:none;width:calc(var(--p) * .9);height:calc(var(--p) * .9);left:0;top:0;transition:transform .2s ease-in-out}
+.frogger svg{width:100%;height:100%;animation:none}
+.frogger.hop svg{animation:hop .2s ease-in-out}
+@keyframes hop{50%{transform:translateY(-35%) scale(1.08,.94)}}
+.dance svg,.shore .spot.dance svg{animation:dance .5s ease-in-out infinite alternate}
+@keyframes dance{0%{transform:translateY(0) rotate(-7deg)}100%{transform:translateY(-10px) rotate(7deg)}}
+@media (orientation:landscape) and (min-aspect-ratio:5/4){
+  .playwrap{grid-template-columns:auto minmax(400px,1fr);align-items:start;justify-items:stretch}
+  .playwrap .boardcell{grid-column:1;grid-row:1}
+  .playwrap .side{grid-column:2;grid-row:1;max-width:none}
+}
+.playwrap.compact .top{margin-bottom:0}
+.playwrap.compact .top .nm{display:none}
+@media (orientation:landscape) and (min-aspect-ratio:5/4){ .playwrap.compact{grid-template-columns:auto minmax(320px,1fr);gap:10px} }
+.playwrap.compact .top .pill:not(.jar),.playwrap.compact .top .jarbar,.playwrap.compact .story .arrow{display:none}
+.playwrap.compact .top,.playwrap.compact .story{gap:5px}
+.playwrap.compact .tripdots{gap:3px}
+.playwrap.compact .tray{gap:8px}
+
+/* overlays */
+.ov{position:fixed;inset:0;background:rgba(45,42,74,.45);z-index:40;display:flex;align-items:center;justify-content:center;padding:14px}
+.panel{background:var(--bg);border-radius:28px;padding:20px;max-width:600px;width:100%;max-height:94vh;overflow:auto;text-align:center;
+  box-shadow:0 10px 0 rgba(0,0,0,.12);animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{0%{transform:scale(.4)}100%{transform:scale(1)}}
+.panel h2{font-size:30px;margin-bottom:6px}
+.cheer{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.cheer svg{width:64px;height:64px;animation:dance .55s ease-in-out infinite alternate}
+.cheer svg:nth-child(2n){animation-delay:.27s}
+.coins{font-size:30px;font-weight:700;color:var(--gold-d);margin:6px 0}
+.reveal{font-size:84px;line-height:1.1;animation:spin 1s .3s both}
+@keyframes spin{0%{transform:rotateY(180deg) scale(.3)}100%{transform:none}}
+.star{font-size:48px}
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.note{background:#fff;border-radius:16px;padding:10px 14px;box-shadow:0 4px 0 var(--line);margin:10px 0;font-size:18px}
+.left{text-align:left}
+.muted{color:var(--muted)}
+.confetti{position:fixed;top:-20px;z-index:60;width:12px;height:16px;border-radius:3px;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+
+@media (max-width:600px){
+  .top{gap:5px} .top .iconbtn{width:48px;height:48px;font-size:24px}
+  .pill{font-size:18px;padding:4px 10px;min-height:48px} .pill .av{font-size:26px}
+  .jarbar{width:44px}
+  .tiers{gap:8px} .tier{min-height:150px} .tier .mini svg{width:22px;height:22px}
+  .story .who svg{width:36px;height:36px} .story .ctrls .iconbtn{width:48px;height:48px;font-size:24px}
+  .tripdots i{width:16px;height:16px}
+  .btn{font-size:19px;padding:8px 12px;min-height:58px;min-width:58px}
+}
+@media (max-height:500px){
+  .top .iconbtn{width:46px;height:46px;font-size:22px} .pill{min-height:46px}
+  .story{min-height:54px;padding:4px 8px} .story .ctrls .iconbtn{width:46px;height:46px;font-size:22px}
+  .story .who svg{width:34px;height:34px}
+}
+/* Respect "reduce motion": no bouncing, wobbling, flying or falling. Feedback stays as colour + sound. */
+@media (prefers-reduced-motion: reduce){
+  .sayzone.nudge,.story.nudge,.piece.glow,.cell.glow{outline:5px solid var(--gold);outline-offset:2px}
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;animation-delay:0s!important;transition-duration:.001ms!important}
+  .confetti{display:none}
+}
+</style>
+</head>
+<body>
+<div id="app" role="main"></div>
+<div id="ov"></div>
+<script>
+/*VOICE-START v1.0.0*/
+/* ElzeeVoice v1.0.0 - one shared read-aloud voice for Elzee and its games (1.4.2).
+   Source of truth: workspace/build142/elzee-voice.js, pasted unchanged between the VOICE markers of
+   index.html and games/*.html (the pages are offline single files, so no <script src>).
+   - Calm, natural voices first (iPad Safari: Ava Premium/Enhanced, Samantha Enhanced, Allison, Susan, Karen, Samantha).
+   - Novelty voices (Fred, Zarvox, Bubbles, ...) are never used.
+   - One calm rate (0.9) and normal pitch (1.0) everywhere, younger mode included.
+   - Each kid picks their own voice in Elzee (🔈 on the top bar). It is saved on their profile as profile.voice
+     in logicquest.v1; games only READ it (active profile). No network, on-device voices only. */
+(function (root) {
+  "use strict";
+  var VERSION = "1.0.0", RATE = 0.9, PITCH = 1.0, MAIN_KEY = "logicquest.v1";
+  var NOVELTY = /(^|[\s.\-_(])(Fred|Albert|Bad News|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Pipe Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Bahh|Junior|Ralph|Kathy|Deranged|Hysterical)($|[\s.\-_)])/i;
+  var PREFER = [/^Ava\b.*\((Premium|Enhanced)\)/i, /^Samantha\b.*\(Enhanced\)/i, /^Allison\b/i, /^Susan\b/i, /^Karen\b/i, /^Samantha\b/i];
+  // Friendly characters for the kids' voice cards (picture-only; no reading needed).
+  var CHARS = [{ e: "🦉", n: "Owl" }, { e: "🐻", n: "Bear" }, { e: "🐰", n: "Bunny" }, { e: "🐢", n: "Turtle" }, { e: "🐳", n: "Whale" }];
+  function isNovelty(v) { return !!v && (NOVELTY.test(String(v.name || "")) || NOVELTY.test(String(v.voiceURI || ""))); }
+  function score(v) {
+    var name = String(v.name || ""), i;
+    for (i = 0; i < PREFER.length; i++) if (PREFER[i].test(name)) return i;
+    return /^en[-_]US/i.test(v.lang || "") ? 20 : 30;
+  }
+  function voices() {
+    var all = [];
+    try { all = (root.speechSynthesis && root.speechSynthesis.getVoices && root.speechSynthesis.getVoices()) || []; } catch (e) { all = []; }
+    var seen = {}, out = [];
+    for (var i = 0; i < all.length; i++) {
+      var v = all[i];
+      if (!v || !/^en/i.test(v.lang || "") || v.localService === false || isNovelty(v) || seen[v.name]) continue; // on-device English only
+      seen[v.name] = 1; out.push(v);
+    }
+    return out.map(function (v, i) { return { v: v, s: score(v), i: i }; })
+      .sort(function (a, b) { return a.s - b.s || a.i - b.i; }).map(function (x) { return x.v; });
+  }
+  // Active Elzee profile, read only (games never write logicquest.v1).
+  function activeProfile() {
+    try {
+      var d = JSON.parse(root.localStorage.getItem(MAIN_KEY));
+      if (!d || !Array.isArray(d.profiles)) return null;
+      for (var i = 0; i < d.profiles.length; i++) if (d.profiles[i] && d.profiles[i].id === d.activeId) return d.profiles[i];
+    } catch (e) {}
+    return null;
+  }
+  function prefFor(p) { return p && typeof p.voice === "string" && p.voice ? p.voice.slice(0, 100) : null; }
+  function pick(name) {
+    var list = voices();
+    if (name) for (var i = 0; i < list.length; i++) if (list[i].name === name) return list[i];
+    return list[0] || null; // calm default
+  }
+  // Voice cards for the kid picker: the best few voices, each with a friendly character.
+  function choices(max) {
+    var list = voices().slice(0, Math.min(max || CHARS.length, CHARS.length));
+    return list.map(function (v, i) { return { name: v.name, lang: v.lang, emoji: CHARS[i].e, char: CHARS[i].n }; });
+  }
+  // Set voice, calm rate and normal pitch on an utterance. name undefined = the active profile's pick.
+  function apply(u, name) {
+    if (name === undefined) name = prefFor(activeProfile());
+    var v = pick(name);
+    if (v) { try { u.voice = v; } catch (e) { /* not a real voice object */ } u.lang = v.lang || "en-US"; } else u.lang = "en-US";
+    u.rate = RATE; u.pitch = PITCH;
+    api.last = v ? v.name : null;
+    return u;
+  }
+  var api = { version: VERSION, RATE: RATE, PITCH: PITCH, CHARS: CHARS, isNovelty: isNovelty, voices: voices, pick: pick,
+    choices: choices, apply: apply, prefFor: prefFor, activeProfile: activeProfile, last: null };
+  root.ElzeeVoice = api;
+})(typeof window !== "undefined" ? window : this);
+/*VOICE-END*/
+</script>
+<script>
+"use strict";
+/* ==========================================================================
+   LILY BRIDGE: an Elzee interlude (spatial building). Boba Frog has to carry a
+   boba tea across the pond to a buddy. Kids drag plank pieces (straight and
+   corner) into the gaps so the planks connect from shore to shore.
+   Every pond is generated from a seed and solver-checked to be buildable with
+   the pieces in the tray (which include decoys).
+   ========================================================================== */
+const GAME = {
+  id: "lilybridge",
+  storageKey: "logicquest.minigame.lilybridge.v1", // this game's own key
+  mainKey: "logicquest.v1",                        // main app key: READ ONLY, never written here
+  pondsPerTrip: 3,
+};
+const ECON = { perPond: 1, tripBonus: 1, dailyCap: Infinity }; // Elzee 1.4.2: no daily cap (Aaron: unlimited, replays paid)
+const STICKERS = ["🪷", "🐞", "🍄", "🐌", "🌻", "🦆", "🦋", "🐢", "🐟", "🌈", "🐚", "🦀"];
+const SKIES = ["", "sunset", "night"];
+const FRIENDS = ["D", "C", "A", "B"];   // who is waiting for the boba on each pond
+const RM = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- generator + solver (identical copy is unit-tested in lily-bridge-dev/) ---------- */
+/*GEN-START*/
+/* Directions as bits: N=1 E=2 S=4 W=8. A plank tile is a 2-bit mask (straight or corner). */
+const DIRS = [[1, -1, 0], [2, 0, 1], [4, 1, 0], [8, 0, -1]];
+const OPP = { 1: 4, 4: 1, 2: 8, 8: 2 };
+const rotCW = m => ((m << 1) | (m >> 3)) & 15;
+const TILE_TYPES = [10, 5, 3, 6, 12, 9];               // ═ ║ ╚ ╔ ╗ ╝
+const isStraight = m => m === 10 || m === 5;
+const TIERS = {
+  1: { rows: 4, cols: 5, len: [5, 8],  gaps: 2, run: 0, extra: 0, decoys: 1, rotate: false, rocks: 0.15 },
+  2: { rows: 5, cols: 6, len: [7, 11], gaps: 2, run: 2, extra: 0, decoys: 2, rotate: false, rocks: 0.2 },
+  3: { rows: 5, cols: 6, len: [8, 13], gaps: 1, run: 3, extra: 3, decoys: 2, rotate: true,  rocks: 0.25 },
+};
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+/* Follows planks from the start (entering from the west shore). Returns the list of connected cells and whether it reaches the east shore at the goal row.
+   tileAt(i) -> mask or 0. */
+function trace(p, tileAt) {
+  const C = p.cols; let r = p.startRow, c = 0, from = 8; const cells = [], seen = new Set();
+  while (true) {
+    if (r < 0 || c < 0 || r >= p.rows) return { cells, done: false };
+    if (c >= C) return { cells, done: r === p.goalRow && from === 8 };
+    const i = r * C + c, m = tileAt(i);
+    if (!m || !(m & from) || seen.has(i)) return { cells, done: false };
+    seen.add(i); cells.push(i);
+    const out = m & ~from; const d = DIRS.find(x => x[0] === out);
+    if (!d) return { cells, done: false };
+    r += d[1]; c += d[2]; from = OPP[out];
+  }
+}
+/* Does mask m fit at cell i given its neighbours right now? Empty buildable neighbours are "unknown" and always ok. */
+function fits(p, i, m, tileAt) {
+  const C = p.cols, r = Math.floor(i / C), c = i % C;
+  for (const [bit, dr, dc] of DIRS) {
+    const nr = r + dr, nc = c + dc, has = !!(m & bit);
+    if (nc < 0 || nc >= C || nr < 0 || nr >= p.rows) {
+      const shoreOK = (nc < 0 && r === p.startRow) || (nc >= C && r === p.goalRow);
+      if (has && !shoreOK) return false;
+      if (!has && shoreOK) return false;  // the start/goal plank must reach the shore
+      continue;
+    }
+    const j = nr * C + nc, k = p.kind[j];
+    if (k === "rock" || k === "water") { if (has) return false; continue; }
+    const nm = tileAt(j);
+    if (!nm) continue;                          // empty slot: unknown
+    if (has !== !!(nm & OPP[bit])) return false;
+  }
+  return true;
+}
+/* Counts ways to finish the bridge using the tray (rotations allowed on tier 3). Stops at `limit`. */
+function countSolutions(p, limit = 1) {
+  const used = new Array(p.tray.length).fill(false), placed = {}; let n = 0;
+  (function walk(r, c, from) {
+    if (n >= limit) return;
+    if (c >= p.cols) { if (r === p.goalRow && from === 8) n++; return; }
+    if (r < 0 || c < 0 || r >= p.rows) return;
+    const i = r * p.cols + c;
+    const go = m => { const out = m & ~from; const d = DIRS.find(x => x[0] === out); walk(r + d[1], c + d[2], OPP[out]); };
+    if (p.kind[i] === "fixed") { if (p.fixed[i] & from) go(p.fixed[i]); return; }
+    if (p.kind[i] !== "slot" || placed[i]) return;
+    const tried = new Set();
+    for (let t = 0; t < p.tray.length; t++) {
+      if (used[t]) continue;
+      const options = p.rotate ? (isStraight(p.tray[t]) ? [10, 5] : [3, 6, 12, 9]) : [p.tray[t]];
+      for (const m of options) {
+        if (!(m & from) || tried.has(m)) continue;
+        tried.add(m); used[t] = true; placed[i] = m; go(m); delete placed[i]; used[t] = false;
+        if (n >= limit) return;
+      }
+    }
+  })(p.startRow, 0, 8);
+  return n;
+}
+function genPond(tier, seed) {
+  const T = TIERS[tier], rnd = mulberry32(seed >>> 0), R = T.rows, C = T.cols;
+  const pick = a => a[Math.floor(rnd() * a.length)];
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  for (let attempt = 0; attempt < 5000; attempt++) {
+    // 1. a random self-avoiding route from the west shore to the east shore
+    const startRow = Math.floor(rnd() * R), L = T.len[0] + Math.floor(rnd() * (T.len[1] - T.len[0] + 1));
+    const path = [[startRow, 0]], seen = new Set([startRow * C]);
+    while (path.length < L) {
+      const [r, c] = path[path.length - 1];
+      const opts = DIRS.map(([, dr, dc]) => [r + dr, c + dc]).filter(([a, b]) => a >= 0 && b >= 0 && a < R && b < C && !seen.has(a * C + b) && !(b === C - 1 && path.length < L - 1));
+      if (!opts.length) break;
+      const nx = pick(opts); path.push(nx); seen.add(nx[0] * C + nx[1]);
+    }
+    if (path.length !== L || path[L - 1][1] !== C - 1) continue;
+    const goalRow = path[L - 1][0];
+    const dirTo = (a, b) => DIRS.find(([, dr, dc]) => a[0] + dr === b[0] && a[1] + dc === b[1])[0];
+    const masks = path.map((cell, k) => (k === 0 ? 8 : dirTo(cell, path[k - 1])) | (k === L - 1 ? 2 : dirTo(cell, path[k + 1])));
+    // 2. choose the gaps: an optional run of consecutive planks + isolated gaps
+    const gapIdx = new Set();
+    if (T.run) { const s = Math.floor(rnd() * (L - T.run + 1)); for (let k = s; k < s + T.run; k++) gapIdx.add(k); }
+    const isoCands = shuffle([...Array(L).keys()].filter(k => !gapIdx.has(k) && !gapIdx.has(k - 1) && !gapIdx.has(k + 1)));
+    for (const k of isoCands) { if (gapIdx.size >= T.run + T.gaps) break; if (![...gapIdx].some(g => Math.abs(g - k) === 1)) gapIdx.add(k); }
+    if (gapIdx.size < T.run + T.gaps) continue;
+    // 3. build the board
+    const kind = new Array(R * C).fill("water"), fixed = {}, solution = {};
+    const onPath = new Set(path.map(([r, c]) => r * C + c));
+    path.forEach(([r, c], k) => { const i = r * C + c; if (gapIdx.has(k)) { kind[i] = "slot"; solution[i] = masks[k]; } else { kind[i] = "fixed"; fixed[i] = masks[k]; } });
+    // extra open-water build spots next to the run, so big kids can choose a different route
+    if (T.extra) {
+      const near = new Set();
+      for (const k of gapIdx) { const [r, c] = path[k]; for (const [, dr, dc] of DIRS) { const a = r + dr, b = c + dc; if (a >= 0 && b >= 0 && a < R && b < C && !onPath.has(a * C + b)) near.add(a * C + b); } }
+      shuffle([...near]).slice(0, T.extra).forEach(i => { kind[i] = "slot"; });
+    }
+    for (let i = 0; i < R * C; i++) if (kind[i] === "water" && rnd() < T.rocks) kind[i] = "rock";
+    // 4. tray: the needed planks + decoys, shuffled; tier 3 pieces start in a random turn
+    let tray = Object.values(solution).concat(Array.from({ length: T.decoys }, () => pick(TILE_TYPES)));
+    tray = shuffle(tray);
+    if (T.rotate) tray = tray.map(m => { let x = m; const k = Math.floor(rnd() * 4); for (let j = 0; j < k; j++) x = rotCW(x); return x; });
+    const p = { tier, seed, rows: R, cols: C, startRow, goalRow, kind, fixed, solution, tray, rotate: T.rotate, path: path.map(([r, c]) => r * C + c) };
+    // 5. solver check: must be solvable with the tray, and NOT already complete
+    if (trace(p, i => (kind[i] === "fixed" ? fixed[i] : 0)).done) continue;
+    if (countSolutions(p, 1) !== 1) continue;
+    return p;
+  }
+  return null;
+}
+/*GEN-END*/
+
+/* ---------- art ---------- */
+function face(ey, mood, opt = {}) {
+  const sp = opt.sp || 12, cx = 50;
+  const eyes = mood === "yay"
+    ? `<path d="M${cx-sp-5} ${ey+1} q5 -7 10 0 M${cx+sp-5} ${ey+1} q5 -7 10 0" stroke="#2d2a4a" stroke-width="3.5" fill="none" stroke-linecap="round"/>`
+    : `<circle cx="${cx-sp}" cy="${ey}" r="4.8" fill="#2d2a4a"/><circle cx="${cx+sp}" cy="${ey}" r="4.8" fill="#2d2a4a"/>
+       <circle cx="${cx-sp+1.6}" cy="${ey-1.8}" r="1.6" fill="#fff"/><circle cx="${cx+sp+1.6}" cy="${ey-1.8}" r="1.6" fill="#fff"/>`;
+  const m = ey + (opt.my || 9);
+  const mouth = mood === "sad" ? `<path d="M${cx-5} ${m+4} q5 -6 10 0" stroke="#2d2a4a" stroke-width="3" fill="none" stroke-linecap="round"/>`
+    : mood === "yay" ? `<path d="M${cx-6} ${m-1} q6 10 12 0 z" fill="#e35d7a" stroke="#2d2a4a" stroke-width="2.5" stroke-linejoin="round"/>`
+    : `<path d="M${cx-5} ${m} q5 5 10 0" stroke="#2d2a4a" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  const brow = mood === "sad" ? `<path d="M${cx-sp-6} ${ey-9} l9 3 M${cx+sp+6} ${ey-9} l-9 3" stroke="#2d2a4a" stroke-width="2.5" stroke-linecap="round"/>` : "";
+  return `${eyes}${brow}<ellipse cx="${cx-sp-9}" cy="${ey+8}" rx="6" ry="3.6" fill="#ff8fab" opacity=".55"/>
+    <ellipse cx="${cx+sp+9}" cy="${ey+8}" rx="6" ry="3.6" fill="#ff8fab" opacity=".55"/>${mouth}`;
+}
+function buddySVG(id, mood = "happy") {
+  let body = "";
+  if (id === "D") body = `
+    <path d="M10 72 Q10 40 50 32 Q90 40 90 72 Q90 88 50 88 Q10 88 10 72Z" fill="#fff3dc" stroke="#e5c995" stroke-width="3"/>
+    <path d="M34 37 q4 -7 8 0 M46 33 q4 -7 8 0 M58 37 q4 -7 8 0" stroke="#e5c995" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M30 34 Q34 12 52 12 Q68 13 72 30 Z" fill="#9b6b43"/><path d="M24 33 Q50 24 80 31 Q52 38 24 33Z" fill="#7a5233"/>
+    <path d="M40 18 l10 -6 l3 4" stroke="#c99b6b" stroke-width="3" fill="none"/>${face(60, mood)}`;
+  else if (id === "C") body = `
+    <circle cx="26" cy="30" r="7" fill="#a86f42"/><circle cx="74" cy="30" r="7" fill="#a86f42"/>
+    <rect x="12" y="26" width="76" height="64" rx="30" fill="#c48a5a"/>
+    <g fill="#fff" stroke="#ddd" stroke-width="2"><circle cx="38" cy="24" r="9"/><circle cx="50" cy="20" r="9.5"/><circle cx="62" cy="24" r="9"/>
+    <circle cx="15" cy="48" r="8"/><circle cx="13" cy="62" r="8"/><circle cx="85" cy="48" r="8"/><circle cx="87" cy="62" r="8"/></g>
+    <ellipse cx="50" cy="71" rx="19" ry="12" fill="#a86f42"/>
+    <ellipse cx="44" cy="66" rx="2.5" ry="1.6" fill="#5b3a22"/><ellipse cx="56" cy="66" rx="2.5" ry="1.6" fill="#5b3a22"/>
+    ${face(50, mood, { my: 24, sp: 14 })}`;
+  else if (id === "A") body = `
+    <g fill="#ff7aa2"><rect x="2" y="34" width="22" height="9" rx="4.5" transform="rotate(-25 13 38)"/><rect x="0" y="49" width="22" height="9" rx="4.5"/>
+    <rect x="2" y="63" width="22" height="9" rx="4.5" transform="rotate(25 13 67)"/>
+    <rect x="76" y="34" width="22" height="9" rx="4.5" transform="rotate(25 87 38)"/><rect x="78" y="49" width="22" height="9" rx="4.5"/>
+    <rect x="76" y="63" width="22" height="9" rx="4.5" transform="rotate(-25 87 67)"/></g>
+    <ellipse cx="50" cy="60" rx="35" ry="29" fill="#ffc2d4" stroke="#f59ab8" stroke-width="3"/>${face(56, mood, { sp: 14 })}`;
+  else if (id === "B") body = `
+    <ellipse cx="36" cy="26" rx="9" ry="21" fill="#ffe6d6" stroke="#f2b99b" stroke-width="3"/><ellipse cx="36" cy="28" rx="4" ry="13" fill="#ffc2d4"/>
+    <ellipse cx="64" cy="26" rx="9" ry="21" fill="#ffe6d6" stroke="#f2b99b" stroke-width="3"/><ellipse cx="64" cy="28" rx="4" ry="13" fill="#ffc2d4"/>
+    <ellipse cx="50" cy="64" rx="36" ry="27" fill="#ffe6d6" stroke="#f2b99b" stroke-width="3"/>${face(60, mood)}`;
+  else if (id === "F") body = `
+    <circle cx="32" cy="38" r="14" fill="#8fd16a" stroke="#6cb14a" stroke-width="3"/><circle cx="68" cy="38" r="14" fill="#8fd16a" stroke="#6cb14a" stroke-width="3"/>
+    <ellipse cx="50" cy="64" rx="38" ry="26" fill="#8fd16a" stroke="#6cb14a" stroke-width="3"/>
+    <ellipse cx="50" cy="74" rx="22" ry="12" fill="#c9efb0"/>
+    <circle cx="44" cy="78" r="3" fill="#5b3a22"/><circle cx="52" cy="80" r="3" fill="#5b3a22"/><circle cx="58" cy="76" r="3" fill="#5b3a22"/>
+    ${face(38, mood, { sp: 18, my: 20 })}`;
+  return `<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">${body}</svg>`;
+}
+
+/* A wooden plank piece: a centre block plus an arm toward each connected side. */
+function plankSVG(m, kind = "loose") {
+  const wood = kind === "fixed" ? "#b67a49" : "#d8a26b", edge = kind === "fixed" ? "#8a5a33" : "#a8743f";
+  const arms = { 1: "M34 0 H66 V50 H34 Z", 2: "M50 34 H100 V66 H50 Z", 4: "M34 50 H66 V100 H34 Z", 8: "M0 34 H50 V66 H0 Z" };
+  const lines = { 1: "M50 4 V30", 2: "M70 50 H96", 4: "M50 70 V96", 8: "M4 50 H30" };
+  let d = "", l = "";
+  for (const b of [1, 2, 4, 8]) if (m & b) { d += arms[b] + " "; l += lines[b] + " "; }
+  return `<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path d="${d} M30 30 H70 V70 H30 Z" fill="${wood}" stroke="${edge}" stroke-width="4" stroke-linejoin="round"/>
+    <path d="${l}" stroke="${edge}" stroke-width="3" stroke-linecap="round" opacity=".55"/><circle cx="40" cy="40" r="3" fill="${edge}"/><circle cx="60" cy="60" r="3" fill="${edge}"/></svg>`;
+}
+const ROCK = `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M14 70 Q10 40 34 28 Q52 14 72 30 Q92 42 86 70 Q70 86 46 84 Q22 84 14 70Z" fill="#9aa0a6" stroke="#6e747a" stroke-width="5"/><path d="M34 44 Q44 36 56 40" stroke="#c9cdd1" stroke-width="5" fill="none" stroke-linecap="round"/></svg>`;
+const LILY = `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 50 L58 6 A44 44 0 1 1 42 6 Z" fill="#7cc96b" stroke="#58a84a" stroke-width="4" opacity=".85"/></svg>`;
+
+/* ---------- utilities ---------- */
+const $app = document.getElementById("app"), $ov = document.getElementById("ov");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+function ymd(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+const todayStr = () => ymd(new Date());
+const num = (v, d = 0) => (typeof v === "number" && isFinite(v) ? Math.max(0, Math.floor(v)) : d);
+const isObj = v => !!v && typeof v === "object" && !Array.isArray(v);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function newSeed() { try { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] || 1; } catch (e) { return ((Date.now() ^ (Math.random() * 4294967296)) >>> 0) || 1; } }
+const hash = i => ((i * 2654435761) >>> 0) % 7;
+
+/* ---------- main app profile (read only) ---------- */
+function readMainProfile() {
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem(GAME.mainKey)); } catch (e) { raw = null; }
+  const base = { id: "guest", name: "Guest", avatar: "🙂", little: false, sound: true, linked: false };
+  if (!isObj(raw) || !Array.isArray(raw.profiles)) return base;
+  const sound = typeof raw.sound === "boolean" ? raw.sound : true;
+  const p = raw.profiles.find(x => isObj(x) && x.id === raw.activeId);
+  if (!p) return { ...base, sound };
+  return { id: String(p.id).slice(0, 40), name: typeof p.name === "string" && p.name.trim() ? p.name.slice(0, 40) : "Player",
+    avatar: typeof p.avatar === "string" && p.avatar ? p.avatar.slice(0, 16) : "🙂", little: p.pathId === "little", sound, linked: true };
+}
+
+/* ---------- this game's own store (kids[id].lifetime only grows: matches the main app's claim ledger) ---------- */
+const Store = {
+  data: null,
+  cleanTrip(t) {
+    if (!isObj(t) || ![1, 2, 3].includes(t.tier) || !Array.isArray(t.seeds) || t.seeds.length !== GAME.pondsPerTrip) return null;
+    const seeds = t.seeds.map(s => num(s)); if (seeds.some(s => !s)) return null;
+    const placed = {};
+    if (isObj(t.placed)) for (const [k, v] of Object.entries(t.placed)) if (/^\d+$/.test(k) && Number.isInteger(v) && v >= 0 && v < 20) placed[k] = v;
+    const rots = Array.isArray(t.rots) ? t.rots.map(m => ([10, 5, 3, 6, 12, 9].includes(m) ? m : 0)) : [];
+    return { tier: t.tier, seeds, i: Math.min(GAME.pondsPerTrip, num(t.i)), placed, rots,
+      wobbles: num(t.wobbles), hints: num(t.hints), stars: num(t.stars), sky: num(t.sky) % SKIES.length };
+  },
+  load() {
+    let raw = null;
+    try { raw = JSON.parse(localStorage.getItem(GAME.storageKey)); } catch (e) { raw = null; }
+    const d = { version: 1, kids: {} };
+    if (isObj(raw) && isObj(raw.kids)) for (const [id, k] of Object.entries(raw.kids)) {
+      if (!isObj(k)) continue;
+      d.kids[String(id).slice(0, 40)] = {
+        day: typeof k.day === "string" ? k.day : null, earnedToday: num(k.earnedToday),
+        lifetime: num(k.lifetime), pending: num(k.pending), trips: num(k.trips), ponds: num(k.ponds),
+        tier: [1, 2, 3].includes(k.tier) ? k.tier : null,
+        noRead: typeof k.noRead === "boolean" ? k.noRead : null, sound: typeof k.sound === "boolean" ? k.sound : null,
+        trip: this.cleanTrip(k.trip),
+      };
+    }
+    this.data = d;
+  },
+  save() {
+    try {
+      let disk = null; try { disk = JSON.parse(localStorage.getItem(GAME.storageKey)); } catch (e) { disk = null; }
+      if (isObj(disk) && isObj(disk.kids)) for (const [id, k] of Object.entries(this.data.kids)) {
+        const o = disk.kids[id]; if (isObj(o)) k.lifetime = Math.max(k.lifetime, num(o.lifetime)); // never lower what the wallet ledger has seen
+      }
+      localStorage.setItem(GAME.storageKey, JSON.stringify(this.data));
+    } catch (e) { /* private mode / storage full */ }
+  },
+};
+let me = readMainProfile();
+function kid() {
+  const d = Store.data;
+  if (!d.kids[me.id]) d.kids[me.id] = { day: null, earnedToday: 0, lifetime: 0, pending: 0, trips: 0, ponds: 0, tier: null, noRead: null, sound: null, trip: null };
+  const k = d.kids[me.id];
+  if (k.day !== todayStr()) { k.day = todayStr(); k.earnedToday = 0; }
+  return k;
+}
+const noRead = () => { const k = kid(); return k.noRead === null ? me.little : k.noRead; };
+const soundOn = () => { const k = kid(); return k.sound === null ? me.sound : k.sound; };
+/* Younger mode (one per-kid switch, on by default for the 'little' path): pictures only, every screen talks,
+   Little pond only, and no way to "fail" (wrong pieces just wobble home, the star is never lost). */
+const young = noRead;
+const recTier = () => young() ? 1 : kid().tier || (me.little ? 1 : 2);
+function pay(n) { const k = kid(), got = Math.max(0, Math.min(n, ECON.dailyCap - k.earnedToday)); k.earnedToday += got; k.lifetime += got; k.pending += got; return got; }
+
+/* ---------- sound + optional speech (on-device only) ---------- */
+const Sound = {
+  ctx: null,
+  play(notes, type = "triangle") {
+    if (!soundOn()) return;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      this.ctx = this.ctx || new AC();
+      if (this.ctx.state === "suspended" && this.ctx.resume) this.ctx.resume().catch(() => {});
+      let t = this.ctx.currentTime;
+      for (const [f, dur] of notes) {
+        const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = type; o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.2, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g).connect(this.ctx.destination); o.start(t); o.stop(t + dur + 0.02); t += dur * 0.75;
+      }
+    } catch (e) { /* no audio */ }
+  },
+  lift() { this.play([[480, .05]]); }, clack() { this.play([[180, .06], [260, .08]], "square"); },
+  boing() { this.play([[300, .1], [220, .12], [300, .1]], "sine"); }, tap() { this.play([[600, .05]]); },
+  hop() { this.play([[620, .05], [820, .06]]); }, win() { this.play([[523, .14], [659, .14], [784, .14], [1047, .3]]); },
+};
+const Speech = {
+  ok: !!window.speechSynthesis && typeof SpeechSynthesisUtterance === "function",
+  /* Returns true if it handed the words to a voice. force = the child pressed 🔈 (speak even if game sounds are off). */
+  say(text, force = false) {
+    if (!this.ok || (!soundOn() && !force)) return false;
+    // iPad Safari: speech only starts inside a tap. Before the first tap, keep the newest line and say it on that tap.
+    if (!this.unlocked && !(navigator.userActivation && navigator.userActivation.hasBeenActive)) { this.pending = text; return true; }
+    this.unlocked = true;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      if (window.ElzeeVoice) ElzeeVoice.apply(u); else { u.lang = "en-US"; u.rate = 0.9; u.pitch = 1; } // shared calm voice (kid's pick)
+      u.onerror = () => {};
+      this.cur = u; speechSynthesis.speak(u); return true;
+    } catch (e) { return false; }
+  },
+  /* Auto-speak the first time a screen shows in younger mode. */
+  seen: new Set(),
+  auto(key, text) { if (!young() || this.seen.has(key)) return; this.seen.add(key); this.say(text); },
+  stop() { this.pending = null; if (this.ok) try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } },
+  unlocked: false, pending: null,
+  unlock() { if (this.unlocked) return; this.unlocked = true; const p = this.pending; this.pending = null; if (p) this.say(p, true); },
+};
+for (const ev of ["pointerup", "touchend", "click", "keydown"]) document.addEventListener(ev, () => Speech.unlock(), { capture: true, passive: true });
+/* 🔈 button: speaks; with no voice on the device it still answers: a chime and a glow around the pictures it explains. */
+function sayBtn(text, cls = "iconbtn") { return `<button class="${cls} saybtn" data-act="sayZone" data-say="${esc(text)}" aria-label="Read aloud">🔈</button>`; }
+function speakOrNudge(text, el) {
+  if (Speech.say(text, true)) return;
+  Sound.play([[660, .12], [880, .16]]);
+  const z = el && el.closest(".sayzone, .story, .panel, .pill"); if (!z) return;
+  z.classList.remove("nudge"); void z.offsetWidth; z.classList.add("nudge"); setTimeout(() => z.classList.remove("nudge"), 1300);
+}
+const jarText = () => { const k = kid(); return `You earned ${k.earnedToday} token${k.earnedToday === 1 ? "" : "s"} here today. Every bridge earns more!`; };
+const startText = () => `Lily Bridge! Boba Frog is bringing boba to a friend. Drag the wood pieces into the gaps to make a bridge. ${young() ? "Tap the pond to play!" : "Pick a pond to play."}${kid().earnedToday >= ECON.dailyCap ? " " + jarText() : ""}`;
+const pondText = () => `Make a bridge for ${BUDDY_NAMES[friend()]}! Drag the wood pieces into the gaps. Openings must touch openings.${pond.rotate ? " Tap the turn button to spin a piece." : ""}`;
+
+/* ---------- state ---------- */
+let view = "start", pond = null, sel = null, busy = false;
+const trip = () => kid().trip;
+const friend = () => FRIENDS[(kid().ponds + trip().i) % FRIENDS.length];
+const maskOf = t => trip().rots[t] || pond.tray[t];
+const placedAt = i => { const t = trip().placed[i]; return t === undefined ? 0 : maskOf(t); };
+const tileAt = i => pond.kind[i] === "fixed" ? pond.fixed[i] : pond.kind[i] === "slot" ? placedAt(i) : 0;
+const usedTray = () => new Set(Object.values(trip().placed));
+
+function startTrip(tier) {
+  const k = kid(); k.tier = tier;
+  k.trip = { tier, seeds: Array.from({ length: GAME.pondsPerTrip }, newSeed), i: 0, placed: {}, rots: [], wobbles: 0, hints: 0, stars: 0, sky: k.trips % SKIES.length };
+  Store.save(); openPond(true);
+}
+function openPond(push) {
+  document.querySelectorAll(".confetti").forEach(c => c.remove());
+  const t = trip(); if (!t || t.i >= GAME.pondsPerTrip) { view = "start"; return render(); }
+  pond = genPond(t.tier, t.seeds[t.i]);
+  if (!pond) { t.seeds[t.i] = newSeed(); Store.save(); return openPond(push); } // not expected: 0 failures in the 6000-seed test
+  // validate a resumed board: rotations must keep each piece's shape family, placements must be on slots with unique pieces
+  t.rots = pond.tray.map((m, i) => { const r = t.rots[i]; return r && (isStraight(r) === isStraight(m)) && (pond.rotate || r === m) ? r : m; });
+  const seen = new Set();
+  for (const [k, v] of Object.entries(t.placed)) { if (pond.kind[+k] !== "slot" || v >= pond.tray.length || seen.has(v)) delete t.placed[k]; else seen.add(v); }
+  sel = null; busy = false; misses = 0; Store.save();
+  if (push && view !== "pond") try { history.pushState({ s: "pond" }, ""); } catch (e) { /* no history */ }
+  view = "pond"; render(); window.scrollTo(0, 0);
+  Speech.auto("pond:" + t.seeds[t.i], pondText());
+  if (trace(pond, tileAt).done) celebrate();   // resumed exactly at a finished bridge
+}
+
+/* ---------- rendering ---------- */
+function topBar() {
+  const k = kid(), nr = noRead();
+  return `<div class="top">
+    ${view === "pond" ? `<button class="iconbtn" data-act="leave" aria-label="Back">⬅️</button>` : ""}
+    <div class="pill" aria-label="Player ${esc(me.name)}" data-say="${esc(`This is you, ${me.name}!`)}"><span class="av">${esc(me.avatar)}</span>${nr ? "" : `<span class="nm">${esc(me.name)}</span>`}</div>
+    <div class="pill jar" aria-label="Tokens today: ${k.earnedToday}" data-say="${esc(jarText())}">🪙 <b>${k.earnedToday}</b></div>
+    <div class="spacer"></div>
+    ${view === "start" ? `<button class="iconbtn ${nr ? "on" : ""}" data-act="toggleRead" aria-label="${nr ? "Younger mode is on: pictures and talking. Tap for words and all ponds" : "Tap for younger mode: pictures and talking"}" aria-pressed="${nr}">${nr ? "🐣" : "🔤"}</button>` : ""}
+    <button class="iconbtn" data-act="toggleSound" aria-label="Sound ${soundOn() ? "on" : "off"}" aria-pressed="${soundOn()}">${soundOn() ? "🔊" : "🔇"}</button>
+    ${view === "start" ? `<button class="iconbtn" data-act="grown" aria-label="For grown-ups">ⓘ</button>` : ""}
+  </div>`;
+}
+function renderStart() {
+  const k = kid(), nr = noRead(), t = k.trip, rec = recTier(), full = k.earnedToday >= ECON.dailyCap;
+  const names = { 1: "Little pond", 2: "Big pond", 3: "Twisty pond" }, minis = { 1: [10, 10], 2: [10, 3, 5], 3: [6, 12, "⟳"] };
+  const inApp = /\/games\/[^/]+\.html$/.test(location.pathname) && location.protocol !== "file:";
+  $app.innerHTML = `${topBar()}
+    <div class="hero"><div class="frog">${buddySVG("F", "yay")}</div>
+      <div class="bubble sayzone"><div class="btxt">${nr ? `<div class="demo" aria-label="Put planks in the gaps to make a bridge">${buddySVG("F")} ${plankSVG(10, "fixed")}${plankSVG(10)}${plankSVG(12, "fixed")} ➜ ${buddySVG("D")}</div>`
+        : `<b>Lily Bridge!</b> Boba Frog is bringing boba to a friend. Drag the wood pieces into the gaps so the bridge connects all the way across!`}
+        ${full ? (nr ? `<div class="jarfull" aria-label="Token jar full for today">🪙✅🌙</div>` : `<div class="muted jarfull" style="margin-top:6px">Your token jar is full for today 🌙 Bridges are still free to build!</div>`) : ""}
+      </div>${sayBtn(startText())}</div></div>
+    <div class="tiers ${nr ? "one" : ""}">${(nr ? [1] : [1, 2, 3]).map(n => { const resume = t && t.tier === n && t.i < GAME.pondsPerTrip;
+      return `<button class="tier ${n === rec ? "rec" : ""}" data-act="tier" data-tier="${n}" aria-label="${names[n]}${resume ? ", keep going" : ""}">
+        ${resume ? `<span class="resume" aria-hidden="true">▶️</span>` : ""}
+        <span class="mini">${minis[n].map(m => typeof m === "number" ? plankSVG(m) : `<span style="font-size:24px">${m}</span>`).join("")}</span>
+        ${nr ? "" : `<b>${names[n]}</b>`}</button>`; }).join("")}</div>
+    <div class="shelf sayzone"><div class="zonehead"><h2>${nr ? "🪷" : "🪷 My Pond"}</h2>${sayBtn(`My Pond sticker book. You have ${k.trips} sticker${k.trips === 1 ? "" : "s"}. Build three bridges in a row to get a new sticker!`)}</div>
+      <div class="stk">${STICKERS.map((s, i) => `<span class="${i < k.trips ? "" : "no"}" aria-label="${i < k.trips ? "sticker" : "locked sticker"}">${i < k.trips ? s : "?"}</span>`).join("")}</div></div>
+    ${inApp ? `<div class="row"><a class="btn ghost" href="../index.html#home" aria-label="Back to Elzee">🏠 ${nr ? "" : "Elzee"}</a></div>` : ""}`;
+}
+
+const compact = () => window.innerHeight < 500 && window.innerWidth > window.innerHeight * 1.25;
+let wasCompact = null;
+const landMQ = () => window.matchMedia("(orientation:landscape) and (min-aspect-ratio:5/4)").matches;
+const layoutKey = () => compact() + "/" + landMQ();
+function renderPond() {
+  const t = trip(), p = pond, nr = noRead(), cp = compact(), st = landMQ(); wasCompact = layoutKey();
+  const lit = new Set(trace(p, tileAt).cells), used = usedTray(), who = friend();
+  const cells = [];
+  for (let i = 0; i < p.rows * p.cols; i++) {
+    const k = p.kind[i], r = Math.floor(i / p.cols), c = i % p.cols, pos = `grid-row:${r + 1};grid-column:${c + 2}`;
+    if (k === "fixed") cells.push(`<div class="cell fixed ${lit.has(i) ? "lit" : ""}" style="${pos}"><span class="plank">${plankSVG(p.fixed[i], "fixed")}</span></div>`);
+    else if (k === "slot") {
+      const tIdx = t.placed[i];
+      cells.push(`<div class="cell slot ${lit.has(i) ? "lit" : ""} ${sel !== null && tIdx === undefined ? "sel-target" : ""}" data-slot="${i}" style="${pos}" aria-label="Gap">${tIdx === undefined ? "" :
+        `<button class="piece" data-piece="${tIdx}" data-from="${i}" aria-label="Wood piece, tap to take it back">${plankSVG(maskOf(tIdx))}</button>`}</div>`);
+    } else if (k === "rock") cells.push(`<div class="cell rock" style="${pos}">${ROCK}</div>`);
+    else cells.push(`<div class="cell ${hash(i) === 0 ? "lily" : ""}" style="${pos}">${hash(i) === 0 ? LILY : ""}</div>`);
+  }
+  const trayHTML = p.tray.map((m, ti) => used.has(ti) ? "" : `<span class="slotbox"><button class="piece ${sel === ti ? "sel" : ""}" data-piece="${ti}" data-from="tray" aria-label="Wood piece${p.rotate ? ", turnable" : ""}">${plankSVG(maskOf(ti))}</button>
+      ${p.rotate ? `<button class="rot" data-act="rot" data-ti="${ti}" aria-label="Turn this piece">⟳</button>` : ""}</span>`).join("");
+  $app.innerHTML = `${cp ? "" : topBar()}
+  <div class="playwrap ${cp ? "compact" : ""}">
+    <div class="side">${cp ? topBar() : ""}
+      <div class="story">
+        <span class="who" aria-label="Frog brings boba to a friend" data-say="${esc(`Frog is bringing boba to ${BUDDY_NAMES[who]}.`)}">${buddySVG("F")}<span class="arrow">➜</span>${buddySVG(who)}</span>
+        <span class="tripdots" aria-label="Pond ${t.i + 1} of ${GAME.pondsPerTrip}">${Array.from({ length: GAME.pondsPerTrip }, (_, i) => `<i class="${i < t.i ? "done" : i === t.i ? "cur" : ""}"></i>`).join("")}</span>
+        <span class="ctrls">
+          <button class="iconbtn" data-act="hint" aria-label="Hint">💡</button>
+          <button class="iconbtn" data-act="clearAll" aria-label="Take all pieces back">↩️</button>
+          <button class="iconbtn" data-act="say" aria-label="Say what to do">🔈</button>
+        </span>
+      </div>
+      ${nr || cp ? "" : `<div class="say-line">Drag wood into the gaps. Connect Frog to ${BUDDY_NAMES[who]}!</div>`}
+      ${st ? `<div class="tray ${p.rotate ? "turny" : ""}" aria-label="Wood pieces">${trayHTML || `<span class="empty" aria-hidden="true">✨</span>`}</div>` : ""}
+    </div>
+    <div class="boardcell"><div class="board ${SKIES[t.sky]}" id="board" style="grid-template-columns:calc(var(--p) * .7) repeat(${p.cols},var(--p)) calc(var(--p) * .7);grid-template-rows:repeat(${p.rows},var(--p))">
+      <div class="shore" style="grid-column:1"><span class="spot" id="startSpot" style="top:calc(${p.startRow} * (var(--p) + 4px))">${buddySVG("F")}<span class="cup" aria-hidden="true">🧋</span></span></div>
+      ${cells.join("")}
+      <div class="shore" style="grid-column:${p.cols + 2}"><span class="spot" id="goalSpot" style="top:calc(${p.goalRow} * (var(--p) + 4px))">${buddySVG(who)}<span class="think" aria-hidden="true">🧋?</span></span></div>
+    </div></div>
+    ${st ? "" : `<div class="tray ${p.rotate ? "turny" : ""}" aria-label="Wood pieces">${trayHTML || `<span class="empty" aria-hidden="true">✨</span>`}</div>`}
+  </div>`;
+  fitBoard();
+}
+const BUDDY_NAMES = { D: "Dumpling", C: "Capybara", A: "Axolotl", B: "Bunny", F: "Frog" };
+
+/* Pick the biggest cell size where the whole board (and, in portrait, the tray) fits on screen. Min 44px. */
+function fitBoard() {
+  if (view !== "pond" || !pond) return;
+  const wrap = document.querySelector(".playwrap"), board = document.getElementById("board"); if (!wrap || !board) return;
+  const land = landMQ(), cp = compact(), sideMin = cp ? 332 : 412, extra = pond.rotate ? 48 : 0;
+  const W = wrap.clientWidth, H = window.innerHeight, top = board.getBoundingClientRect().top + window.scrollY;
+  const n = pond.tray.length; let best = 44, bestT = 48;
+  // try the biggest board first; tray pieces may shrink to 48px on small phones so everything fits without scrolling
+  search: for (let p = 120; p >= 44; p -= 2) {
+    const bw = (pond.cols + 1.4) * p + (pond.cols + 1) * 4 + 16, bh = pond.rows * p + (pond.rows - 1) * 4 + 16;
+    for (const t of [Math.min(88, Math.max(56, p)), 48]) {
+      const perRow = Math.max(1, Math.floor(((land ? W - bw - 12 : W) - 20) / (t + 10 + extra)));
+      const trayH = Math.ceil(n / perRow) * (t + 10) + 24;
+      const ok = land ? bw <= W - sideMin && top + bh + 10 <= H && top + (cp ? 120 : 110) + trayH <= H
+                      : bw <= W && top + bh + 12 + trayH + 8 <= H;
+      if (ok) { best = p; bestT = t; break search; }
+    }
+  }
+  const t = bestT;
+  document.documentElement.style.setProperty("--p", best + "px");
+  document.documentElement.style.setProperty("--t", (cp ? (pond.rotate ? 48 : Math.min(t, 60)) : t) + "px");
+}
+
+/* ---------- moves ---------- */
+function slotCenter(i) { const el = document.querySelector(`[data-slot="${i}"]`); if (!el) return null; const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width }; }
+function trayRect(ti) { const el = document.querySelector(`.tray [data-piece="${ti}"]`); return el ? el.getBoundingClientRect() : null; }
+/* Nearest empty-or-filled gap within ~0.8 of a cell from the finger: forgiving "magnet" snapping for small hands. */
+function nearestSlot(x, y) {
+  let best = null, bd = Infinity;
+  document.querySelectorAll("[data-slot]").forEach(el => { const r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, d = Math.hypot(cx - x, cy - y);
+    if (d < bd && d < r.width * 0.8) { bd = d; best = +el.dataset.slot; } });
+  return best;
+}
+
+/* Animate the piece now sitting in slot i from screen point (x,y): fly in, then squish. */
+function animateIn(i, from) {
+  const el = document.querySelector(`[data-slot="${i}"] .piece`); if (!el) return;
+  const cell = document.querySelector(`[data-slot="${i}"]`);
+  if (RM() || !from) { el.classList.add("squish"); return; }
+  const r = el.getBoundingClientRect(), dx = from.x - (r.left + r.width / 2), dy = from.y - (r.top + r.height / 2);
+  el.style.transition = "none"; el.style.transform = `translate(${dx}px,${dy}px) scale(1.1)`;
+  void el.offsetWidth;
+  el.style.transition = "transform .16s ease-out"; el.style.transform = "";
+  setTimeout(() => { el.style.transition = ""; el.classList.add("squish"); if (cell) cell.classList.add("squish"); }, 160);
+}
+/* Wrong spot: the piece wobbles over the gap, then slides back home. */
+async function wobbleBack(ghost, i, homeRect) {
+  const sc = slotCenter(i), cell = document.querySelector(`[data-slot="${i}"]`);
+  if (cell) { cell.classList.add("flash"); setTimeout(() => cell.classList.remove("flash"), 500); }
+  if (RM() || !ghost || !sc) { if (ghost) ghost.remove(); return; }
+  const g = ghost.getBoundingClientRect().width;
+  ghost.classList.add("snap"); ghost.style.transform = `translate(${sc.x - g / 2}px,${sc.y - g / 2}px)`;
+  await sleep(150);
+  ghost.firstElementChild.classList.add("wobble"); await sleep(420);
+  ghost.classList.remove("snap"); ghost.classList.add("back");
+  if (homeRect) ghost.style.transform = `translate(${homeRect.left + homeRect.width / 2 - g / 2}px,${homeRect.top + homeRect.height / 2 - g / 2}px) scale(.9)`;
+  await sleep(330); ghost.remove();
+}
+async function slideBack(ghost, homeRect) {
+  if (RM() || !ghost || !homeRect) { if (ghost) ghost.remove(); return; }
+  const g = ghost.getBoundingClientRect().width;
+  ghost.classList.add("back"); ghost.style.transform = `translate(${homeRect.left + homeRect.width / 2 - g / 2}px,${homeRect.top + homeRect.height / 2 - g / 2}px) scale(.9)`;
+  await sleep(330); ghost.remove();
+}
+
+/* Try to put tray piece ti into gap i. `from` = screen point the piece comes from; ghost = the dragged copy, if any. */
+async function tryPlace(ti, i, from, ghost) {
+  const t = trip(); busy = true;
+  const prevSlot = Object.keys(t.placed).find(k => t.placed[k] === ti);
+  const m = maskOf(ti);
+  // test the fit as if this piece were already there (and removed from its old gap)
+  const test = j => (j === i ? m : (prevSlot !== undefined && j === +prevSlot) ? 0 : tileAt(j));
+  if (!fits(pond, i, m, test)) {
+    t.wobbles++; Store.save(); Sound.boing();
+    if (young()) { Speech.say("Oops! That piece doesn't fit there. Openings must touch openings. Try another one!"); misses++; }
+    const home = prevSlot !== undefined ? document.querySelector(`[data-slot="${prevSlot}"]`)?.getBoundingClientRect() : trayRect(ti);
+    await wobbleBack(ghost, i, home);
+    document.querySelectorAll(".lifted").forEach(e => e.classList.remove("lifted"));
+    if (young() && misses >= 2) helpGlow();
+    busy = false; return;
+  }
+  if (prevSlot !== undefined) delete t.placed[prevSlot];
+  // (a piece already in this gap simply goes back to the tray)
+  t.placed[i] = ti; sel = null; Store.save();
+  if (ghost) ghost.remove();
+  Sound.clack(); render(); animateIn(i, from);
+  if (young() && misses >= 2 && !trace(pond, tileAt).done) helpGlow();
+  busy = false;
+  if (trace(pond, tileAt).done) celebrate();
+}
+/* Younger mode: after two misses on a pond, a matching piece and its gap glow (no penalty, no fail). */
+let misses = 0;
+function helpGlow() {
+  const cells = Object.keys(pond.solution).map(Number), used = usedTray();
+  const i = cells.find(c => placedAt(c) !== pond.solution[c]); if (i === undefined) return;
+  const ti = pond.tray.map((m, ti) => ti).find(ti => !used.has(ti) && maskOf(ti) === pond.solution[i]); if (ti === undefined) return;
+  document.querySelector(`.tray [data-piece="${ti}"]`)?.classList.add("glow");
+  document.querySelector(`[data-slot="${i}"]`)?.classList.add("glow");
+}
+async function takeBack(i) {
+  const t = trip(), ti = t.placed[i]; if (ti === undefined) return;
+  const sc = slotCenter(i); delete t.placed[i]; sel = null; Store.save(); Sound.tap(); render();
+  const el = document.querySelector(`.tray [data-piece="${ti}"]`);
+  if (el && sc && !RM()) { const r = el.getBoundingClientRect(); el.style.transition = "none"; el.style.transform = `translate(${sc.x - r.left - r.width / 2}px,${sc.y - r.top - r.height / 2}px)`;
+    void el.offsetWidth; el.style.transition = "transform .3s cubic-bezier(.3,.8,.4,1)"; el.style.transform = ""; setTimeout(() => { el.style.transition = ""; el.classList.add("squish"); }, 300); }
+}
+function rotate(ti) {
+  if (!pond.rotate || busy) return;
+  const t = trip(); t.rots[ti] = rotCW(maskOf(ti)); Store.save(); Sound.tap();
+  const svg = document.querySelector(`.tray [data-piece="${ti}"] svg`);
+  if (svg && !RM()) { svg.style.transform = "rotate(90deg)"; setTimeout(render, 200); } else render();
+}
+function hint() {
+  if (busy) return;
+  const t = trip(); t.hints++; Store.save();
+  const cells = Object.keys(pond.solution).map(Number);
+  const i = cells.find(c => placedAt(c) !== pond.solution[c]); if (i === undefined) return;
+  const need = pond.solution[i], used = usedTray();
+  // prefer a free piece; else borrow one that is sitting somewhere it isn't needed
+  const cand = pond.tray.map((m, ti) => ti).filter(ti => (pond.rotate ? isStraight(pond.tray[ti]) === isStraight(need) : maskOf(ti) === need));
+  const free = cand.find(ti => !used.has(ti)) ?? cand.find(ti => { const at = Object.keys(t.placed).find(k => t.placed[k] === ti); return at !== undefined && placedAt(+at) !== pond.solution[+at]; });
+  if (free === undefined) return;
+  const from = trayRect(free); const fromPt = from ? { x: from.left + from.width / 2, y: from.top + from.height / 2 } : null;
+  for (const k of Object.keys(t.placed)) if (t.placed[k] === free) delete t.placed[k];
+  t.rots[free] = need; t.placed[i] = free; Store.save();
+  Sound.clack(); render(); animateIn(i, fromPt);
+  if (young()) Speech.say("Here is a piece for you!");
+  if (trace(pond, tileAt).done) celebrate();
+}
+
+/* ---------- celebration: frog hops across the finished bridge ---------- */
+async function celebrate() {
+  busy = true;
+  const path = trace(pond, tileAt).cells, board = document.getElementById("board"), start = document.getElementById("startSpot"), goal = document.getElementById("goalSpot");
+  if (!board || !start || !goal) return pondDone();
+  const b = board.getBoundingClientRect();
+  const center = el => { const r = el.getBoundingClientRect(); return [r.left - b.left + r.width / 2, r.top - b.top + r.height / 2]; };
+  const fr = document.createElement("div"); fr.className = "frogger"; fr.innerHTML = buddySVG("F", "yay");
+  board.appendChild(fr); start.style.visibility = "hidden";
+  const sz = fr.getBoundingClientRect().width, put = ([x, y]) => { fr.style.transform = `translate(${x - sz / 2}px,${y - sz / 2}px)`; };
+  put(center(start)); await sleep(30);
+  const cellsEls = [...board.querySelectorAll(".cell")];
+  if (!RM()) {
+    for (const i of path) { const el = cellsEls[i]; if (!el) continue; fr.classList.remove("hop"); void fr.offsetWidth; fr.classList.add("hop"); put(center(el)); Sound.hop(); await sleep(210); }
+    put(center(goal)); await sleep(220);
+  } else { put(center(goal)); }
+  goal.classList.add("dance"); const th = goal.querySelector(".think"); if (th) th.textContent = "🧋❤️";
+  Sound.win(); confetti(50); await sleep(RM() ? 200 : 900);
+  pondDone();
+}
+function pondDone() {
+  const k = kid(), t = trip();
+  const perfect = young() || (t.wobbles === 0 && t.hints === 0), who = friend();
+  let got = pay(ECON.perPond); const last = t.i + 1 >= GAME.pondsPerTrip; let sticker = null;
+  if (perfect) t.stars++;
+  k.ponds++;
+  if (last) { got += pay(ECON.tripBonus); sticker = STICKERS[k.trips % STICKERS.length]; k.trips++; }
+  t.i++; t.placed = {}; t.rots = []; t.wobbles = 0; t.hints = 0;
+  const stars = t.stars; if (last) k.trip = null;
+  Store.save();  // award + progress are saved together, so a reload can never pay twice
+  confetti(last ? 120 : 50); // every bridge gets a party; the trip's is bigger
+  showDone({ got, last, perfect, sticker, stars, who });
+  busy = false;
+}
+function showDone({ got, last, perfect, sticker, stars, who }) {
+  const nr = noRead(), capped = kid().earnedToday >= ECON.dailyCap;
+  const words = [last ? "Everyone got their boba!" : `${BUDDY_NAMES[who]} got the boba!`, perfect ? "You got a star!" : "",
+    got ? `You earned ${got} token${got === 1 ? "" : "s"}!` : capped ? "Your token jar is full for today. You can still build bridges for fun!" : "",
+    last && sticker ? "Here is a new sticker for My Pond!" : "", last ? "Tap the house to go back, or the arrows to play again." : "Tap the green arrow for the next pond."].filter(Boolean).join(" ");
+  $ov.innerHTML = `<div class="ov"><div class="panel sayzone" role="dialog" aria-label="${last ? "Trip complete" : "Bridge built"}">
+    <h2>${last ? (nr ? "🎉🌉" : "🎉 All friends got their boba!") : (nr ? "🌉🧋" : `${BUDDY_NAMES[who]} got the boba!`)}</h2>
+    <div class="cheer">${(last ? "FDCAB" : "F" + who).split("").map(b => buddySVG(b, "yay")).join("")}</div>
+    ${perfect ? `<div class="star" aria-label="Perfect build">⭐</div>` : ""}
+    ${got ? `<div class="coins">+${got} 🪙</div>` : ""}
+    ${!got && capped ? `<div class="note">${nr ? "🪙✅🌙" : "Your token jar is full for today. Bridges are still free to build! 🌙"}</div>` : ""}
+    ${last && sticker ? `<div class="reveal" aria-label="New sticker for My Pond">${sticker}</div>${nr ? "" : `<div class="muted">New sticker for My Pond!${stars ? ` (${stars} ⭐ this trip)` : ""}</div>`}` : ""}
+    <div class="row">${sayBtn(words, "btn ghost")}${last
+      ? `<button class="btn ghost" data-act="home" aria-label="Back to start"><span class="ico">🏠</span></button>
+         <button class="btn" data-act="again" aria-label="New trip"><span class="ico">🔁</span>${nr ? "" : "Again"}</button>`
+      : `<button class="btn" data-act="nextPond" aria-label="Next pond"><span class="ico">▶️</span>${nr ? "" : "Next pond"}</button>`}</div>
+  </div></div>`;
+  Speech.say(words);
+}
+function showGrown() {
+  const k = kid();
+  $ov.innerHTML = `<div class="ov"><div class="panel left sayzone" role="dialog" aria-label="For grown-ups">
+    <h2 style="text-align:center">For grown-ups</h2>
+    <p><b>What it practices:</b> spatial reasoning: matching connections (an opening must meet an opening), planning a route through open water, and on <i>Twisty pond</i> mentally rotating pieces. Some pieces are decoys, so kids must decide which ones belong.</p>
+    <p><b>Tokens:</b> only from playing. +${ECON.perPond} per bridge, +${ECON.tripBonus} for finishing a ${GAME.pondsPerTrip}-bridge trip (about 1–3 minutes). No daily limit: every bridge pays, replays too. No purchases, ads, timers, or lives. Wobbles and hints only affect the ⭐.</p>
+    <div class="note">Player: ${esc(me.avatar)} ${esc(me.name)} ${me.linked ? "(from Elzee)" : "(no Elzee player on this device)"}<br>
+      Today: ${k.earnedToday} · Bridges built: ${k.ponds} · Trips: ${k.trips}</div>
+    <p class="muted" style="font-size:16px">Tokens are moved into the Elzee wallet by the main app. 🐣 Younger mode hides all words and talks; 🔈 reads every screen with the device's own voice. Animations turn off when the device's “Reduce Motion” setting is on. No reset button here on purpose.</p>
+    <p><b>Younger mode 🐣</b> (on by default for the Little path, switch per child on the start screen): no words, every screen talks (🔈 and auto-speak), Little pond only, and nothing to fail. Wrong pieces wobble home, the right piece glows after two misses, and the ⭐ is never lost.</p>
+    <div class="row"><button class="btn ghost saybtn" data-act="sayZone" aria-label="Read aloud">🔈</button><button class="btn" data-act="closeOv">Close</button></div></div></div>`;
+  const b = $ov.querySelector(".saybtn"); b.dataset.say = $ov.querySelector(".panel").innerText.replace(/🔈|Close/g, "").replace(/\s+/g, " ").trim();
+  Speech.auto("grown", "For grown-ups. Tap the speaker to hear this page.");
+}
+function confetti(n = 60) {
+  if (RM()) return;
+  const colors = ["#3ccf4e", "#ffc83d", "#ff6b3d", "#ff8fab", "#2a9d8f", "#d8a26b"];
+  for (let i = 0; i < n; i++) {
+    const c = document.createElement("div"); c.className = "confetti";
+    c.style.left = Math.random() * 100 + "vw"; c.style.background = colors[i % colors.length];
+    c.style.animationDuration = (1.5 + Math.random() * 1.5) + "s"; c.style.animationDelay = (Math.random() * .3) + "s";
+    document.body.appendChild(c); setTimeout(() => c.remove(), 3500);
+  }
+}
+function render() { if (view === "pond" && pond && trip()) renderPond(); else { view = "start"; renderStart(); if (!$ov.innerHTML) Speech.auto("start" + (kid().earnedToday >= ECON.dailyCap ? ":full" : ""), startText()); } }
+
+/* ---------- input: buttons ---------- */
+const ACTS = {
+  tier(el) { const n = +el.dataset.tier, t = trip(); Sound.tap(); if (t && t.tier === n && t.i < GAME.pondsPerTrip) openPond(true); else startTrip(n); },
+  leave() { Speech.stop(); if (history.state && history.state.s === "pond") history.back(); else { view = "start"; render(); } },
+  toggleRead() { kid().noRead = !noRead(); Store.save(); render(); Speech.say(young() ? "Younger mode on! Pictures and talking." : "Younger mode off. Words and all the ponds.", true); },
+  toggleSound() { kid().sound = !soundOn(); Store.save(); if (!soundOn()) Speech.stop(); render(); },
+  grown() { showGrown(); }, closeOv() { $ov.innerHTML = ""; render(); },
+  hint() { hint(); },
+  clearAll() { if (busy) return; trip().placed = {}; sel = null; Store.save(); Sound.tap(); render(); },
+  rot(el) { rotate(+el.dataset.ti); },
+  say(el) { speakOrNudge(pondText(), el); },
+  sayZone(el) { speakOrNudge(el.dataset.say, el); },
+  nextPond() { $ov.innerHTML = ""; openPond(false); },
+  again() { $ov.innerHTML = ""; startTrip(recTier()); },
+  home() { $ov.innerHTML = ""; ACTS.leave(); },
+};
+let lastNav = 0;
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]");
+  if (el && !el.disabled && ACTS[el.dataset.act]) {
+    const nav = ["tier", "leave", "nextPond", "again", "home", "closeOv", "grown"].includes(el.dataset.act);
+    if (nav && Date.now() - lastNav < 350) return;  // double-tap must not also hit the next screen
+    if (nav) lastNav = Date.now();
+    if (young() && !["say", "sayZone", "toggleRead"].includes(el.dataset.act) && el.getAttribute("aria-label")) Speech.say(el.getAttribute("aria-label"));   // talking buttons
+    ACTS[el.dataset.act](el); return;
+  }
+});
+/* Tap any picture with data-say (avatar, token jar, story strip) to hear it. */
+document.addEventListener("pointerup", e => { const el = e.target.closest("[data-say]"); if (el && !el.closest("[data-act]") && !drag) speakOrNudge(el.dataset.say, el); });
+/* tap-to-place: piece selected, then tap a gap. Uses pointer events because iOS Safari sends no click for plain divs. */
+let downSlot = null;
+document.addEventListener("pointerdown", e => { const s = e.target.closest("[data-slot]"); downSlot = s && !e.target.closest("[data-piece]") ? s : null; }, true);
+document.addEventListener("pointerup", e => {
+  const slot = e.target.closest("[data-slot]"), was = downSlot; downSlot = null;
+  if (!slot || slot !== was || view !== "pond" || busy || sel === null || $ov.innerHTML || e.target.closest("[data-piece]")) return;
+  const r = trayRect(sel); tryPlace(sel, +slot.dataset.slot, r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null, null);
+});
+
+/* ---------- input: drag with snap (pointer events: finger, pencil, or mouse) ---------- */
+let drag = null;
+document.addEventListener("pointerdown", e => {
+  const pc = e.target.closest("[data-piece]");
+  if (!pc || view !== "pond" || busy || $ov.innerHTML || e.target.closest(".rot")) return;
+  e.preventDefault();
+  const r = pc.getBoundingClientRect();
+  drag = { ti: +pc.dataset.piece, from: pc.dataset.from, el: pc, x0: e.clientX, y0: e.clientY, ox: e.clientX - r.left, oy: e.clientY - r.top, w: r.width, home: r, moving: false, ghost: null, id: e.pointerId, target: null };
+  try { pc.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+});
+document.addEventListener("pointermove", e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  if (!drag.moving && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) > 8) {
+    drag.moving = true; Sound.lift();
+    const size = Math.max(drag.w, parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--p")) || 72);
+    const g = document.createElement("div"); g.className = "dragghost"; g.style.width = g.style.height = size + "px";
+    g.innerHTML = plankSVG(maskOf(drag.ti)); document.body.appendChild(g); drag.ghost = g; drag.size = size;
+    drag.el.classList.add("lifted"); drag.el.style.opacity = ".25";
+  }
+  if (drag.moving) {
+    const s = drag.size;
+    drag.ghost.style.transform = `translate(${e.clientX - s / 2}px,${e.clientY - s / 2 - (e.pointerType === "touch" ? s * 0.35 : 0)}px) rotate(-4deg) scale(1.08)`;
+    const tgt = nearestSlot(e.clientX, e.clientY - (e.pointerType === "touch" ? s * 0.35 : 0));
+    if (tgt !== drag.target) {
+      document.querySelectorAll(".cell.target").forEach(c => c.classList.remove("target"));
+      if (tgt !== null) document.querySelector(`[data-slot="${tgt}"]`)?.classList.add("target");
+      drag.target = tgt;
+    }
+  }
+});
+async function endDrag(e, cancelled) {
+  if (!drag || e.pointerId !== drag.id) return;
+  const d = drag; drag = null;
+  document.querySelectorAll(".cell.target").forEach(c => c.classList.remove("target"));
+  if (!d.moving) {          // a tap
+    if (d.from !== "tray") return takeBack(+d.from);   // tap a placed piece: it slides back to the tray
+    sel = sel === d.ti ? null : d.ti; Sound.lift(); render(); return;
+  }
+  const gr = d.ghost.getBoundingClientRect(), pt = { x: gr.left + gr.width / 2, y: gr.top + gr.height / 2 };
+  if (cancelled || d.target === null) {
+    if (d.from !== "tray" && !cancelled) { d.ghost.remove(); return takeBack(+d.from); }   // dragged off the board: back to the tray
+    await slideBack(d.ghost, d.home); d.el.style.opacity = ""; d.el.classList.remove("lifted"); return;
+  }
+  if (d.from !== "tray" && +d.from === d.target) { d.ghost.remove(); d.el.style.opacity = ""; d.el.classList.remove("lifted"); animateIn(d.target, pt); return; }
+  await tryPlace(d.ti, d.target, pt, d.ghost);
+  if (d.el.isConnected) { d.el.style.opacity = ""; d.el.classList.remove("lifted"); }
+}
+document.addEventListener("pointerup", e => endDrag(e, false));
+document.addEventListener("pointercancel", e => endDrag(e, true));
+
+window.addEventListener("popstate", () => { if (view === "pond") { Speech.stop(); $ov.innerHTML = ""; view = "start"; render(); } });
+window.addEventListener("storage", e => {
+  if (e.key === GAME.mainKey) { me = readMainProfile(); if (!busy) render(); }
+  else if (e.key === GAME.storageKey && !$ov.innerHTML && !busy) { Store.load(); render(); }
+});
+let rz = 0; window.addEventListener("resize", () => { cancelAnimationFrame(rz); rz = requestAnimationFrame(() => { if (busy) return; if (view === "pond" && layoutKey() !== wasCompact) render(); else fitBoard(); }); });
+
+Store.load();
+{ const t = trip(); if (t && t.i < GAME.pondsPerTrip) openPond(true); else render(); }
+</script>
+</body>
+</html>
