@@ -15,7 +15,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="app-version" content="1.4.3-preview">
+<meta name="app-version" content="1.4.4-preview">
 <style>
 /* Fredoka (SIL Open Font License, see OFL-Fredoka.txt), self-hosted so the app never waits on a third-party server */
 @font-face{font-family:"Fredoka";font-style:normal;font-weight:300 700;font-display:swap;src:url("fredoka-latin.woff2") format("woff2")}
@@ -1991,12 +1991,13 @@ const APP = {
   mascot: "🦉",
   mascotName: "Professor Hoot",
   pinLength: 4,
-  version: "1.4.3-preview",
+  version: "1.4.4-preview",
 };
 const AVATARS = ["🦊","🐼","🦄","🐯","🐸","🐙","🦖","🐰","🐨","🦁","🐧","🐝","🐬","🦋","🐱","🐶"];
 const REWARDS = {
   firstTry: 2,          // correct on first try
-  retry: 1,             // correct after a miss
+  retry: 1,             // correct after a miss (Little Thinkers)
+  retryBig: 0,          // 1.4.4: Big Thinkers get nothing for a question they missed first (Aaron)
   comboEvery: 3,        // every N first-try answers in a row...
   comboBonus: 1,        // ...earns this extra
   lessonFirstClear: 10, // first time finishing a lesson
@@ -2027,6 +2028,13 @@ const GATE = {
   lockMaxMs: 15 * 60000,
   checkLockMs: 60000,      // after a wrong grown-up math answer (Forgot PIN only); never longer than this
 };
+// 1.4.4 Big Thinkers economy (Aaron, Oct 4): prize prices x3 by default (grown-ups can pick 1x-4x per kid),
+// retry pays 0, and every wrong answer or "Show me" costs one star (3 -> 0). Little Thinkers keep the old rules.
+const PRICE_X = { big: 3, little: 1, choices: [1, 2, 3, 4] };
+const bigRules = pl => !!pl && !isYoungerProfile(pl);
+const priceX = pl => (pl && PRICE_X.choices.includes(pl.priceX) ? pl.priceX : bigRules(pl) ? PRICE_X.big : PRICE_X.little);
+const prizeCost = (prize, pl) => Math.max(1, Math.round((prize ? prize.cost : 0) * priceX(pl)));
+const lessonStars = (pl, mistakes) => bigRules(pl) ? Math.max(0, 3 - mistakes) : mistakes === 0 ? 3 : mistakes <= 2 ? 2 : 1;
 const SHOW_ME_MAX = 3; // reveals per lesson; running out disables the button and never blocks answering
 const PRAISE = ["Great thinking!", "You got it!", "Brainy!", "Super sleuth!", "Hoot hoot, correct!", "Nailed it!", "Logic legend!"];
 const GENTLE = ["Not quite — good try!", "Ooh, a tricky one!", "Almost! Here's the secret:", "Good thinking, but not this time!"];
@@ -2129,6 +2137,7 @@ const Store = {
         progress, lessonsDone: num(p.lessonsDone),
         replayDay: typeof p.replayDay === "string" ? p.replayDay : null, replayCount: num(p.replayCount),
         readAloud: typeof p.readAloud === "boolean" ? p.readAloud : getPath(pathId).readAloudDefault,
+        priceX: PRICE_X.choices.includes(p.priceX) ? p.priceX : null, // 1.4.4: prize price multiplier; null = default for the path
         voice: typeof p.voice === "string" && p.voice ? p.voice.slice(0, 100) : null, // 1.4.2: this kid's read-aloud voice (ElzeeVoice)
         created: num(p.created, Date.now()),
       };
@@ -2336,6 +2345,11 @@ const MINIGAMES = [
   { id: "letter-bakery", name: "Letter Bakery", emoji: "🧁", blurb: "Bake words from letter cookies!", href: "games/letter-bakery.html",
     key: "logicquest.minigame.letter-bakery.v1", group: "words",
     interlude: true, role: "interlude", roundLabel: "1 level", minutes: 3, enabled: true },
+  // Peek-a-Rule (1.4.4, Bob): if-then reasoning (must be / can't be / can't tell). +2 per round, no cap; younger mode for
+  // Little Thinkers. 🧠 thinking group. Carries the shared ElzeeVoice block, so it speaks in the kid's 🔈 pick.
+  { id: "peek-a-rule", name: "Peek-a-Rule", emoji: "📦", blurb: "Peek in the box: must be, can't be, or can't tell?",
+    href: "games/peek-a-rule.html", key: "logicquest.minigame.peek-a-rule.v1",
+    interlude: true, role: "interlude", roundLabel: "1 parade (3–4 buddies)", minutes: 3, enabled: true },
 ];
 // 1.4.3: the home splits the games into two icon tabs a non-reader can tell apart: 🧠 thinking games and 🔤 word games.
 const GAME_GROUPS = [{ id: "think", emoji: "🧠", name: "Thinking games" }, { id: "words", emoji: "🔤", name: "Word games" }];
@@ -2913,7 +2927,7 @@ function answer(btn) {
     const first = !lesson.missed.has(lesson.cur);
     lesson.combo = first ? lesson.combo + 1 : 0;
     if (!lesson.replay) { // per-question tokens only the first time through a lesson; paid out when the lesson is finished
-      gained = first ? REWARDS.firstTry : REWARDS.retry;
+      gained = first ? REWARDS.firstTry : bigRules(pl) ? REWARDS.retryBig : REWARDS.retry;
       if (first && lesson.combo % REWARDS.comboEvery === 0) { gained += REWARDS.comboBonus; comboNote = ` · ${lesson.combo} in a row! 🔥`; }
     } else if (first && lesson.combo % REWARDS.comboEvery === 0) comboNote = ` · ${lesson.combo} in a row! 🔥`;
     lesson.mastered.add(lesson.cur); lesson.earned += gained;
@@ -2932,7 +2946,7 @@ function showMe() {
   const q = lessonQ();
   lesson.answered = true;
   lesson.showMeLeft--;
-  if (!lesson.missed.has(lesson.cur)) lesson.mistakes++;
+  if (!lesson.missed.has(lesson.cur) || bigRules(player())) lesson.mistakes++; // 1.4.4: for Big Thinkers help always costs a star
   lesson.combo = 0;
   lesson.mastered.add(lesson.cur);
   lesson.missed.add(lesson.cur);
@@ -2991,7 +3005,7 @@ function finishLesson() {
   LessonSave.clear();
   const pl = player(), key = progKey(lesson.pathId, lesson.ti, lesson.li);
   const prev = pl.progress[key] || {};
-  const stars = lesson.mistakes === 0 ? 3 : lesson.mistakes <= 2 ? 2 : 1;
+  const stars = lessonStars(pl, lesson.mistakes);
   const today = todayStr();
   const lines = [];
   if (!prev.done) {
@@ -3016,7 +3030,7 @@ function finishLesson() {
   pl.progress[key] = { done: true, stars: Math.max(stars, prev.stars || 0), plays: (prev.plays || 0) + 1, last: Date.now() };
   pl.lessonsDone++;
   Store.save();
-  const result = { stars, lines, total, pathId: lesson.pathId };
+  const result = { stars, lines, total, pathId: lesson.pathId, big: bigRules(pl) };
   lesson = null;
   go("results", { result }, { replace: true });
   Sound.win(); confetti();
@@ -3030,6 +3044,7 @@ function renderResults() {
     <div class="bigstars">${[0,1,2].map(i => `<span style="animation-delay:${.2 + i * .25}s"><span class="${i < r.stars ? "" : "nostar"}">⭐</span></span>`).join("")}</div>
     <div class="tally">${r.lines.map(([label, n]) => `<div><span>${esc(label)}</span><b>+${n} 🪙</b></div>`).join("")}
       <div><span>Total</span><b>+${r.total} 🪙</b></div></div>
+    ${r.big && r.stars < 3 ? `<p class="muted">Each miss or “Show me” costs a ⭐. Play it again with no misses to win all 3!</p>` : ""}
     <p class="muted">You now have <b>🪙 ${pl.tokens}</b> tokens.</p>
     <div style="max-width:520px;margin:0 auto;display:grid;gap:12px">
       <button class="btn block" data-act="home">Continue</button>
@@ -3044,11 +3059,11 @@ function renderShop() {
   $app.innerHTML = topBar(pl, { back: true }) + `
     <h1 class="title">🎁 Prize Shop</h1><p class="subtitle">Spend your tokens on real prizes! A grown-up has to say yes.</p>
     ${st.prizes.length ? `<div class="shopgrid">${st.prizes.map(p => {
-      const can = pl.tokens >= p.cost;
+      const cost = prizeCost(p, pl), can = pl.tokens >= cost; // 1.4.4: each kid sees their own price
       return `<div class="prize"><div class="pe">${esc(p.emoji || "🎁")}</div><div class="pn">${esc(p.name)}</div>
-        <div class="pc">🪙 ${p.cost}</div>
+        <div class="pc" data-cost="${cost}">🪙 ${cost}</div>
         ${can ? `<button class="btn block" data-act="redeem" data-id="${p.id}">Get it!</button>`
-              : `<button class="btn block" disabled>Need ${p.cost - pl.tokens} more</button>`}</div>`;
+              : `<button class="btn block" disabled>Need ${cost - pl.tokens} more</button>`}</div>`;
     }).join("")}</div>` : `<div class="card"><p>No prizes yet! Ask a grown-up to add some in ⚙️.</p></div>`}
     <div class="card"><h3>My prizes</h3>${mine.length ? `<ul class="list">${mine.map(l =>
       `<li><span>${esc(l.emoji)} ${esc(l.name)}</span><span class="muted">${fmtDate(l.ts)} · 🪙 ${l.cost}</span></li>`).join("")}</ul>`
@@ -3056,11 +3071,13 @@ function renderShop() {
 }
 function redeem(id) {
   const pl = player(), prize = state().prizes.find(p => p.id === id);
-  if (!prize || pl.tokens < prize.cost) return;
-  requireGrownUp(`${pl.name} wants “${prize.name}” for ${prize.cost} tokens. Grown-up, enter your PIN to say yes.`, () => {
-    if (player() !== pl || pl.tokens < prize.cost) { toast("Not enough tokens for that one yet!"); render(); return; }
-    pl.tokens -= prize.cost;
-    state().log.unshift({ ts: Date.now(), profileId: pl.id, who: pl.name, avatar: pl.avatar, emoji: prize.emoji, name: prize.name, cost: prize.cost });
+  const cost = prizeCost(prize, pl);
+  if (!prize || pl.tokens < cost) return;
+  requireGrownUp(`${pl.name} wants “${prize.name}” for ${cost} tokens. Grown-up, enter your PIN to say yes.`, () => {
+    const c = prizeCost(prize, pl);
+    if (player() !== pl || pl.tokens < c) { toast("Not enough tokens for that one yet!"); render(); return; }
+    pl.tokens -= c;
+    state().log.unshift({ ts: Date.now(), profileId: pl.id, who: pl.name, avatar: pl.avatar, emoji: prize.emoji, name: prize.name, cost: c });
     Store.save(); render(); Sound.win(); confetti(120);
     const m = openModal(`<div class="bigicon">${esc(prize.emoji || "🎁")}</div><h3>You got it!</h3>
       <p>“${esc(prize.name)}” is yours! Go tell your grown-up. 🎉</p><div class="acts"><button class="btn block" data-m="ok">Yay!</button></div>`);
@@ -3083,13 +3100,15 @@ function renderParent() {
         <div class="line">${pathSelect(p)}<label class="toggle"><input type="checkbox" ${p.readAloud ? "checked" : ""} data-field="readAloud" data-kind="player" data-id="${p.id}"> Read questions aloud</label></div>
         <div class="line"><b>🪙 ${p.tokens}</b>
           <span class="muted">· 🔥 ${liveStreak(p)} · ${done(p)}/${totalLessons} lessons · ${p.totalEarned} earned all-time · 👚 ${p.closet ? p.closet.spent : 0} closet spent</span></div>
+        <div class="line pxrow"><span class="muted">🎁 Prize prices:</span> ${PRICE_X.choices.map(x => `<button class="btn small ${priceX(p) === x ? "brand" : "ghost"}" data-act="setPriceX" data-id="${p.id}" data-x="${x}" aria-pressed="${priceX(p) === x}">${x}×</button>`).join(" ")}
+          <span class="muted">(grand prize ${prizeCost({ cost: 500 }, p)} for ${esc(p.name)}${p.priceX ? "" : ", default"})</span></div>
         ${window.ElzeeVoice ? `<div class="line"><button class="btn small ghost" data-act="voicePick" data-id="${p.id}">🔈 Voice</button> <span class="muted">${esc(p.voice || "Calm default")} (kids can pick on their own with 🔈 on the top bar)</span></div>` : ""}
         <div class="line"><button class="btn small ghost" data-act="resetPlayer" data-id="${p.id}">Reset progress</button>
           <button class="btn small danger" data-act="deletePlayer" data-id="${p.id}">Delete player</button></div>
       </div>`).join("") || `<p class="muted">No players yet.</p>`}
     </div>
 
-    <div class="card"><h3>Prizes (shared by all players)</h3>
+    <div class="card"><h3>Prizes (shared by all players)</h3><p class="muted">These are base prices. Each kid pays base × their 🎁 multiplier (set per player above; Big Thinkers default 3×, Little Thinkers 1×).</p>
       <p class="muted" style="margin-top:0">Changes save automatically. Each kid spends their own tokens.</p>
       <div class="prizescroll">
       ${st.prizes.map(p => `<div class="prow">
@@ -3192,6 +3211,11 @@ const actions = {
     confirmBox("Delete this prize?", `“${p.name}”`, "Delete", () => { st.prizes = st.prizes.filter(x => x.id !== p.id); Store.save(); render(); }, true);
   },
   changePin() { createPin(() => {}); },
+  setPriceX(el) { // 1.4.4: per-kid prize price multiplier (grown-ups only)
+    const p = state().profiles.find(x => x.id === el.dataset.id), x = Number(el.dataset.x);
+    if (!p || !PRICE_X.choices.includes(x)) return;
+    p.priceX = x; Store.save(); render(); toast(`${p.name}: prizes cost ${x}×`);
+  },
   voicePick(el) { voicePicker(el.dataset.id || (player() ? player().id : null)); },
   gameGroup(el) { // 1.4.3: switch the home between 🧠 thinking and 🔤 word games, and say which (for non-readers)
     const g = el.dataset.g === "words" ? "words" : "think"; setHomeGroup(g); Sound.tap();
