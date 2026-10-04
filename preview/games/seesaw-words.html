@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Offline-only: the page may not load anything from anywhere (no fonts, images, scripts, or fetches). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; media-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#7c4dff">
+<title>Seesaw Words · Elzee</title>
+<style>
+:root{
+  --bg:#fff8e7; --ink:#2d2a4a; --muted:#7a7699; --card:#fff; --line:#e7e2f5;
+  --brand:#7c4dff; --brand-d:#5a2fd6; --brand-l:#efe9ff;
+  --good:#3ccf4e; --good-d:#2a9d38; --good-l:#e6fbe9;
+  --oops:#ff9f43; --oops-d:#e07b15; --oops-l:#fff3e3;
+  --gold:#ffc83d; --gold-d:#e0a400;
+  --radius:22px;
+  --font:"Fredoka","Chalkboard SE","Comic Sans MS","Arial Rounded MT Bold",system-ui,sans-serif;
+  --sky1:#bfe6ff; --sky2:#eef9ff; --grass:#8fdc7a; --wood:#e7a35c; --wood-d:#b8743a;
+  --cw:118px; --ch:96px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:20px;line-height:1.3;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%;overscroll-behavior:none}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2,h3{margin:0}
+#app{max-width:1180px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 10px) calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 14px) calc(env(safe-area-inset-left) + 16px)}
+.btn{border:none;border-radius:18px;padding:12px 24px;min-height:64px;min-width:64px;font-size:23px;font-weight:600;
+  background:var(--good);color:#fff;box-shadow:0 5px 0 var(--good-d);display:inline-flex;align-items:center;justify-content:center;gap:10px}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--good-d)}
+.btn.ghost{background:#fff;color:var(--ink);box-shadow:0 5px 0 var(--line);border:2px solid var(--line)}
+.btn .ico{font-size:30px;line-height:1}
+.iconbtn{border:none;background:#fff;border-radius:18px;width:64px;height:64px;font-size:30px;flex:none;text-decoration:none;
+  box-shadow:0 4px 0 var(--line);display:inline-flex;align-items:center;justify-content:center;position:relative}
+.iconbtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.iconbtn.on{background:var(--brand-l);box-shadow:0 4px 0 #cbbcff}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex:none}
+.pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:6px 16px;min-height:56px;font-size:22px;font-weight:700;box-shadow:0 4px 0 var(--line)}
+.pill .av{font-size:32px}.pill .nm{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pill b{color:var(--gold-d)}
+.spacer{flex:1}
+.banner{flex:none;background:var(--gold);border-radius:16px;padding:8px 16px;margin-bottom:8px;font-weight:700;text-align:center}
+.mapwrap{flex:1;min-height:0;overflow:auto;padding:4px 2px 8px}
+.hero{display:flex;align-items:center;gap:14px;margin:4px 0 16px}
+.hero .big{font-size:60px;animation:bob 2.4s ease-in-out infinite}
+.bubble{background:#fff;border-radius:22px;padding:14px 18px;box-shadow:0 4px 0 var(--line);font-size:21px}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}
+.lvl{position:relative;border:none;background:#fff;border-radius:24px;box-shadow:0 6px 0 var(--line);min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px}
+.lvl .num{position:absolute;top:10px;left:14px;font-weight:700;color:var(--muted)}
+.lvl .tw{position:absolute;top:8px;right:12px;font-size:22px}
+.lvl .scene{font-size:54px;line-height:1}
+.lvl.next{box-shadow:0 6px 0 #cbbcff,0 0 0 4px var(--brand) inset}.lvl.next .scene{animation:bob 1.8s ease-in-out infinite}
+.lvl.locked{opacity:.55}
+.stars{font-size:22px;letter-spacing:2px}.nostar{opacity:.2}
+.board{flex:1;min-height:0;display:flex;flex-direction:column;gap:12px}
+.park{flex:1;min-height:0;position:relative;border-radius:28px;overflow:hidden;background:linear-gradient(var(--sky1),var(--sky2) 70%,var(--grass) 70%);box-shadow:0 6px 0 var(--line);display:flex;flex-direction:column}
+.park .deco{position:absolute;font-size:44px;opacity:.9;pointer-events:none;animation:floaty 4s ease-in-out infinite}
+.prompt{position:relative;z-index:2;display:flex;align-items:center;gap:12px;padding:12px 14px 0;flex:none}
+.prompt .ptxt{font-size:clamp(20px,2.4vw,26px);font-weight:600;background:rgba(255,255,255,.85);border-radius:18px;padding:8px 14px;flex:1}
+.prompt .ptxt b{color:var(--brand-d)}
+.prompt .kind{font-size:40px;background:rgba(255,255,255,.85);border-radius:18px;padding:4px 12px;line-height:1.2}
+.dots{display:flex;gap:6px}.dots i{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.9);box-shadow:inset 0 0 0 2px #b9a6ff}.dots i.done{background:var(--good);box-shadow:none}.dots i.cur{background:var(--gold);box-shadow:none}
+.stage{position:relative;flex:1;min-height:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6%}
+.seesaw{position:relative;width:var(--sw);height:calc(var(--ch) + 120px)}
+.pivot{position:absolute;left:50%;bottom:0;width:90px;height:70px;margin-left:-45px;background:linear-gradient(#9c6ade,#7c4dff);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.plank{position:absolute;left:0;right:0;bottom:62px;height:24px;border-radius:14px;background:linear-gradient(var(--wood),var(--wood-d));box-shadow:0 4px 0 rgba(0,0,0,.12);transform-origin:50% 50%}
+.seat{position:absolute;bottom:100%;display:flex;align-items:flex-end;gap:6px;padding-bottom:2px}
+.seat.left{left:8px}.seat.right{right:8px}
+.buddy{font-size:48px;line-height:1;animation:bob 2.2s ease-in-out infinite}
+.weight{font-size:56px;line-height:1;letter-spacing:-6px}
+.card,.slot{width:var(--cw);height:var(--ch);border-radius:20px;flex:none}
+.card{position:relative;border:none;background:#fff;box-shadow:0 6px 0 #d9d0f5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;touch-action:none;padding:4px}
+.card .e{font-size:44px;line-height:1;pointer-events:none}
+.card .e svg{width:56px;height:56px;display:block}
+.card .w{font-size:20px;font-weight:700;pointer-events:none;line-height:1.1}
+.card.anchor{box-shadow:0 6px 0 #cbbcff,0 0 0 3px var(--brand) inset}
+.card.placed{box-shadow:0 6px 0 var(--good-d),0 0 0 3px var(--good) inset;animation:pop .35s}
+.slot{border:4px dashed #9d86ff;background:rgba(244,239,255,.9);display:flex;align-items:center;justify-content:center;font-size:34px;transition:transform .15s,background .15s;touch-action:none}
+.slot.hot{background:#e1d6ff;border-color:var(--brand);transform:scale(1.08)}
+.glow{animation:glow 1s ease-in-out infinite!important}
+.ladder{position:relative;display:flex;align-items:flex-end;gap:16px}
+.rungs{position:relative;display:flex;flex-direction:column-reverse;gap:10px;padding:12px 26px;border-left:10px solid var(--wood-d);border-right:10px solid var(--wood-d);border-radius:8px}
+.rung{display:flex;align-items:center;gap:10px}
+.meter{display:flex;flex-direction:column-reverse;gap:10px;padding:12px 0}
+.meter span{height:var(--ch);display:flex;align-items:center;justify-content:center;width:46px}
+.meter i{display:block;border-radius:50%;background:linear-gradient(#ff9f43,#ff5d73)}
+.slide{width:70px;align-self:stretch;border-radius:40px 40px 10px 10px;background:linear-gradient(90deg,#ffd36b,#ffb13d);box-shadow:inset -6px 0 0 rgba(0,0,0,.08)}
+.climber{position:absolute;font-size:46px;left:-30px;bottom:24px;transition:transform 1s ease-in-out;z-index:3}
+.side{flex:none;display:flex;flex-direction:column;align-items:center}
+.tray{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:14px;padding:4px 8px;min-height:var(--ch)}
+.tray .card.used{visibility:hidden}
+.tray .card.sel{transform:translateY(-10px) scale(1.06);box-shadow:0 10px 0 #cbbcff,0 0 0 4px var(--brand) inset}
+.card.wob{animation:wiggle .5s}
+.card .spk{position:absolute;top:4px;right:6px;font-size:15px;opacity:.5;pointer-events:none}
+.tools{display:flex;gap:10px;justify-content:center;margin-top:10px}
+.drag{position:fixed;left:0;top:0;z-index:50;pointer-events:none;border-radius:20px;background:#fff;box-shadow:0 18px 30px rgba(45,42,74,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;will-change:transform}
+.drag .e{font-size:48px;line-height:1}.drag .e svg{width:60px;height:60px;display:block}.drag .w{font-size:20px;font-weight:700}
+.toast{pointer-events:none;position:fixed;left:50%;top:86px;transform:translateX(-50%);background:#fff;border-radius:18px;padding:10px 18px;box-shadow:0 6px 0 var(--line);font-size:21px;z-index:40;max-width:90vw;text-align:center}
+.ov{position:fixed;inset:0;background:rgba(45,42,74,.45);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
+.panel{background:#fff;border-radius:30px;padding:20px 22px;max-width:720px;width:100%;max-height:calc(100dvh - 32px);overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;animation:pop .35s}
+.panel h2{font-size:32px}
+.row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.startov{background:linear-gradient(var(--sky1),var(--sky2) 65%,var(--grass) 65%)}
+.startbtn{border:none;border-radius:50%;width:200px;height:200px;font-size:96px;background:var(--good);color:#fff;box-shadow:0 10px 0 var(--good-d);animation:pulse 1.6s ease-in-out infinite}
+.title{font-size:44px;font-weight:700;color:var(--brand-d);text-shadow:0 3px 0 #fff}
+.minisaw{font-size:70px;display:flex;gap:40px;justify-content:center}.minisaw span{animation:hop 1s ease-in-out infinite}
+.winscene{position:relative;width:100%;height:clamp(150px,24vh,260px);border-radius:24px;overflow:hidden;background:linear-gradient(var(--sky1),var(--sky2) 70%,var(--grass) 70%)}
+.winscene .wplank{position:absolute;left:12%;right:12%;bottom:32%;height:18px;border-radius:10px;background:linear-gradient(var(--wood),var(--wood-d));animation:rock 1.2s ease-in-out infinite}
+.winscene .wplank span{position:absolute;bottom:100%;font-size:min(64px,9vh);animation:hop .9s ease-in-out infinite}
+.winscene .wpiv{position:absolute;left:50%;bottom:12%;width:60px;height:46px;margin-left:-30px;background:#7c4dff;clip-path:polygon(50% 0,100% 100%,0 100%)}
+.winscene .words{position:absolute;top:10px;left:0;right:0;font-size:min(44px,6vh)}
+.pairs{font-size:clamp(26px,4vh,38px);line-height:1.35}.pairs small{font-size:.55em;font-weight:700;color:var(--muted)}.pairs svg{width:1.2em;height:1.2em;vertical-align:middle}
+.bigstars{font-size:42px}.bigstars span{display:inline-block;animation:pop .4s backwards}
+.coins{font-size:30px;font-weight:700;color:var(--gold-d)}
+.parade{display:flex;gap:10px;font-size:48px}.parade span{animation:hop 1s ease-in-out infinite}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:70}
+.grown p{text-align:left;font-size:18px;margin:4px 0}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}
+@keyframes wiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg)}40%{transform:rotate(8deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(4deg)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-20px)}}
+@keyframes rock{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(255,200,61,0)}50%{box-shadow:0 0 0 10px rgba(255,200,61,.8)}}
+@media (orientation:landscape) and (min-width:900px){.board{flex-direction:row}.side{width:276px;justify-content:center}.tray{max-width:276px}}
+#app.young{--cw:140px;--ch:120px}#app.young .card .e{font-size:68px}#app.young .card .e svg{width:84px;height:84px}
+@media (max-width:600px){#app{--cw:84px;--ch:74px;padding-left:10px;padding-right:10px}#app.young{--cw:96px;--ch:86px}.card .e{font-size:32px}.card .w{font-size:15px}.buddy{display:none}.weight{font-size:40px}
+  .top{gap:6px}.top .pill[aria-label=Player],[data-act=grown]{display:none!important}.pill{padding:6px 10px}.tray{gap:8px}.prompt .ptxt{font-size:17px}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="ov"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<script>
+/*VOICE-START v1.0.0*/
+/* ElzeeVoice v1.0.0 - one shared read-aloud voice for Elzee and its games (1.4.2).
+   Source of truth: workspace/build142/elzee-voice.js, pasted unchanged between the VOICE markers of
+   index.html and games/*.html (the pages are offline single files, so no <script src>).
+   - Calm, natural voices first (iPad Safari: Ava Premium/Enhanced, Samantha Enhanced, Allison, Susan, Karen, Samantha).
+   - Novelty voices (Fred, Zarvox, Bubbles, ...) are never used.
+   - One calm rate (0.9) and normal pitch (1.0) everywhere, younger mode included.
+   - Each kid picks their own voice in Elzee (🔈 on the top bar). It is saved on their profile as profile.voice
+     in logicquest.v1; games only READ it (active profile). No network, on-device voices only. */
+(function (root) {
+  "use strict";
+  var VERSION = "1.0.0", RATE = 0.9, PITCH = 1.0, MAIN_KEY = "logicquest.v1";
+  var NOVELTY = /(^|[\s.\-_(])(Fred|Albert|Bad News|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Pipe Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Bahh|Junior|Ralph|Kathy|Deranged|Hysterical)($|[\s.\-_)])/i;
+  var PREFER = [/^Ava\b.*\((Premium|Enhanced)\)/i, /^Samantha\b.*\(Enhanced\)/i, /^Allison\b/i, /^Susan\b/i, /^Karen\b/i, /^Samantha\b/i];
+  // Friendly characters for the kids' voice cards (picture-only; no reading needed).
+  var CHARS = [{ e: "🦉", n: "Owl" }, { e: "🐻", n: "Bear" }, { e: "🐰", n: "Bunny" }, { e: "🐢", n: "Turtle" }, { e: "🐳", n: "Whale" }];
+  function isNovelty(v) { return !!v && (NOVELTY.test(String(v.name || "")) || NOVELTY.test(String(v.voiceURI || ""))); }
+  function score(v) {
+    var name = String(v.name || ""), i;
+    for (i = 0; i < PREFER.length; i++) if (PREFER[i].test(name)) return i;
+    return /^en[-_]US/i.test(v.lang || "") ? 20 : 30;
+  }
+  function voices() {
+    var all = [];
+    try { all = (root.speechSynthesis && root.speechSynthesis.getVoices && root.speechSynthesis.getVoices()) || []; } catch (e) { all = []; }
+    var seen = {}, out = [];
+    for (var i = 0; i < all.length; i++) {
+      var v = all[i];
+      if (!v || !/^en/i.test(v.lang || "") || v.localService === false || isNovelty(v) || seen[v.name]) continue; // on-device English only
+      seen[v.name] = 1; out.push(v);
+    }
+    return out.map(function (v, i) { return { v: v, s: score(v), i: i }; })
+      .sort(function (a, b) { return a.s - b.s || a.i - b.i; }).map(function (x) { return x.v; });
+  }
+  // Active Elzee profile, read only (games never write logicquest.v1).
+  function activeProfile() {
+    try {
+      var d = JSON.parse(root.localStorage.getItem(MAIN_KEY));
+      if (!d || !Array.isArray(d.profiles)) return null;
+      for (var i = 0; i < d.profiles.length; i++) if (d.profiles[i] && d.profiles[i].id === d.activeId) return d.profiles[i];
+    } catch (e) {}
+    return null;
+  }
+  function prefFor(p) { return p && typeof p.voice === "string" && p.voice ? p.voice.slice(0, 100) : null; }
+  function pick(name) {
+    var list = voices();
+    if (name) for (var i = 0; i < list.length; i++) if (list[i].name === name) return list[i];
+    return list[0] || null; // calm default
+  }
+  // Voice cards for the kid picker: the best few voices, each with a friendly character.
+  function choices(max) {
+    var list = voices().slice(0, Math.min(max || CHARS.length, CHARS.length));
+    return list.map(function (v, i) { return { name: v.name, lang: v.lang, emoji: CHARS[i].e, char: CHARS[i].n }; });
+  }
+  // Set voice, calm rate and normal pitch on an utterance. name undefined = the active profile's pick.
+  function apply(u, name) {
+    if (name === undefined) name = prefFor(activeProfile());
+    var v = pick(name);
+    if (v) { try { u.voice = v; } catch (e) { /* not a real voice object */ } u.lang = v.lang || "en-US"; } else u.lang = "en-US";
+    u.rate = RATE; u.pitch = PITCH;
+    api.last = v ? v.name : null;
+    return u;
+  }
+  var api = { version: VERSION, RATE: RATE, PITCH: PITCH, CHARS: CHARS, isNovelty: isNovelty, voices: voices, pick: pick,
+    choices: choices, apply: apply, prefFor: prefFor, activeProfile: activeProfile, last: null };
+  root.ElzeeVoice = api;
+})(typeof window !== "undefined" ? window : this);
+/*VOICE-END*/
+</script>
+<script>
+"use strict";
+/* ==========================================================================
+   SEESAW WORDS: a vocabulary interlude for Elzee.
+   Opposites go on opposite ends (the seesaw swings level), same-meaning words
+   share a seat, and shades of meaning climb a ladder from "a little" to "a lot".
+   Young path (little-path profiles): picture opposites, everything read aloud.
+   Fixed levels; exactly one card fits each spot (seesaw-words-dev/verify.mjs).
+   No randomness, no timer, no fail state.
+   ========================================================================== */
+const GAME = {
+  id: "seesaw-words",
+  storageKey: "logicquest.minigame.seesaw-words.v1", // this game's own key
+  mainKey: "logicquest.v1",                           // main app key: READ ONLY, never written here
+  resultKey: "logicquest.interlude.result.v1",
+};
+const ECON = { firstClear: 3, firstThreeStars: 2, replay: 0 }; // contract §6 fixed-level rates; no caps of any kind
+const RM = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- picture helpers (inline SVG, no assets) ---------- */
+function cupSVG(full, color) {
+  const id = "c" + full + color.slice(1);
+  return `<svg viewBox="0 0 80 80" aria-hidden="true"><defs><clipPath id="${id}"><path d="M18 10 L62 10 L56 72 L24 72 Z"/></clipPath></defs>
+    ${full ? `<rect x="0" y="22" width="80" height="60" fill="${color}" clip-path="url(#${id})"/>` : ""}
+    <path d="M18 10 L62 10 L56 72 L24 72 Z" fill="none" stroke="#2d2a4a" stroke-width="4" stroke-linejoin="round"/></svg>`;
+}
+function jarSVG(full) {
+  const cookies = full ? [[30, 60], [50, 60], [40, 46], [28, 34], [52, 34]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="9" fill="#c98b4a" stroke="#8a5a2b" stroke-width="2"/><circle cx="${x - 3}" cy="${y - 2}" r="1.8" fill="#5a3a1a"/><circle cx="${x + 3}" cy="${y + 3}" r="1.8" fill="#5a3a1a"/>`).join("") : "";
+  return `<svg viewBox="0 0 80 80" aria-hidden="true"><rect x="22" y="6" width="36" height="10" rx="4" fill="#ff8fab" stroke="#2d2a4a" stroke-width="3"/>
+    <path d="M18 18 Q14 18 14 26 L14 66 Q14 74 22 74 L58 74 Q66 74 66 66 L66 26 Q66 18 62 18 Z" fill="#e9f6ff" stroke="#2d2a4a" stroke-width="4"/>${cookies}</svg>`;
+}
+
+/*LEVELS-START*/
+/* Words. e = picture (emoji) or svg, w = word (big path), say = spoken form, prop = picture property (young path). */
+const WORDS = {
+  hot: { e: "🔥", w: "hot" }, cold: { e: "🧊", w: "cold" }, warm: { e: "☀️", w: "warm" }, spicy: { e: "🌶️", w: "spicy" },
+  up: { e: "⬆️", w: "up" }, down: { e: "⬇️", w: "down" }, high: { e: "🪁", w: "high" }, sky: { e: "☁️", w: "sky" },
+  happy: { e: "😀", w: "happy" }, sad: { e: "😢", w: "sad" }, glad: { e: "😊", w: "glad" }, silly: { e: "🤪", w: "silly" },
+  big: { e: "🐘", w: "big" }, small: { e: "🐭", w: "small" }, huge: { e: "🦕", w: "huge" }, tall: { e: "🦒", w: "tall" },
+  fast: { e: "🐆", w: "fast" }, slow: { e: "🐢", w: "slow" }, quick: { e: "⚡", w: "quick" }, loud: { e: "📢", w: "loud" },
+  open: { e: "🔓", w: "open" }, closed: { e: "🔒", w: "closed" }, wide: { e: "↔️", w: "wide" }, new: { e: "✨", w: "new" },
+  giant: { e: "🦣", w: "giant" }, tiny: { e: "🐜", w: "tiny" }, heavy: { e: "🏋️", w: "heavy" }, sleepy: { e: "😴", w: "sleepy" },
+  little: { e: "🐥", w: "little" }, round: { e: "⚪", w: "round" },
+  shout: { e: "📣", w: "shout" }, yell: { e: "🗣️", w: "yell" }, whisper: { e: "🤫", w: "whisper" }, sing: { e: "🎤", w: "sing" },
+  begin: { e: "🏁", w: "begin" }, end: { e: "🔚", w: "end" }, start: { e: "🚦", w: "start" }, jump: { e: "🦘", w: "jump" },
+  boiling: { e: "♨️", w: "boiling" }, damp: { e: "💧", w: "damp" }, wet: { e: "💦", w: "wet" }, soaked: { e: "🌊", w: "soaked" },
+  ancient: { e: "🏛️", w: "ancient" }, modern: { e: "🏙️", w: "modern" }, old: { e: "👴", w: "old" },
+  brave: { e: "🦁", w: "brave" }, scared: { e: "😱", w: "scared" }, bold: { e: "💪", w: "bold" },
+  generous: { e: "🎁", w: "generous" }, selfish: { e: "🙅", w: "selfish" }, kind: { e: "💝", w: "kind" }, rich: { e: "💰", w: "rich" },
+  freezing: { e: "🥶", w: "freezing" }, noisy: { e: "🥁", w: "noisy" }, quiet: { e: "🔇", w: "quiet" }, busy: { e: "🐝", w: "busy" },
+  tired: { e: "🥱", w: "tired" }, awake: { e: "⏰", w: "awake" }, hungry: { e: "🍽️", w: "hungry" },
+  walk: { e: "🚶", w: "walk" }, jog: { e: "🏃", w: "jog" }, sprint: { e: "💨", w: "sprint" },
+  // young path pictures (no words shown)
+  elephant: { e: "🐘", say: "elephant", prop: "big" }, mouse: { e: "🐭", say: "mouse", prop: "small" }, whale: { e: "🐋", say: "whale", prop: "big" },
+  ant: { e: "🐜", say: "ant", prop: "small" }, dino: { e: "🦖", say: "dinosaur", prop: "big" }, ladybug: { e: "🐞", say: "ladybug", prop: "small" },
+  sun: { e: "☀️", say: "sun", prop: "hot" }, snowman: { e: "⛄", say: "snowman", prop: "cold" }, fire: { e: "🔥", say: "fire", prop: "hot" },
+  icecream: { e: "🍦", say: "ice cream", prop: "cold" }, cocoa: { e: "☕", say: "hot cocoa", prop: "hot" }, ice: { e: "🧊", say: "ice", prop: "cold" },
+  cupfull: { svg: () => cupSVG(1, "#4dc3ff"), say: "full cup", prop: "full" }, cupempty: { svg: () => cupSVG(0, "#4dc3ff"), say: "empty cup", prop: "empty" },
+  juice: { svg: () => cupSVG(1, "#ff9f43"), say: "full cup of juice", prop: "full" },
+  jarempty: { svg: () => jarSVG(0), say: "empty cookie jar", prop: "empty" }, jarfull: { svg: () => jarSVG(1), say: "full cookie jar", prop: "full" },
+  cheetah: { e: "🐆", say: "cheetah", prop: "fast" }, turtle: { e: "🐢", say: "turtle", prop: "slow" }, rocket: { e: "🚀", say: "rocket", prop: "fast" },
+  snail: { e: "🐌", say: "snail", prop: "slow" }, racecar: { e: "🏎️", say: "race car", prop: "fast" }, apple: { e: "🍎", say: "apple" },
+  smile: { e: "😀", say: "happy face", prop: "happy" }, cry: { e: "😢", say: "sad face", prop: "sad" }, grin: { e: "😄", say: "grinning face", prop: "happy" },
+  flower: { e: "🌸", say: "flower" }, moon: { e: "🌙", say: "moon", prop: "night" }, sunface: { e: "🌞", say: "morning sun", prop: "day" }, star: { e: "⭐", say: "star", prop: "night" },
+};
+/* Lexicon for the verifier: antonym pairs, synonym groups, intensity scales (low to high), picture-property opposites. */
+const LEX = {
+  ant: [["hot", "cold"], ["hot", "freezing"], ["hot", "cool"], ["warm", "cool"], ["boiling", "freezing"], ["up", "down"], ["high", "low"],
+    ["happy", "sad"], ["glad", "sad"], ["big", "small"], ["big", "little"], ["big", "tiny"], ["huge", "tiny"], ["huge", "small"], ["huge", "little"],
+    ["giant", "tiny"], ["giant", "small"], ["giant", "little"], ["tall", "short"], ["fast", "slow"], ["quick", "slow"], ["loud", "quiet"], ["noisy", "quiet"], ["loud", "soft"],
+    ["open", "closed"], ["new", "old"], ["ancient", "modern"], ["old", "modern"], ["brave", "scared"], ["bold", "scared"], ["generous", "selfish"],
+    ["kind", "mean"], ["rich", "poor"], ["shout", "whisper"], ["yell", "whisper"], ["begin", "end"], ["start", "end"], ["start", "finish"],
+    ["tired", "awake"], ["sleepy", "awake"], ["wet", "dry"], ["damp", "dry"], ["soaked", "dry"], ["heavy", "light"], ["wide", "narrow"], ["busy", "calm"]],
+  syn: [["big", "huge", "giant", "large"], ["small", "little", "tiny"], ["happy", "glad"], ["fast", "quick"], ["shout", "yell"], ["begin", "start"],
+    ["old", "ancient"], ["brave", "bold"], ["generous", "kind"], ["tired", "sleepy"], ["loud", "noisy"], ["quiet", "silent"], ["scared", "afraid"]],
+  scales: [["freezing", "cold", "warm", "hot", "boiling"], ["damp", "wet", "soaked"], ["tiny", "small", "big", "huge"], ["walk", "jog", "sprint"]],
+  propOpp: { big: "small", small: "big", hot: "cold", cold: "hot", full: "empty", empty: "full", fast: "slow", slow: "fast", happy: "sad", sad: "happy", day: "night", night: "day" },
+};
+/* Levels. Round types: opp (other end of the seesaw), syn (same seat), ladder (order from a little to a lot). */
+const LEVELS = [
+  { id: "hot", name: "Hot and Cold", scene: "🔥", age: 7, rounds: [
+    { type: "opp", anchor: "hot", answer: "cold", cards: ["warm", "cold", "spicy"] },
+    { type: "opp", anchor: "up", answer: "down", cards: ["high", "sky", "down"] },
+    { type: "opp", anchor: "happy", answer: "sad", cards: ["sad", "glad", "silly"] } ] },
+  { id: "bigsmall", name: "Big and Small", scene: "🐘", age: 7, rounds: [
+    { type: "opp", anchor: "big", answer: "small", cards: ["huge", "tall", "small"] },
+    { type: "opp", anchor: "fast", answer: "slow", cards: ["slow", "quick", "loud"] },
+    { type: "opp", anchor: "open", answer: "closed", cards: ["new", "closed", "wide"] } ] },
+  { id: "sameseat", name: "Same Seat", scene: "🤝", age: 7.5, twist: "syn", rounds: [
+    { type: "syn", anchor: "huge", answer: "giant", cards: ["tiny", "giant", "heavy"] },
+    { type: "syn", anchor: "glad", answer: "happy", cards: ["happy", "sad", "sleepy"] },
+    { type: "syn", anchor: "quick", answer: "fast", cards: ["slow", "loud", "fast"] } ] },
+  { id: "whichseat", name: "Which Seat?", scene: "🎠", age: 8, twist: "mix", rounds: [
+    { type: "opp", anchor: "tiny", answer: "huge", cards: ["little", "huge", "round"] },
+    { type: "syn", anchor: "shout", answer: "yell", cards: ["whisper", "yell", "sing"] },
+    { type: "opp", anchor: "begin", answer: "end", cards: ["start", "jump", "end"] } ] },
+  { id: "heatladder", name: "Hotter and Hotter", scene: "♨️", age: 8, twist: "ladder", rounds: [
+    { type: "ladder", scale: ["warm", "hot", "boiling"], cards: ["boiling", "warm", "hot"] },
+    { type: "ladder", scale: ["damp", "wet", "soaked"], cards: ["wet", "soaked", "damp"] } ] },
+  { id: "tricky", name: "Tricky Opposites", scene: "🏛️", age: 8.5, rounds: [
+    { type: "opp", anchor: "ancient", answer: "modern", cards: ["old", "modern", "tall"] },
+    { type: "opp", anchor: "brave", answer: "scared", cards: ["bold", "loud", "scared"] },
+    { type: "opp", anchor: "generous", answer: "selfish", cards: ["kind", "selfish", "rich"] } ] },
+  { id: "bigladder", name: "Big Ladder", scene: "🪜", age: 8.5, twist: "ladder4", rounds: [
+    { type: "ladder", scale: ["tiny", "small", "big", "huge"], cards: ["big", "tiny", "huge", "small"] },
+    { type: "ladder", scale: ["freezing", "cold", "warm", "hot"], cards: ["warm", "hot", "freezing", "cold"] } ] },
+  { id: "party", name: "Seesaw Party", scene: "🎉", age: 9, rounds: [
+    { type: "opp", anchor: "noisy", answer: "quiet", cards: ["loud", "quiet", "busy"] },
+    { type: "syn", anchor: "tired", answer: "sleepy", cards: ["awake", "hungry", "sleepy"] },
+    { type: "ladder", scale: ["walk", "jog", "sprint"], cards: ["sprint", "walk", "jog"] } ] },
+  /* ---- young path (little-path profiles): picture opposites, 2-3 cards, everything spoken ---- */
+  { id: "y-size", young: true, name: "Big and Small", scene: "🐘", age: 6, rounds: [
+    { type: "opp", anchor: "elephant", answer: "mouse", cards: ["mouse", "whale"], say: "The elephant is big! What is the opposite of big?" },
+    { type: "opp", anchor: "ant", answer: "dino", cards: ["ladybug", "dino"], say: "The ant is small! What is the opposite of small?" } ] },
+  { id: "y-temp", young: true, name: "Hot and Cold", scene: "☀️", age: 6, rounds: [
+    { type: "opp", anchor: "sun", answer: "snowman", cards: ["fire", "snowman"], say: "The sun is hot! What is the opposite of hot?" },
+    { type: "opp", anchor: "icecream", answer: "cocoa", cards: ["cocoa", "ice"], say: "Ice cream is cold! What is the opposite of cold?" } ] },
+  { id: "y-full", young: true, name: "Full and Empty", scene: "🥛", age: 6, rounds: [
+    { type: "opp", anchor: "cupfull", answer: "cupempty", cards: ["juice", "cupempty"], say: "This cup is full! What is the opposite of full?" },
+    { type: "opp", anchor: "jarempty", answer: "jarfull", cards: ["jarfull", "cupempty"], say: "This cookie jar is empty! What is the opposite of empty?" } ] },
+  { id: "y-speed", young: true, name: "Fast and Slow", scene: "🐆", age: 6, rounds: [
+    { type: "opp", anchor: "cheetah", answer: "turtle", cards: ["rocket", "turtle", "apple"], say: "The cheetah is fast! What is the opposite of fast?" },
+    { type: "opp", anchor: "snail", answer: "racecar", cards: ["turtle", "apple", "racecar"], say: "The snail is slow! What is the opposite of slow?" } ] },
+  { id: "y-mix", young: true, name: "Happy and Night", scene: "🌙", age: 6.5, rounds: [
+    { type: "opp", anchor: "smile", answer: "cry", cards: ["grin", "cry", "flower"], say: "This face is happy! What is the opposite of happy?" },
+    { type: "opp", anchor: "moon", answer: "sunface", cards: ["star", "flower", "sunface"], say: "The moon comes out at night! What is the opposite of night?" } ] },
+];
+/* A card fits a spot only if it is that spot's answer. Spots: "seat" (opp/syn) or "r0".."r3" (ladder rungs, low to high). */
+function fits(li, ri, spot, cardId) {
+  const R = LEVELS[li] && LEVELS[li].rounds[ri]; if (!R) return false;
+  if (R.type === "ladder") { const m = /^r(\d)$/.exec(spot); return !!m && R.scale[+m[1]] === cardId; }
+  return spot === "seat" && R.answer === cardId;
+}
+const spotsOf = (li, ri) => { const R = LEVELS[li].rounds[ri]; return R.type === "ladder" ? R.scale.map((_, i) => "r" + i) : ["seat"]; };
+/*LEVELS-END*/
+const trackOf = li => (LEVELS[li].young ? "young" : "big");
+const trackList = tr => LEVELS.map((L, i) => i).filter(i => trackOf(i) === tr);
+const BUDDIES = { big: ["🐸", "🐰"], young: ["🐻", "🐼"] };
+const KIND = { opp: "↔️", syn: "🤝", ladder: "🪜" };
+const TWIST = { syn: "🤝", mix: "🎠", ladder: "🪜", ladder4: "🪜" };
+
+/* ---------- utilities ---------- */
+const $app = document.getElementById("app"), $ov = document.getElementById("ov");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+function ymd(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+const todayStr = () => ymd(new Date());
+const starStr = n => "⭐".repeat(n) + `<span class="nostar">${"⭐".repeat(3 - n)}</span>`;
+const num = (v, d = 0) => (typeof v === "number" && isFinite(v) ? Math.max(0, Math.round(v)) : d);
+const wSay = id => WORDS[id].say || WORDS[id].w;
+const pic = id => (WORDS[id].svg ? WORDS[id].svg() : esc(WORDS[id].e));
+const synOf = a => new Set(LEX.syn.filter(g => g.includes(a)).flat().filter(x => x !== a));
+const antOf = a => new Set(LEX.ant.filter(p => p.includes(a)).map(p => (p[0] === a ? p[1] : p[0])));
+
+/* ---------- launch params (interlude contract §3) ---------- */
+const Q = new URLSearchParams(location.search);
+function safeRet(r) { return typeof r === "string" && r.startsWith("../index.html") && !/[\\]|\/\//.test(r) ? r : "../index.html#home"; }
+const LAUNCH = {
+  elzee: Q.get("elzee") === "1",
+  mode: Q.get("mode") === "interlude" ? "interlude" : "free",
+  sid: Q.get("sid") || "", step: parseInt(Q.get("step"), 10) || 0,
+  min: Math.max(1, parseInt(Q.get("min"), 10) || 3),
+  ret: safeRet(Q.get("ret") || (Q.get("mode") === "interlude" ? "../index.html#session" : "../index.html#home")),
+};
+const INTERLUDE = LAUNCH.elzee && LAUNCH.mode === "interlude";
+
+/* ---------- main app profile (read only) ---------- */
+function readMainProfile() {
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem(GAME.mainKey)); } catch (e) { raw = null; }
+  const base = { id: "guest", name: "Guest", avatar: "🙂", little: false, sound: true, linked: false };
+  if (!raw || typeof raw !== "object" || !Array.isArray(raw.profiles)) return base;
+  const p = raw.profiles.find(x => x && x.id === raw.activeId);
+  const sound = typeof raw.sound === "boolean" ? raw.sound : true;
+  if (!p) return { ...base, sound };
+  return { id: String(p.id).slice(0, 40), name: typeof p.name === "string" && p.name.trim() ? p.name.slice(0, 40) : "Player",
+    avatar: typeof p.avatar === "string" && p.avatar ? p.avatar.slice(0, 16) : "🙂", little: p.pathId === "little", sound, linked: true };
+}
+
+/* ---------- this game's own store ---------- */
+function cleanCur(c) {
+  if (!c || typeof c !== "object" || !/^\d+$/.test(String(c.li)) || +c.li >= LEVELS.length) return null;
+  const li = +c.li, ri = num(c.ri);
+  if (ri >= LEVELS[li].rounds.length) return null;
+  const placed = {};
+  for (const [spot, id] of Object.entries(c.placed && typeof c.placed === "object" ? c.placed : {})) if (fits(li, ri, spot, id)) placed[spot] = id;
+  return { li, ri, placed, hints: Math.min(9, num(c.hints)) };
+}
+const Store = {
+  data: null,
+  load() {
+    let raw = null;
+    try { raw = JSON.parse(localStorage.getItem(GAME.storageKey)); } catch (e) { raw = null; }
+    const d = { version: 1, kids: {} };
+    if (raw && typeof raw === "object" && raw.kids && typeof raw.kids === "object") {
+      for (const [id, k] of Object.entries(raw.kids)) {
+        if (!k || typeof k !== "object") continue;
+        const progress = {};
+        for (const [li, v] of Object.entries(k.progress && typeof k.progress === "object" ? k.progress : {})) {
+          if (/^\d+$/.test(li) && +li < LEVELS.length && v && typeof v === "object") progress[li] = { stars: Math.min(3, num(v.stars)), clears: num(v.clears) };
+        }
+        d.kids[String(id).slice(0, 40)] = {
+          progress, day: typeof k.day === "string" ? k.day : null,
+          earnedToday: num(k.earnedToday), pending: num(k.pending), lifetime: num(k.lifetime),
+          noRead: typeof k.noRead === "boolean" ? k.noRead : null, sound: typeof k.sound === "boolean" ? k.sound : null,
+          cur: cleanCur(k.cur), track: k.track === "young" || k.track === "big" ? k.track : null,
+        };
+      }
+    }
+    this.data = d;
+  },
+  save() { try { localStorage.setItem(GAME.storageKey, JSON.stringify(this.data)); } catch (e) { /* private mode / full */ } },
+};
+let me = readMainProfile();
+function kid() {
+  const d = Store.data;
+  if (!d.kids[me.id]) d.kids[me.id] = { progress: {}, day: null, earnedToday: 0, pending: 0, lifetime: 0, noRead: null, sound: null, cur: null, track: null };
+  const k = d.kids[me.id];
+  if (k.day !== todayStr()) { k.day = todayStr(); k.earnedToday = 0; }
+  return k;
+}
+/* Track: little path (pathId "little", same rule as Silly Stories and Jelly Jars) gets the picture levels by default.
+   A grown-up can flip it with the visible 🐣/🦁 button; the choice is stored per kid in this game's own key. */
+const curTrack = () => { const k = kid(); return k.track || (me.little ? "young" : "big"); };
+const noRead = () => { const k = kid(); return k.noRead === null ? (me.little || curTrack() === "young") : k.noRead; };
+const soundOn = () => { const k = kid(); return k.sound === null ? me.sound : k.sound; };
+const isCleared = li => !!(kid().progress[li] && kid().progress[li].clears);
+const isUnlocked = li => { const L = trackList(trackOf(li)), i = L.indexOf(li); return i <= 0 || isCleared(L[i - 1]); };
+const nextIn = li => { const L = trackList(trackOf(li)), i = L.indexOf(li); return i >= 0 && i < L.length - 1 ? L[i + 1] : -1; };
+const isFinal = li => nextIn(li) < 0;
+function pickLevel(tr) { // interlude round: in-progress level of this track, else next uncleared, else lowest stars
+  const k = kid(), L = trackList(tr);
+  if (k.cur && trackOf(k.cur.li) === tr) return k.cur.li;
+  const n = L.find(i => !isCleared(i)); if (n !== undefined) return n;
+  let lo = L[0]; L.forEach(i => { if (((k.progress[i] || {}).stars || 0) < ((k.progress[lo] || {}).stars || 0)) lo = i; }); return lo;
+}
+/* Award tokens for a finished level. lifetime only ever increases (the main app pays lifetime - claimed). */
+function award(li, stars) {
+  const k = kid(), prev = k.progress[li] || { stars: 0, clears: 0 };
+  let want = 0;
+  if (!prev.clears) want += ECON.firstClear; else want += ECON.replay;
+  if (stars === 3 && prev.stars < 3) want += ECON.firstThreeStars;
+  const got = want; // paid in full: no caps (contract §6); earnedToday is a display stat only
+  k.earnedToday += got; k.pending += got; k.lifetime += got;
+  k.progress[li] = { stars: Math.max(prev.stars, stars), clears: prev.clears + 1 };
+  k.cur = null;
+  Store.save();
+  return { want, got };
+}
+
+/* ---------- sound (Web Audio, created on the first tap only) ---------- */
+const Sound = {
+  ctx: null,
+  tone(f0, f1, dur, type = "triangle", vol = 0.18, delay = 0) {
+    if (!soundOn() || !started) return;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      this.ctx = this.ctx || new AC();
+      if (this.ctx.state === "suspended" && this.ctx.resume) this.ctx.resume().catch(() => {});
+      const t = this.ctx.currentTime + delay, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(this.ctx.destination); o.start(t); o.stop(t + dur + 0.03);
+    } catch (e) { /* no audio */ }
+  },
+  pick() { this.tone(300, 720, 0.13, "sine"); },
+  good() { this.tone(660, 660, 0.12); this.tone(880, 880, 0.18, "triangle", 0.18, 0.11); },
+  boing() { this.tone(140, 560, 0.18, "sine", 0.22); this.tone(560, 220, 0.22, "sine", 0.16, 0.17); this.tone(220, 380, 0.16, "sine", 0.1, 0.38); },
+  oops() { this.tone(330, 330, 0.14, "triangle", 0.14); this.tone(294, 294, 0.2, "triangle", 0.12, 0.13); },
+  slide() { this.tone(520, 160, 0.4, "sine", 0.1); },
+  win() { [523, 659, 784, 1047, 1319].forEach((f, i) => this.tone(f, f * 1.01, 0.22, "triangle", 0.18, i * 0.11)); },
+  pop() { this.tone(900, 300, 0.1, "sine", 0.15); },
+};
+
+/* ---------- read-aloud ----------
+   Calm, natural voice: rate 0.9, pitch 1.0, en-US preferred, novelty voices (macOS/iOS joke voices) never chosen.
+   iPad Safari rule: nothing is spoken until the first tap (the ▶️ start screen), which also unlocks speechSynthesis.
+   Anything asked for before that is queued; any failure (no API, no voices, throws) is silent and the game never waits. */
+const NOVELTY = /\b(albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|hysterical|jester|organ|pipe organ|princess|superstar|trinoids|whisper|wobble|zarvox|junior|ralph|fred|kathy|grandma|grandpa|eddy|flo|reed|rocko|sandy|shelley)\b/i;
+const PREFERRED = /\b(samantha|ava|allison|susan|nicky|joelle|zoe|evan|nathan|google us english|aria|jenny|guy|zira|alex)\b/i;
+function pickNaturalVoice(voices) {
+  const list = (Array.isArray(voices) ? voices : []).filter(v => v && typeof v.name === "string" && !NOVELTY.test(v.name));
+  const us = list.filter(v => /^en[-_]us/i.test(v.lang || "")), en = list.filter(v => /^en/i.test(v.lang || ""));
+  for (const pool of [us, en]) {
+    if (!pool.length) continue;
+    const local = pool.filter(v => v.localService !== false);
+    return local.find(v => PREFERRED.test(v.name)) || pool.find(v => PREFERRED.test(v.name)) || local[0] || pool[0];
+  }
+  return null;
+}
+let started = false;
+const Speech = {
+  RATE: 0.9, PITCH: 1.0,
+  get ok() { try { return !!(window.speechSynthesis && typeof window.speechSynthesis.speak === "function" && typeof window.SpeechSynthesisUtterance === "function"); } catch (e) { return false; } },
+  voice: null, token: 0, unlocked: false, queued: null,
+  pickVoice() { try { this.voice = pickNaturalVoice(speechSynthesis.getVoices() || []); } catch (e) { this.voice = null; } },
+  utter(text) {
+    const u = new SpeechSynthesisUtterance(text);
+    if (window.ElzeeVoice) ElzeeVoice.apply(u); else { if (this.voice) u.voice = this.voice; u.lang = this.voice && this.voice.lang ? this.voice.lang : "en-US"; u.rate = this.RATE; u.pitch = this.PITCH; } // shared calm voice (kid's pick)
+    return u;
+  },
+  /* Called only from the ▶️ tap handler: a silent utterance inside the gesture unlocks speech on iOS. */
+  unlock() {
+    this.unlocked = true;
+    if (!this.ok) return;
+    try { this.pickVoice(); speechSynthesis.cancel(); const u = this.utter(" "); u.volume = 0; speechSynthesis.speak(u); } catch (e) { /* ignore */ }
+  },
+  seq(chunks, onDone) {
+    if (!this.unlocked) { this.queued = [chunks, onDone]; return; }
+    const my = ++this.token, speak = this.ok && soundOn();
+    if (speak) { try { speechSynthesis.cancel(); if (speechSynthesis.paused) speechSynthesis.resume(); } catch (e) { /* ignore */ } if (!this.voice) this.pickVoice(); }
+    let i = -1, timer = 0;
+    const next = () => {
+      clearTimeout(timer);
+      if (my !== this.token) return;
+      i++;
+      if (i >= chunks.length) { if (onDone) onDone(); return; }
+      const text = chunks[i], est = 900 + text.length * 75;
+      let advanced = false; const go = () => { if (!advanced) { advanced = true; next(); } };
+      timer = setTimeout(go, speak ? est + 2500 : Math.min(est, 3200)); // watchdog / silent pacing
+      if (!speak) return;
+      try { const u = this.utter(text); u.onend = () => setTimeout(go, 200); u.onerror = () => setTimeout(go, 200); speechSynthesis.speak(u); } catch (e) { /* timer carries on */ }
+    };
+    next();
+  },
+  say(text) { this.seq([text]); },
+  flush() { const q = this.queued; this.queued = null; if (q) this.seq(q[0], q[1]); },
+  stop() { this.token++; this.queued = null; if (this.ok && this.unlocked) try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } },
+};
+try { if (Speech.ok && "onvoiceschanged" in speechSynthesis) speechSynthesis.addEventListener("voiceschanged", () => Speech.pickVoice()); } catch (e) { /* ignore */ }
+
+/* ---------- state ---------- */
+let view = "map";
+let play = null; // { li, ri, placed:{spot:cardId}, hints, sel, busy, done }
+const session = { startedAt: Date.now(), solved: 0, tokens: 0, bannerShown: false, offerShown: false, finished: false };
+try { const s = JSON.parse(sessionStorage.getItem("sw.session." + LAUNCH.sid)); if (INTERLUDE && s && s.startedAt) Object.assign(session, { startedAt: num(s.startedAt), solved: num(s.solved), tokens: num(s.tokens) }); } catch (e) { /* ignore */ }
+const saveSession = () => { try { sessionStorage.setItem("sw.session." + LAUNCH.sid, JSON.stringify({ startedAt: session.startedAt, solved: session.solved, tokens: session.tokens })); } catch (e) { /* ignore */ } };
+const afterStart = []; // things to do (auto-read) once the ▶️ tap has happened
+function whenStarted(fn, ms = 300) { if (started) setTimeout(fn, ms); else afterStart.push(fn); }
+
+const R0 = () => LEVELS[play.li].rounds[play.ri];
+const isYoung = () => !!(play && LEVELS[play.li].young);
+const roundFull = () => spotsOf(play.li, play.ri).every(s => play.placed[s]);
+function promptSay(R) {
+  if (R.say) return R.say;
+  if (R.type === "opp") return `What is the opposite of ${wSay(R.anchor)}?`;
+  if (R.type === "syn") return `Which word means the same as ${wSay(R.anchor)}?`;
+  return "Put the words in order, from a little to a lot!";
+}
+function promptHTML(R) {
+  if (R.type === "opp") return `Find the opposite of <b>${esc(wSay(R.anchor))}</b>. It rides on the other end!`;
+  if (R.type === "syn") return `Find a word that means the same as <b>${esc(wSay(R.anchor))}</b>. It shares the seat!`;
+  return "Climb from <b>a little</b> to <b>a lot</b>!";
+}
+function saveCur() { if (!play || play.done) return; kid().cur = { li: play.li, ri: play.ri, placed: { ...play.placed }, hints: play.hints }; Store.save(); }
+function startLevel(li, resume) {
+  Speech.stop(); clearGlow();
+  const c = resume && kid().cur && kid().cur.li === li ? kid().cur : null;
+  play = { li, ri: c ? c.ri : 0, placed: c ? { ...c.placed } : {}, hints: c ? c.hints : 0, sel: null, busy: false, done: false };
+  view = "play"; if (started) $ov.innerHTML = ""; saveCur(); render();
+  startRound();
+}
+function startRound() {
+  const li = play.li, ri = play.ri, L = LEVELS[li];
+  const first = trackList(trackOf(li))[0] === li;
+  if (ri === 0 && !isCleared(li) && (L.twist || first) && !Object.keys(play.placed).length) whenStarted(() => { if (play && play.li === li && play.ri === ri) freeGlow(); }, 900);
+  if (L.young || noRead()) whenStarted(() => { if (play && play.li === li && play.ri === ri && !play.done) Speech.say(promptSay(R0())); });
+}
+function freeGlow() { const s = document.querySelector(".stage .slot"); if (s) s.classList.add("glow"); }
+
+/* ---------- screens ---------- */
+function topBar(back) {
+  const k = kid(), nr = noRead(), y = curTrack() === "young";
+  let home = "";
+  if (INTERLUDE || LAUNCH.elzee) home = `<button class="iconbtn" data-act="home" aria-label="Back to Elzee">🏠</button>`;
+  else if (back) home = `<button class="iconbtn" data-act="map" aria-label="Back to levels">⬅️</button>`;
+  else if (me.linked) home = `<a class="iconbtn" href="../index.html#home" aria-label="Back to Elzee">🏠</a>`;
+  return `<div class="top">${home}
+    ${back && LAUNCH.elzee && !INTERLUDE ? `<button class="iconbtn" data-act="map" aria-label="Back to levels">🗺️</button>` : ""}
+    <div class="pill" aria-label="Player"><span class="av">${esc(me.avatar)}</span>${nr ? "" : `<span class="nm">${esc(me.name)}</span>`}</div>
+    <div class="pill" aria-label="Tokens earned today ${k.earnedToday}">🪙 <b>${k.earnedToday}</b></div>
+    <div class="spacer"></div>
+    <button class="iconbtn trackbtn" data-act="toggleTrack" aria-label="${y ? "Little seesaw. Tap for big seesaw" : "Big seesaw. Tap for little seesaw"}" aria-pressed="${y}">${y ? "🐣" : "🦁"}</button>
+    <button class="iconbtn ${nr ? "on" : ""}" data-act="toggleRead" aria-label="Picture mode (no reading)" aria-pressed="${nr}">${nr ? "🖼️" : "🔤"}</button>
+    <button class="iconbtn" data-act="toggleSound" aria-label="Sound" aria-pressed="${soundOn()}">${soundOn() ? "🔊" : "🔇"}</button>
+    ${back || INTERLUDE ? "" : `<button class="iconbtn" data-act="grown" aria-label="For grown-ups">ⓘ</button>`}
+  </div>`;
+}
+function bannerHTML() {
+  if (!INTERLUDE || !session.bannerShown || session.finished) return "";
+  return `<div class="banner" aria-label="Last level, then back to the trail">${noRead() ? "🕐 ➜ 🗺️" : "Last level, then back to the trail! 🗺️"}</div>`;
+}
+function renderMap() {
+  $app.classList.toggle("young", curTrack() === "young");
+  const nr = noRead(), k = kid(), y = curTrack() === "young";
+  const TL = trackList(curTrack()), next = TL.find(i => !isCleared(i));
+  $app.innerHTML = `${topBar(false)}
+    <div class="mapwrap">
+    <div class="hero"><span class="big" aria-hidden="true">🎢</span>
+      ${nr ? `<button class="iconbtn" data-act="sayIntro" aria-label="Hear how to play">🔈</button>${y ? `<span class="big" aria-hidden="true">🐣</span>` : ""}` : `<div class="bubble"><b>Seesaw Words!</b> Opposites ride on opposite ends. Same-meaning words share a seat. Ladders climb from a little to a lot.</div>`}
+    </div>
+    <div class="levels ${curTrack()}">${TL.map((i, n) => {
+      const L = LEVELS[i], un = isUnlocked(i), st = (k.progress[i] || {}).stars || 0;
+      return `<button class="lvl ${un ? "" : "locked"} ${i === next ? "next" : ""}" data-act="${un ? "start" : "locked"}" data-li="${i}" aria-label="Level ${n + 1}${un ? "" : ", locked"}">
+        <span class="num">${n + 1}</span>${L.twist && un ? `<span class="tw" aria-hidden="true">${TWIST[L.twist]}</span>` : ""}<span class="scene">${un ? L.scene : "🔒"}</span>
+        ${nr ? "" : `<b style="font-size:18px">${esc(L.name)}</b>`}<span class="stars">${un ? starStr(st) : ""}</span></button>`;
+    }).join("")}</div></div>`;
+}
+function cardHTML(id, cls, extra = "") {
+  const W = WORDS[id], nr = noRead() || isYoung();
+  return `<div class="card ${cls}" data-card="${id}" ${extra} role="button" aria-label="${esc(wSay(id))}"><span class="e">${pic(id)}</span>${nr || !W.w ? "" : `<span class="w">${esc(W.w)}</span>`}</div>`;
+}
+function spotHTML(spot, badge) {
+  const id = play.placed[spot];
+  return id ? cardHTML(id, "placed", `data-spot="${spot}"`) : `<div class="slot" data-spot="${spot}" role="button" aria-label="Empty spot">${badge}</div>`;
+}
+function stageHTML() {
+  const R = R0(), [b1, b2] = BUDDIES[isYoung() ? "young" : "big"];
+  if (R.type === "ladder") {
+    const n = R.scale.length, top = Object.keys(play.placed).length;
+    return `<div class="ladder fit">
+      <div class="meter" aria-hidden="true">${R.scale.map((_, i) => `<span><i style="width:${12 + i * 9}px;height:${12 + i * 9}px"></i></span>`).join("")}</div>
+      <div class="rungs">${R.scale.map((_, i) => `<div class="rung">${spotHTML("r" + i, "")}</div>`).join("")}
+        <span class="climber" aria-hidden="true" style="transform:translateY(calc(${-top} * (var(--ch) + 10px)))">${b1}</span></div>
+      <div class="slide" aria-hidden="true"></div></div>`;
+  }
+  const full = roundFull(), tilt = full ? 0 : R.type === "opp" ? -9 : 9;
+  const left = R.type === "opp" ? `<span class="buddy">${b1}</span>${cardHTML(R.anchor, "anchor")}` : `<span class="buddy">${b1}</span>${cardHTML(R.anchor, "anchor")}${spotHTML("seat", "🤝")}`;
+  const right = R.type === "opp" ? `${spotHTML("seat", "↔️")}<span class="buddy">${b2}</span>` : `<span class="weight" aria-hidden="true">${b2}${b2}</span>`;
+  return `<div class="seesaw fit ${R.type}" style="--sw:calc(var(--cw) * ${R.type === "opp" ? 2 : 2} + ${R.type === "opp" ? 250 : 290}px)">
+    <div class="pivot" aria-hidden="true"></div>
+    <div class="plank" data-tilt="${tilt}" style="transform:rotate(${tilt}deg)"><div class="seat left">${left}</div><div class="seat right">${right}</div></div></div>`;
+}
+function renderPlay() {
+  const L = LEVELS[play.li], R = R0(), nr = noRead() || !!L.young;
+  $app.classList.toggle("young", !!L.young);
+  const used = new Set(Object.values(play.placed));
+  $app.innerHTML = `${topBar(true)}${bannerHTML()}
+    <div class="board">
+      <div class="park">
+        <span class="deco" style="left:4%;top:16%" aria-hidden="true">☁️</span><span class="deco" style="right:6%;top:8%;animation-delay:1s" aria-hidden="true">${L.young ? "🌈" : "☀️"}</span>
+        <span class="deco" style="left:3%;bottom:4%;font-size:36px" aria-hidden="true">🌳</span><span class="deco" style="right:3%;bottom:3%;font-size:32px;animation-delay:.6s" aria-hidden="true">🌼</span>
+        <div class="prompt"><span class="kind" aria-hidden="true">${KIND[R.type]}</span>
+          ${nr ? "" : `<span class="ptxt">${promptHTML(R)}</span>`}
+          <span class="dots" aria-label="Round ${play.ri + 1} of ${L.rounds.length}">${L.rounds.map((_, i) => `<i class="${i < play.ri ? "done" : i === play.ri ? "cur" : ""}"></i>`).join("")}</span>
+          ${nr ? `<span class="spacer"></span>` : ""}<button class="iconbtn" data-act="sayPrompt" aria-label="Hear it">🔈</button></div>
+        <div class="stage">${stageHTML()}</div>
+      </div>
+      <div class="side">
+        <div class="tray">${R.cards.map(id => cardHTML(id, (used.has(id) ? "used " : "") + (play.sel === id ? "sel" : ""))).join("")}</div>
+        <div class="tools"><button class="iconbtn" data-act="hint" aria-label="Hint">💡</button></div>
+      </div>
+    </div>`;
+  fitStage();
+}
+function render() { if (view === "play" && play) renderPlay(); else renderMap(); }
+function fitStage() {
+  const st = document.querySelector(".stage"), el = st && st.querySelector(".fit"); if (!el) return;
+  el.style.transform = ""; el.style.transformOrigin = "50% 100%";
+  const pad = 26, aw = st.clientWidth - pad, ah = st.clientHeight - pad - st.clientHeight * 0.06;
+  const w = el.offsetWidth + (el.classList.contains("seesaw") ? 0 : 0), h = el.offsetHeight + (el.classList.contains("seesaw") ? 60 : 0);
+  const s = Math.max(0.3, Math.min(1.6, aw / w, ah / h));
+  el.style.transform = `scale(${s.toFixed(3)})`;
+}
+
+/* ---------- placing ---------- */
+let toastT = 0;
+function toast(msg) { document.querySelectorAll(".toast").forEach(e => e.remove()); const d = document.createElement("div"); d.className = "toast"; d.textContent = msg; document.body.appendChild(d); clearTimeout(toastT); toastT = setTimeout(() => d.remove(), 2600); }
+function clearGlow() { document.querySelectorAll(".glow").forEach(e => e.classList.remove("glow")); }
+function nextSpot() { return spotsOf(play.li, play.ri).find(s => !play.placed[s]); }
+function answerFor(spot) { const R = R0(); return R.type === "ladder" ? R.scale[+spot.slice(1)] : R.answer; }
+function why(R, id) {
+  const a = R.anchor, c = wSay(id);
+  if (R.say) { // young: property talk
+    const pa = WORDS[a].prop, pc = WORDS[id].prop;
+    if (pc && pc === pa) return `The ${c} is ${pc} too! Try again.`;
+    return `Hmm, the ${c}? Try another one!`;
+  }
+  if (R.type === "opp") return synOf(a).has(id) ? `${c} means almost the same as ${wSay(a)}. Find the opposite!` : `${c} is not the opposite of ${wSay(a)}. Try another!`;
+  if (R.type === "syn") return antOf(a).has(id) ? `${c} is the opposite! Find one that means the same.` : `${c} doesn't mean the same as ${wSay(a)}. Try another!`;
+  return `${c} goes on a different step. Try again!`;
+}
+function praise(R) {
+  if (R.say) { const a = WORDS[R.anchor], b = WORDS[R.answer]; return `Yes! ${a.prop} and ${b.prop}! Boing!`; }
+  if (R.type === "opp") return `${wSay(R.anchor)} and ${wSay(R.answer)}. Opposites! Boing!`;
+  if (R.type === "syn") return `${wSay(R.anchor)} and ${wSay(R.answer)} mean the same!`;
+  return `${R.scale.map(wSay).join(", ")}. From a little to a lot!`;
+}
+function tryPlace(id, spot, ghost) {
+  if (!play || play.busy || play.done || play.placed[spot]) { if (ghost) ghost.remove(); return; }
+  const R = R0(), slotEl = document.querySelector(`.stage .slot[data-spot="${spot}"]`);
+  clearGlow(); play.sel = null;
+  if (!fits(play.li, play.ri, spot, id)) { wrong(id, slotEl, ghost); return; }
+  if (ghost) ghost.remove();
+  const prevTilt = +((document.querySelector(".plank") || {}).dataset || {}).tilt || 0;
+  play.placed[spot] = id; saveCur(); Sound.good();
+  renderPlay();
+  const placed = document.querySelector(`.stage .card[data-spot="${spot}"]`);
+  if (R.type === "ladder") {
+    if (!roundFull()) { Speech.say(wSay(id)); return; }
+    Speech.say(praise(R)); ladderWin(); roundDone(); return;
+  }
+  swingLevel(prevTilt); Speech.say(praise(R)); if (placed) placed.classList.add("placed");
+  roundDone();
+}
+function swingLevel(from) {
+  Sound.boing();
+  const p = document.querySelector(".plank"); if (!p) return;
+  if (!RM() && p.animate) {
+    p.animate([{ transform: `rotate(${from}deg)` }, { transform: `rotate(${-from * 0.55}deg)`, offset: 0.35 }, { transform: `rotate(${from * 0.3}deg)`, offset: 0.6 }, { transform: `rotate(${-from * 0.12}deg)`, offset: 0.8 }, { transform: "rotate(0deg)" }], { duration: 1100, easing: "ease-out" });
+    document.querySelectorAll(".seesaw .buddy, .seesaw .card").forEach((b, i) => b.animate([{ transform: "translateY(0)" }, { transform: "translateY(-26px)" }, { transform: "translateY(0)" }, { transform: "translateY(-10px)" }, { transform: "translateY(0)" }], { duration: 800, delay: 200 + i * 60 }));
+  }
+  const r = p.getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top, 26, 0.8, 1);
+}
+function ladderWin() {
+  Sound.boing();
+  const c = document.querySelector(".climber"), rg = document.querySelector(".rungs");
+  if (!c || !rg || RM() || !c.animate) return;
+  const h = rg.offsetHeight, w = rg.offsetWidth;
+  c.animate([{ transform: `translateY(${-h + 50}px)` }, { transform: `translate(${w + 20}px,${-h + 40}px) rotate(20deg)`, offset: 0.35 }, { transform: `translate(${w + 70}px,0) rotate(30deg)`, offset: 0.8 }, { transform: `translate(${w + 80}px,-30px)` }, { transform: `translate(${w + 80}px,0)` }], { duration: 1500, easing: "ease-in", fill: "forwards" });
+  const r = rg.getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top, 26, 0.8, 1);
+}
+function wrong(id, slotEl, ghost) {
+  const R = R0(), card = document.querySelector(`.tray .card[data-card="${id}"]`);
+  Sound.oops(); const msg = why(R, id); Speech.say(msg); toast(noRead() || isYoung() ? "🤔" : msg);
+  const p = document.querySelector(".plank");
+  if (p && p.animate && !RM()) { const t = +p.dataset.tilt || 0; p.animate([{ transform: `rotate(${t}deg)` }, { transform: `rotate(${t - 4}deg)` }, { transform: `rotate(${t + 3}deg)` }, { transform: `rotate(${t}deg)` }], { duration: 500 }); }
+  slideOff(id, card, slotEl, ghost);
+}
+/* A card that doesn't fit lands on the spot, wobbles, and slides off back to the tray. No fail state. */
+function slideOff(id, card, slotEl, ghost) {
+  let g = ghost;
+  if (!g && card) { const r = card.getBoundingClientRect(); g = ghostFor(id, r); g.style.transform = `translate(${r.left}px,${r.top}px)`; }
+  if (card) card.style.visibility = "hidden";
+  const done = () => { if (g) g.remove(); if (card) { card.style.visibility = ""; card.classList.remove("wob"); void card.offsetWidth; card.classList.add("wob"); } };
+  if (!g || RM() || !g.animate || !slotEl) { done(); return; }
+  play.busy = true;
+  const cur = g.getBoundingClientRect(), s = slotEl.getBoundingClientRect(), home = card ? card.getBoundingClientRect() : cur;
+  const sx = s.left + (s.width - cur.width) / 2, sy = s.top + (s.height - cur.height) / 2;
+  const a = g.animate([
+    { transform: `translate(${cur.left}px,${cur.top}px)` },
+    { transform: `translate(${sx}px,${sy}px) rotate(0)`, offset: 0.2 },
+    { transform: `translate(${sx}px,${sy}px) rotate(-12deg)`, offset: 0.3 },
+    { transform: `translate(${sx}px,${sy}px) rotate(10deg)`, offset: 0.4 },
+    { transform: `translate(${sx + 50}px,${sy + 90}px) rotate(28deg)`, offset: 0.62 },
+    { transform: `translate(${(sx + home.left) / 2}px,${Math.max(sy, home.top) + 40}px) rotate(-8deg)`, offset: 0.82 },
+    { transform: `translate(${home.left}px,${home.top}px) rotate(0)` }], { duration: 1100, easing: "ease-in-out" });
+  setTimeout(() => Sound.slide(), 400);
+  let fin = false; const end = () => { if (fin) return; fin = true; play && (play.busy = false); done(); };
+  a.onfinish = end; setTimeout(end, 1400);
+}
+function roundDone() {
+  play.busy = true;
+  const li = play.li, ri = play.ri, last = ri >= LEVELS[li].rounds.length - 1;
+  setTimeout(() => {
+    if (!play || play.li !== li || play.ri !== ri || play.done) return;
+    if (last) { winLevel(); return; }
+    play.ri++; play.placed = {}; play.busy = false; saveCur(); renderPlay(); startRound();
+  }, last ? 1600 : 2000);
+}
+function hint() {
+  if (!play || play.busy || play.done) return;
+  const s = nextSpot(); if (!s) return;
+  play.hints++; saveCur(); clearGlow();
+  const slot = document.querySelector(`.stage .slot[data-spot="${s}"]`), card = document.querySelector(`.tray .card[data-card="${answerFor(s)}"]`);
+  if (slot) slot.classList.add("glow"); if (card) card.classList.add("glow");
+  Speech.say(promptSay(R0()));
+}
+
+/* ---------- drag / tap ---------- */
+let drag = null;
+function ghostFor(id, r) {
+  const g = document.createElement("div"); g.className = "drag";
+  g.innerHTML = `<span class="e">${pic(id)}</span>${noRead() || isYoung() || !WORDS[id].w ? "" : `<span class="w">${esc(WORDS[id].w)}</span>`}`;
+  g.style.width = r.width + "px"; g.style.height = r.height + "px"; document.body.appendChild(g); return g;
+}
+function slotAt(x, y) { const el = document.elementFromPoint(x, y); return (el && el.closest && el.closest(".stage .slot")) || null; }
+document.addEventListener("pointerdown", e => {
+  if (view !== "play" || !play || play.done || play.busy || $ov.firstChild) return;
+  const t = e.target.closest && e.target.closest(".tray .card");
+  if (!t || t.classList.contains("used")) return;
+  e.preventDefault();
+  const r = t.getBoundingClientRect();
+  drag = { id: t.dataset.card, el: t, x0: e.clientX, y0: e.clientY, ox: e.clientX - r.left, oy: e.clientY - r.top, r, moved: false, ghost: null, pid: e.pointerId, lx: e.clientX, vx: 0, hot: null };
+  try { t.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+  Speech.say(wSay(drag.id)); // every card is spoken on touch
+});
+document.addEventListener("pointermove", e => {
+  if (!drag || e.pointerId !== drag.pid) return;
+  const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+  if (!drag.moved && Math.hypot(dx, dy) > 10) {
+    drag.moved = true; clearGlow();
+    drag.ghost = ghostFor(drag.id, drag.r); drag.el.style.visibility = "hidden"; Sound.pick();
+  }
+  if (!drag.moved) return;
+  drag.vx = drag.vx * 0.7 + (e.clientX - drag.lx) * 0.3; drag.lx = e.clientX;
+  const tilt = RM() ? 0 : Math.max(-18, Math.min(18, drag.vx * 1.5));
+  drag.ghost.style.transform = `translate(${e.clientX - drag.ox}px,${e.clientY - drag.oy}px) rotate(${tilt}deg) scale(1.08)`;
+  const b = slotAt(e.clientX, e.clientY);
+  if (b !== drag.hot) { if (drag.hot) drag.hot.classList.remove("hot"); if (b) b.classList.add("hot"); drag.hot = b; }
+});
+function endDrag(e, cancel) {
+  if (!drag || e.pointerId !== drag.pid) return;
+  const d = drag; drag = null;
+  if (!d.moved) { if (!cancel) tapCard(d.id); return; }
+  if (d.hot) d.hot.classList.remove("hot");
+  const b = cancel ? null : slotAt(e.clientX, e.clientY);
+  if (b) { tryPlace(d.id, b.dataset.spot, d.ghost); return; }
+  springHome(d);
+}
+function springHome(d) {
+  const g = d.ghost, el = d.el;
+  const cur = g.getBoundingClientRect(), home = el.getBoundingClientRect();
+  const done = () => { g.remove(); el.style.visibility = ""; };
+  if (RM() || !g.animate) { done(); return; }
+  const a = g.animate([{ transform: `translate(${cur.left}px,${cur.top}px) scale(1.08)` }, { transform: `translate(${home.left}px,${home.top}px) scale(1.1,.9)`, offset: 0.8 }, { transform: `translate(${home.left}px,${home.top}px) scale(1)` }], { duration: 380, easing: "ease-out" });
+  a.onfinish = done; setTimeout(() => { if (g.isConnected) done(); }, 700);
+}
+document.addEventListener("pointerup", e => endDrag(e, false));
+document.addEventListener("pointercancel", e => endDrag(e, true));
+document.addEventListener("contextmenu", e => { if (e.target.closest && e.target.closest(".card")) e.preventDefault(); });
+function tapCard(id) {
+  Sound.pick();
+  play.sel = play.sel === id ? null : id;
+  document.querySelectorAll(".tray .card").forEach(el => el.classList.toggle("sel", el.dataset.card === play.sel));
+}
+
+/* ---------- clicks ---------- */
+document.addEventListener("click", e => {
+  const slot = e.target.closest && e.target.closest(".stage .slot");
+  if (slot && view === "play" && play && !play.done && !play.busy && !$ov.firstChild) {
+    if (play.sel) tryPlace(play.sel, slot.dataset.spot, null); else Speech.say(promptSay(R0()));
+    return;
+  }
+  const pc = e.target.closest && e.target.closest(".stage .card");
+  if (pc && view === "play" && !$ov.firstChild) { Speech.say(wSay(pc.dataset.card)); return; }
+  const b = e.target.closest && e.target.closest("[data-act]"); if (!b) return;
+  const act = b.dataset.act;
+  if (act === "begin") begin();
+  else if (act === "start") { pushNav(); startLevel(+b.dataset.li, true); }
+  else if (act === "locked") { Sound.oops(); if (b.animate) b.animate([{ transform: "rotate(0)" }, { transform: "rotate(-4deg)" }, { transform: "rotate(4deg)" }, { transform: "rotate(0)" }], { duration: 300 }); }
+  else if (act === "map") { try { if (history.state && history.state.sw === "play") history.replaceState({ sw: "map" }, ""); } catch (err) { /* ignore */ } toMap(); }
+  else if (act === "home") exitGame(session.finished ? "done" : "quit");
+  else if (act === "back") exitGame(session.solved ? "done" : "quit");
+  else if (act === "toggleRead") { const k = kid(); k.noRead = !noRead(); Store.save(); render(); }
+  else if (act === "toggleSound") { const k = kid(); k.sound = !soundOn(); Store.save(); if (!k.sound) Speech.stop(); render(); }
+  else if (act === "sayPrompt") Speech.say(promptSay(R0()));
+  else if (act === "sayIntro") Speech.say(curTrack() === "young" ? "Seesaw Words! Put the opposite picture on the other end of the seesaw." : "Seesaw Words! Opposites ride on opposite ends. Same-meaning words share a seat. Ladders climb from a little to a lot.");
+  else if (act === "hint") hint();
+  else if (act === "next") { const n = nextIn(play.li); $ov.innerHTML = ""; if (n >= 0) startLevel(n, true); else toMap(); }
+  else if (act === "toggleTrack") {
+    const k = kid(); k.track = curTrack() === "young" ? "big" : "young"; Store.save(); Sound.pick();
+    Speech.say(k.track === "young" ? "Little seesaw" : "Big seesaw");
+    if (view === "play") { if (play && !play.done) saveCur(); if (INTERLUDE) startLevel(pickLevel(k.track), true); else { $ov.innerHTML = ""; view = "map"; play = null; render(); } }
+    else render();
+  }
+  else if (act === "replay") { $ov.innerHTML = ""; startLevel(play.li, false); }
+  else if (act === "keep") { $ov.innerHTML = ""; }
+  else if (act === "grown") showGrown();
+  else if (act === "closeOv") { $ov.innerHTML = ""; }
+});
+
+/* ---------- the ▶️ start tap (unlocks speech + audio on iPad) ---------- */
+function startScreen() {
+  const nr = noRead() || curTrack() === "young", [b1, b2] = BUDDIES[curTrack()];
+  $ov.innerHTML = `<div class="ov startov"><div class="panel" style="background:transparent;box-shadow:none" role="dialog" aria-label="Seesaw Words. Tap to start">
+    ${nr ? "" : `<div class="title">Seesaw Words</div>`}
+    <div class="minisaw" aria-hidden="true"><span>${b1}</span><span style="animation-delay:.5s">🎢</span><span style="animation-delay:.25s">${b2}</span></div>
+    <button class="startbtn" data-act="begin" aria-label="Tap to start">▶️</button></div></div>`;
+}
+function begin() {
+  if (started) { $ov.innerHTML = ""; return; }
+  started = true;
+  Speech.unlock(); // inside the tap gesture
+  $ov.innerHTML = ""; Sound.pick();
+  if (view === "play") fitStage();
+  const q = afterStart.splice(0); q.forEach(fn => setTimeout(fn, 300));
+  Speech.flush();
+}
+
+/* ---------- navigation (back button) ---------- */
+function pushNav() { if (!INTERLUDE) try { history.pushState({ sw: "play" }, ""); } catch (e) { /* ignore */ } }
+function toMap() { Speech.stop(); clearGlow(); $ov.innerHTML = ""; if (play && !play.done) saveCur(); view = "map"; play = null; render(); }
+window.addEventListener("popstate", () => {
+  if (INTERLUDE) { exitGame(session.solved ? "done" : "quit"); return; }
+  if (view === "play") toMap();
+});
+function exitGame(status) {
+  Speech.stop();
+  if (LAUNCH.elzee) {
+    const now = Date.now();
+    const rec = { v: 1, gameId: GAME.id, sid: LAUNCH.sid, step: LAUNCH.step, profileId: me.id, status: status === "done" ? "done" : "quit",
+      rounds: INTERLUDE ? (session.finished ? 1 : 0) : session.solved, solved: session.solved, startedAt: session.startedAt, endedAt: now,
+      durationMs: Math.max(0, now - session.startedAt), tokensEarned: session.tokens };
+    try { localStorage.setItem(GAME.resultKey, JSON.stringify(rec)); } catch (e) { /* ignore */ }
+    try { sessionStorage.removeItem("sw.session." + LAUNCH.sid); } catch (e) { /* ignore */ }
+  }
+  window.__swExit = LAUNCH.ret; // for tests
+  if (!window.__swNoNav) location.replace(LAUNCH.ret);
+}
+
+/* ---------- winning ---------- */
+function winLevel() {
+  if (!play || play.done) return;
+  play.done = true; clearGlow();
+  const li = play.li, stars = Math.max(1, 3 - play.hints), final = isFinal(li);
+  const res = award(li, stars);
+  session.solved++; session.tokens += res.got; saveSession();
+  if (INTERLUDE) session.finished = true;
+  Sound.win();
+  showWin(li, stars, res, final);
+}
+function pairHTML(R, nr) {
+  if (R.type === "ladder") return R.scale.map(id => `${pic(id)}${nr ? "" : `<small> ${esc(wSay(id))}</small>`}`).join(" < ");
+  const mid = R.type === "opp" ? "↔️" : "🤝";
+  return `${pic(R.anchor)}${nr || R.say ? "" : `<small> ${esc(wSay(R.anchor))}</small>`} ${mid} ${pic(R.answer)}${nr || R.say ? "" : `<small> ${esc(wSay(R.answer))}</small>`}`;
+}
+function showWin(li, stars, res, final) {
+  const L = LEVELS[li], nr = noRead() || !!L.young, [b1, b2] = BUDDIES[trackOf(li)];
+  const parade = final ? `<div class="parade" aria-hidden="true">${trackList(trackOf(li)).map((i, n) => `<span style="animation-delay:${n * 0.12}s">${LEVELS[i].scene}</span>`).join("")}<span>🏆</span></div>` : "";
+  const buttons = INTERLUDE
+    ? `<button class="btn" data-act="back" aria-label="Back to my adventure"><span class="ico">▶️</span>${nr ? "" : "Back to my adventure"}</button>`
+    : `<button class="btn ghost" data-act="map" aria-label="All levels"><span class="ico">🗺️</span></button>
+       <button class="btn ghost" data-act="replay" aria-label="Play again"><span class="ico">🔁</span></button>
+       ${final ? "" : `<button class="btn" data-act="next" aria-label="Next level"><span class="ico">▶️</span>${nr ? "" : "Next"}</button>`}`;
+  $ov.innerHTML = `<div class="ov"><div class="panel win ${final ? "final" : ""}" role="dialog" aria-label="Level complete">
+    <h2>${final ? "🏆" : "🎉"} ${nr ? "" : final ? "Seesaw champion!" : esc(L.name) + "!"}</h2>
+    <div class="winscene" aria-hidden="true"><div class="wpiv"></div><div class="wplank"><span style="left:6%">${b1}</span><span style="right:6%;animation-delay:.45s">${b2}</span></div>
+      <span class="deco" style="position:absolute;left:46%;top:38%;font-size:40px">${L.scene}</span></div>
+    <div class="pairs">${L.rounds.map(R => `<div>${pairHTML(R, nr)}</div>`).join("")}</div>
+    ${parade}
+    <div class="row" style="align-items:center"><span class="bigstars">${[0, 1, 2].map(i => `<span style="animation-delay:${0.3 + i * 0.2}s" class="${i < stars ? "" : "nostar"}">⭐</span>`).join("")}</span>
+      ${res.got ? `<span class="coins">+${res.got} 🪙</span>` : ""}</div>
+    <div class="row">${buttons}</div></div></div>`;
+  const pill = document.querySelector('.top .pill[aria-label^="Tokens"]'); if (pill) { pill.setAttribute("aria-label", "Tokens earned today " + kid().earnedToday); const b = pill.querySelector("b"); if (b) b.textContent = kid().earnedToday; }
+  if (!RM()) { FX.burst(innerWidth / 2, innerHeight * 0.35, final ? 120 : 80, 1.2, 1); if (final) for (let i = 1; i <= 6; i++) setTimeout(() => { if (!$ov.querySelector(".final")) return; FX.burst(innerWidth * (0.15 + 0.7 * ((i * 37) % 10) / 10), innerHeight * (0.15 + 0.1 * (i % 3)), 60, 1, 0); Sound.pop(); }, 500 + i * 450); }
+  const lines = [final ? (L.young ? "Hooray! You finished all the little seesaws!" : "Hooray! You are a seesaw champion!") : (L.young ? "Hooray! You did it!" : "Hooray! Level complete!")];
+  if (res.got) lines.push(`You earned ${res.got} tokens!`);
+  setTimeout(() => { if ($ov.querySelector(".win")) Speech.seq(lines); }, 400);
+}
+function showGrown() {
+  const k = kid();
+  $ov.innerHTML = `<div class="ov"><div class="panel grown" role="dialog" aria-label="For grown-ups"><h2>ⓘ For grown-ups</h2>
+    <p><b>Seesaw Words</b> practices vocabulary: opposites (antonyms), same-meaning words (synonyms), and shades of meaning (warm, hot, boiling). Every spot has exactly one card that fits; the others are close but don't. Wrong picks just slide off.</p>
+    <p><b>Tokens:</b> first time a level is finished +${ECON.firstClear}, first time with no hints +${ECON.firstThreeStars}, replays ${ECON.replay}. No daily limits. No purchases, no ads, no timer.</p>
+    <p>Today: ${k.earnedToday} · Waiting to go into the Elzee jar: <b>${k.pending}</b> · All-time: ${k.lifetime}</p>
+    <p>🐣 little seesaw: picture opposites, everything read aloud. 🖼️ hides all words. 🔈 uses the device's own voice.</p>
+    <div class="row"><button class="btn" data-act="closeOv" aria-label="Close"><span class="ico">👍</span></button></div></div></div>`;
+}
+
+/* ---------- confetti ---------- */
+const FX = {
+  cv: document.getElementById("fx"), ctx: null, parts: [], on: false,
+  size() { const d = window.devicePixelRatio || 1; this.cv.width = innerWidth * d; this.cv.height = innerHeight * d; this.ctx = this.cv.getContext("2d"); if (this.ctx) this.ctx.setTransform(d, 0, 0, d, 0, 0); },
+  burst(x, y, n = 40, spread = 1, up = 1) {
+    if (RM()) return;
+    const cols = ["#7c4dff", "#3ccf4e", "#ffc83d", "#ff6b3d", "#ff8fab", "#4dc3ff", "#ff5d73"];
+    for (let i = 0; i < n; i++) { // decorative only; never affects play or rewards
+      const a = up ? -Math.PI / 2 + (Math.random() - 0.5) * 1.6 * spread : Math.random() * Math.PI * 2, v = 380 + Math.random() * 520;
+      this.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: Math.random() * 6, vr: (Math.random() - 0.5) * 14, w: 8 + Math.random() * 7, h: 10 + Math.random() * 8, c: cols[i % cols.length], life: 2.2 + Math.random(), round: i % 4 === 0 });
+    }
+    if (!this.on) { this.on = true; this.size(); if (!this.ctx) { this.on = false; this.parts = []; return; } this.t = performance.now(); requestAnimationFrame(t => this.tick(t)); }
+  },
+  tick(t) {
+    const dt = Math.min(0.033, (t - this.t) / 1000); this.t = t;
+    const g = this.ctx; g.clearRect(0, 0, innerWidth, innerHeight);
+    this.parts = this.parts.filter(p => (p.life -= dt) > 0 && p.y < innerHeight + 40);
+    for (const p of this.parts) {
+      p.vy += 900 * dt; p.vx *= 0.985; p.vy *= 0.985; p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+      g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.c; g.globalAlpha = Math.min(1, p.life);
+      if (p.round) { g.beginPath(); g.arc(0, 0, p.w / 2, 0, 7); g.fill(); } else g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.r * 2)) + 2);
+      g.restore();
+    }
+    if (this.parts.length) requestAnimationFrame(tt => this.tick(tt)); else { this.on = false; g.clearRect(0, 0, innerWidth, innerHeight); }
+  },
+};
+
+/* ---------- soft time budget (interlude §4.3) ---------- */
+function tickBudget() {
+  if (!INTERLUDE || session.finished || !started) return;
+  const m = (Date.now() - session.startedAt) / 60000;
+  if (m >= LAUNCH.min && !session.bannerShown) { session.bannerShown = true; if (view === "play" && !drag && !(play && play.busy)) renderPlay(); }
+  if (m >= LAUNCH.min + 3 && !session.offerShown && !$ov.firstChild) {
+    session.offerShown = true; const nr = noRead() || isYoung();
+    $ov.innerHTML = `<div class="ov"><div class="panel" role="dialog" aria-label="Back to the trail?"><h2>🗺️ ${nr ? "" : "Time for the trail?"}</h2>
+      <div class="row"><button class="btn ghost" data-act="keep" aria-label="Keep playing"><span class="ico">🎢</span></button>
+      <button class="btn" data-act="back" aria-label="Back to my adventure"><span class="ico">▶️</span>${nr ? "" : "Back to my adventure"}</button></div></div></div>`;
+  }
+}
+setInterval(tickBudget, 5000);
+
+/* ---------- boot ---------- */
+Store.load();
+window.addEventListener("pagehide", () => { if (play && !play.done) saveCur(); });
+window.addEventListener("storage", ev => { if (ev.key === GAME.mainKey) { me = readMainProfile(); if (!(play && play.busy)) render(); } });
+window.addEventListener("resize", () => { if (FX.on) FX.size(); if (view === "play" && play && !drag && !play.busy) renderPlay(); });
+(function boot() {
+  const k = kid(); Store.save();
+  if (INTERLUDE) {
+    try { history.replaceState({ sw: "base" }, ""); history.pushState({ sw: "game" }, ""); } catch (e) { /* ignore */ }
+    startLevel(pickLevel(curTrack()), true);
+  } else if (k.cur) { pushNav(); startLevel(k.cur.li, true); }
+  else render();
+  startScreen(); // every boot (interlude and resume too): one big ▶️ tap, which unlocks speech on iPad
+})();
+
+/* Read-only hooks for automated tests (cannot change game state). */
+window.SeesawWords = Object.freeze({
+  levels: LEVELS, words: WORDS, lex: LEX, fits, spotsOf, pickNaturalVoice,
+  track: () => curTrack(),
+  state: () => JSON.parse(JSON.stringify({ view, play, session, kid: kid(), launch: LAUNCH, started, unlocked: Speech.unlocked, voice: Speech.voice ? Speech.voice.name : null })),
+});
+</script>
+</body>
+</html>

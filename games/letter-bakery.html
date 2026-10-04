@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Offline-only: the page may not load anything from anywhere (no fonts, images, scripts, or fetches). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; media-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#7c4dff">
+<title>Letter Bakery · Elzee</title>
+<style>
+:root{
+  --bg:#fff8e7; --ink:#2d2a4a; --muted:#7a7699; --card:#fff; --line:#e7e2f5;
+  --brand:#7c4dff; --brand-d:#5a2fd6; --brand-l:#efe9ff;
+  --good:#3ccf4e; --good-d:#2a9d38; --good-l:#e6fbe9;
+  --oops:#ff9f43; --oops-d:#e07b15; --oops-l:#fff3e3;
+  --gold:#ffc83d; --gold-d:#e0a400;
+  --radius:22px;
+  --font:"Fredoka","Chalkboard SE","Comic Sans MS","Arial Rounded MT Bold",system-ui,sans-serif;
+  --sky1:#bfe6ff; --sky2:#eef9ff; --grass:#8fdc7a; --wood:#e7a35c; --wood-d:#b8743a;
+  --ck:92px; --dough:#f3c37a; --dough-d:#c98b4a; --belt:#5b5872;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:20px;line-height:1.3;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%;overscroll-behavior:none}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2,h3{margin:0}
+#app{max-width:1180px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 10px) calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 14px) calc(env(safe-area-inset-left) + 16px)}
+.btn{border:none;border-radius:18px;padding:12px 24px;min-height:64px;min-width:64px;font-size:23px;font-weight:600;
+  background:var(--good);color:#fff;box-shadow:0 5px 0 var(--good-d);display:inline-flex;align-items:center;justify-content:center;gap:10px}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--good-d)}
+.btn.ghost{background:#fff;color:var(--ink);box-shadow:0 5px 0 var(--line);border:2px solid var(--line)}
+.btn .ico{font-size:30px;line-height:1}
+.iconbtn{border:none;background:#fff;border-radius:18px;width:64px;height:64px;font-size:30px;flex:none;text-decoration:none;
+  box-shadow:0 4px 0 var(--line);display:inline-flex;align-items:center;justify-content:center;position:relative}
+.iconbtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.iconbtn.on{background:var(--brand-l);box-shadow:0 4px 0 #cbbcff}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex:none}
+.pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:6px 16px;min-height:56px;font-size:22px;font-weight:700;box-shadow:0 4px 0 var(--line)}
+.pill .av{font-size:32px}.pill .nm{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pill b{color:var(--gold-d)}
+.spacer{flex:1}
+.banner{flex:none;background:var(--gold);border-radius:16px;padding:8px 16px;margin-bottom:8px;font-weight:700;text-align:center}
+.mapwrap{flex:1;min-height:0;overflow:auto;padding:4px 2px 8px}
+.hero{display:flex;align-items:center;gap:14px;margin:4px 0 16px}
+.hero .big{font-size:60px;animation:bob 2.4s ease-in-out infinite}
+.bubble{background:#fff;border-radius:22px;padding:14px 18px;box-shadow:0 4px 0 var(--line);font-size:21px}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}
+.lvl{position:relative;border:none;background:#fff;border-radius:24px;box-shadow:0 6px 0 var(--line);min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px}
+.lvl .num{position:absolute;top:10px;left:14px;font-weight:700;color:var(--muted)}
+.lvl .tw{position:absolute;top:8px;right:12px;font-size:22px}
+.lvl .scene{font-size:54px;line-height:1}
+.lvl.next{box-shadow:0 6px 0 #cbbcff,0 0 0 4px var(--brand) inset}.lvl.next .scene{animation:bob 1.8s ease-in-out infinite}
+.lvl.locked{opacity:.55}
+.stars{font-size:22px;letter-spacing:2px}.nostar{opacity:.2}
+.board{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.kitchen{flex:1;min-height:0;position:relative;border-radius:28px;overflow:hidden;background:linear-gradient(#ffe9d6,#fff4e8 62%,#f5d9b8 62%);box-shadow:0 6px 0 var(--line);display:flex;flex-direction:column}
+.kitchen .deco{position:absolute;font-size:40px;opacity:.85;pointer-events:none}
+.prompt{position:relative;z-index:2;display:flex;align-items:center;gap:12px;padding:12px 14px 0;flex:none}
+.prompt .ptxt{font-size:clamp(20px,2.4vw,26px);font-weight:600;background:rgba(255,255,255,.9);border-radius:18px;padding:8px 14px;flex:1}
+.prompt .ptxt b{color:var(--brand-d)}
+.prompt .kind{font-size:40px;background:rgba(255,255,255,.9);border-radius:18px;padding:4px 12px;line-height:1.2}
+.dots{display:flex;gap:6px}.dots i{width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 2px #e0b98a}.dots i.done{background:var(--good);box-shadow:none}.dots i.cur{background:var(--gold);box-shadow:none}
+.stage{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:8px 10px 14px}
+.fit{display:flex;flex-direction:column;align-items:center;gap:16px;transform-origin:50% 50%}
+.plate{width:170px;height:170px;border-radius:50%;background:radial-gradient(#fff 55%,#f1e6ff 56%,#fff 70%);box-shadow:0 8px 0 #e8dccd;display:flex;align-items:center;justify-content:center;font-size:104px;line-height:1;position:relative}
+.plate.mystery{font-size:96px;background:radial-gradient(#fff 55%,#ffe8a8 56%,#fff 70%)}
+.plate .pic{display:inline-block}
+.riddle{font-size:24px;font-weight:600;background:#fff;border-radius:16px;padding:6px 14px;box-shadow:0 4px 0 var(--line)}
+.cutter{display:flex;gap:10px;padding:14px 18px;border-radius:30px;background:#fff7ee;box-shadow:inset 0 0 0 4px #e9cfae,0 6px 0 #e8dccd;position:relative}
+.oven{position:absolute;right:12px;bottom:10px;font-size:54px;line-height:1;pointer-events:none}
+.buddy{position:absolute;left:14px;bottom:10px;font-size:64px;line-height:1;pointer-events:none;animation:bob 2.2s ease-in-out infinite}
+.cookie,.slot{width:var(--ck);height:var(--ck);flex:none;border-radius:50%}
+.cookie.wide,.slot.wide{width:calc(var(--ck) * 1.45);border-radius:46px}
+.cookie{position:relative;border:none;background:radial-gradient(circle at 35% 30%,#ffe0a3,var(--dough) 55%,var(--dough-d));box-shadow:0 6px 0 #a8692e,inset 0 -6px 0 rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;touch-action:none;color:#5a3112;font-size:calc(var(--ck) * .5);font-weight:700;line-height:1;text-transform:lowercase}
+.cookie::after{content:"";position:absolute;inset:14%;border-radius:inherit;background:radial-gradient(circle at 20% 30%,#ff8fab 3px,transparent 4px),radial-gradient(circle at 78% 24%,#4dc3ff 3px,transparent 4px),radial-gradient(circle at 70% 80%,#3ccf4e 3px,transparent 4px),radial-gradient(circle at 26% 76%,#ffc83d 3px,transparent 4px);pointer-events:none}
+.cookie .l{position:relative;z-index:1;pointer-events:none}
+.cookie.fixed{filter:saturate(.9)}
+.cookie.placed{animation:pop .35s}
+.cookie.baked{background:radial-gradient(circle at 35% 30%,#f7c27a,#d98b3e 55%,#a85f22)}
+.slot{border:4px dashed #c98b4a;background:rgba(255,240,220,.9);display:flex;align-items:center;justify-content:center;transition:transform .15s,background .15s;touch-action:none;color:#d8b48c;font-size:calc(var(--ck) * .42);font-weight:700}
+.slot.hot{background:#ffe1b8;border-color:var(--brand);transform:scale(1.08)}
+.glow{animation:glow 1s ease-in-out infinite!important}
+.side{flex:none;display:flex;align-items:center;gap:12px}
+.belt{flex:1;position:relative;border-radius:26px;padding:14px 14px 22px;background:repeating-linear-gradient(90deg,#6c6985 0 22px,#5b5872 22px 44px);box-shadow:inset 0 -10px 0 #46435c,0 6px 0 var(--line);background-size:44px 100%;animation:belt 1.6s linear infinite}
+.belt::before,.belt::after{content:"";position:absolute;bottom:-6px;width:30px;height:30px;border-radius:50%;background:#8d8aa6;box-shadow:inset 0 0 0 6px #46435c}
+.belt::before{left:10px}.belt::after{right:10px}
+.tray{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px;min-height:var(--ck)}
+.tray.rollin .cookie{animation:roll-in .6s backwards}
+.tray .cookie.used{visibility:hidden}
+.tray .cookie.sel{transform:translateY(-12px) scale(1.06);box-shadow:0 10px 0 #a8692e,0 0 0 4px var(--brand)}
+.cookie.wob{animation:wiggle .5s}
+.tools{display:flex;gap:10px;justify-content:center}
+.drag{position:fixed;left:0;top:0;z-index:50;pointer-events:none;will-change:transform}
+.drag.cookie{box-shadow:0 18px 30px rgba(45,42,74,.3)}
+/* young: picture + jars */
+.ypic{width:180px;height:180px;border-radius:32px;background:#fff;box-shadow:0 8px 0 #e8dccd;display:flex;align-items:center;justify-content:center;font-size:120px;line-height:1;touch-action:none;position:relative}
+.ypic.used{visibility:hidden}
+.ypic.sel{box-shadow:0 8px 0 #cbbcff,0 0 0 5px var(--brand) inset}
+.jars{display:flex;gap:22px;justify-content:center;align-items:flex-end}
+.jar{position:relative;width:170px;height:200px;border-radius:26px 26px 40px 40px;background:linear-gradient(90deg,rgba(255,255,255,.75),rgba(225,244,255,.9));border:5px solid #9fd3f0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;touch-action:none;padding-top:20px;transition:transform .15s}
+.jar::before{content:"";position:absolute;top:-22px;left:22px;right:22px;height:26px;border-radius:12px;background:linear-gradient(#ff8fab,#e8668a);box-shadow:0 4px 0 #c94d72}
+.jar .L{font-size:84px;font-weight:700;line-height:.9;color:var(--brand-d);pointer-events:none}
+.jar .A{font-size:52px;line-height:1;pointer-events:none}
+.jar.hot{transform:scale(1.07);border-color:var(--brand)}
+.jar .in{position:absolute;bottom:8px;font-size:40px;pointer-events:none}
+.drag.ypic{box-shadow:0 18px 30px rgba(45,42,74,.3)}
+.toast{pointer-events:none;position:fixed;left:50%;top:86px;transform:translateX(-50%);background:#fff;border-radius:18px;padding:10px 18px;box-shadow:0 6px 0 var(--line);font-size:21px;z-index:40;max-width:90vw;text-align:center}
+.ov{position:fixed;inset:0;background:rgba(45,42,74,.45);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
+.panel{background:#fff;border-radius:30px;padding:20px 22px;max-width:720px;width:100%;max-height:calc(100dvh - 32px);overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;animation:pop .35s}
+.panel h2{font-size:32px}
+.row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.startov{background:linear-gradient(#ffe9d6,#fff4e8 62%,#f5d9b8 62%)}
+.startbtn{border:none;border-radius:50%;width:200px;height:200px;font-size:96px;background:var(--good);color:#fff;box-shadow:0 10px 0 var(--good-d);animation:pulse 1.6s ease-in-out infinite}
+.title{font-size:44px;font-weight:700;color:var(--brand-d);text-shadow:0 3px 0 #fff}
+.minisaw{font-size:70px;display:flex;gap:40px;justify-content:center}.minisaw span{animation:hop 1s ease-in-out infinite}
+.winscene{position:relative;width:100%;height:clamp(150px,24vh,250px);border-radius:24px;overflow:hidden;background:linear-gradient(#ffe9d6,#fff4e8 62%,#f5d9b8 62%);display:flex;align-items:center;justify-content:center;gap:18px}
+.winscene .wb{font-size:min(80px,10vh);animation:hop .9s ease-in-out infinite}
+.winscene .wc{font-size:min(70px,9vh);animation:munch 1.4s ease-in-out infinite}
+.pairs{font-size:clamp(26px,4vh,36px);line-height:1.35}.pairs small{font-size:.6em;font-weight:700;color:#8a5a2b;letter-spacing:2px}
+.bigstars{font-size:42px}.bigstars span{display:inline-block;animation:pop .4s backwards}
+.coins{font-size:30px;font-weight:700;color:var(--gold-d)}
+.parade{display:flex;gap:10px;font-size:48px}.parade span{animation:hop 1s ease-in-out infinite}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:70}
+.grown p{text-align:left;font-size:18px;margin:4px 0}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}
+@keyframes wiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg)}40%{transform:rotate(8deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(4deg)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-20px)}}
+@keyframes rock{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(255,200,61,0)}50%{box-shadow:0 0 0 10px rgba(255,200,61,.8)}}
+@keyframes belt{from{background-position:0 0}to{background-position:-44px 0}}
+@keyframes roll-in{0%{transform:translateX(320px) rotate(220deg);opacity:0}70%{transform:translateX(-8px) rotate(-10deg);opacity:1}100%{transform:none}}
+@keyframes munch{0%,100%{transform:scale(1)}50%{transform:scale(.85) rotate(-8deg)}}
+@media (orientation:landscape) and (min-width:900px){.plate{width:150px;height:150px;font-size:92px}}
+#app.young .jar{width:180px}
+@media (max-width:600px){#app{--ck:64px;padding-left:10px;padding-right:10px}.buddy,.oven{display:none}.plate{width:120px;height:120px;font-size:74px}.jar{width:104px;height:150px}.jar .L{font-size:56px}.jar .A{font-size:34px}.ypic{width:130px;height:130px;font-size:86px}
+  .top{gap:6px}.top .pill[aria-label=Player],[data-act=grown]{display:none!important}.pill{padding:6px 10px}.tray{gap:8px}.prompt .ptxt{font-size:17px}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="ov"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<script>
+/*VOICE-START v1.0.0*/
+/* ElzeeVoice v1.0.0 - one shared read-aloud voice for Elzee and its games (1.4.2).
+   Source of truth: workspace/build142/elzee-voice.js, pasted unchanged between the VOICE markers of
+   index.html and games/*.html (the pages are offline single files, so no <script src>).
+   - Calm, natural voices first (iPad Safari: Ava Premium/Enhanced, Samantha Enhanced, Allison, Susan, Karen, Samantha).
+   - Novelty voices (Fred, Zarvox, Bubbles, ...) are never used.
+   - One calm rate (0.9) and normal pitch (1.0) everywhere, younger mode included.
+   - Each kid picks their own voice in Elzee (🔈 on the top bar). It is saved on their profile as profile.voice
+     in logicquest.v1; games only READ it (active profile). No network, on-device voices only. */
+(function (root) {
+  "use strict";
+  var VERSION = "1.0.0", RATE = 0.9, PITCH = 1.0, MAIN_KEY = "logicquest.v1";
+  var NOVELTY = /(^|[\s.\-_(])(Fred|Albert|Bad News|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Pipe Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Bahh|Junior|Ralph|Kathy|Deranged|Hysterical)($|[\s.\-_)])/i;
+  var PREFER = [/^Ava\b.*\((Premium|Enhanced)\)/i, /^Samantha\b.*\(Enhanced\)/i, /^Allison\b/i, /^Susan\b/i, /^Karen\b/i, /^Samantha\b/i];
+  // Friendly characters for the kids' voice cards (picture-only; no reading needed).
+  var CHARS = [{ e: "🦉", n: "Owl" }, { e: "🐻", n: "Bear" }, { e: "🐰", n: "Bunny" }, { e: "🐢", n: "Turtle" }, { e: "🐳", n: "Whale" }];
+  function isNovelty(v) { return !!v && (NOVELTY.test(String(v.name || "")) || NOVELTY.test(String(v.voiceURI || ""))); }
+  function score(v) {
+    var name = String(v.name || ""), i;
+    for (i = 0; i < PREFER.length; i++) if (PREFER[i].test(name)) return i;
+    return /^en[-_]US/i.test(v.lang || "") ? 20 : 30;
+  }
+  function voices() {
+    var all = [];
+    try { all = (root.speechSynthesis && root.speechSynthesis.getVoices && root.speechSynthesis.getVoices()) || []; } catch (e) { all = []; }
+    var seen = {}, out = [];
+    for (var i = 0; i < all.length; i++) {
+      var v = all[i];
+      if (!v || !/^en/i.test(v.lang || "") || v.localService === false || isNovelty(v) || seen[v.name]) continue; // on-device English only
+      seen[v.name] = 1; out.push(v);
+    }
+    return out.map(function (v, i) { return { v: v, s: score(v), i: i }; })
+      .sort(function (a, b) { return a.s - b.s || a.i - b.i; }).map(function (x) { return x.v; });
+  }
+  // Active Elzee profile, read only (games never write logicquest.v1).
+  function activeProfile() {
+    try {
+      var d = JSON.parse(root.localStorage.getItem(MAIN_KEY));
+      if (!d || !Array.isArray(d.profiles)) return null;
+      for (var i = 0; i < d.profiles.length; i++) if (d.profiles[i] && d.profiles[i].id === d.activeId) return d.profiles[i];
+    } catch (e) {}
+    return null;
+  }
+  function prefFor(p) { return p && typeof p.voice === "string" && p.voice ? p.voice.slice(0, 100) : null; }
+  function pick(name) {
+    var list = voices();
+    if (name) for (var i = 0; i < list.length; i++) if (list[i].name === name) return list[i];
+    return list[0] || null; // calm default
+  }
+  // Voice cards for the kid picker: the best few voices, each with a friendly character.
+  function choices(max) {
+    var list = voices().slice(0, Math.min(max || CHARS.length, CHARS.length));
+    return list.map(function (v, i) { return { name: v.name, lang: v.lang, emoji: CHARS[i].e, char: CHARS[i].n }; });
+  }
+  // Set voice, calm rate and normal pitch on an utterance. name undefined = the active profile's pick.
+  function apply(u, name) {
+    if (name === undefined) name = prefFor(activeProfile());
+    var v = pick(name);
+    if (v) { try { u.voice = v; } catch (e) { /* not a real voice object */ } u.lang = v.lang || "en-US"; } else u.lang = "en-US";
+    u.rate = RATE; u.pitch = PITCH;
+    api.last = v ? v.name : null;
+    return u;
+  }
+  var api = { version: VERSION, RATE: RATE, PITCH: PITCH, CHARS: CHARS, isNovelty: isNovelty, voices: voices, pick: pick,
+    choices: choices, apply: apply, prefFor: prefFor, activeProfile: activeProfile, last: null };
+  root.ElzeeVoice = api;
+})(typeof window !== "undefined" ? window : this);
+/*VOICE-END*/
+</script>
+<script>
+"use strict";
+/* ==========================================================================
+   LETTER BAKERY: a phonics / spelling interlude for Elzee.
+   Letter cookies roll along a conveyor; kids drag them into the cookie-cutter word shape under a picture.
+   A right word bakes, puffs up, and a buddy munches it. Young path (little-path profiles): first sounds,
+   drag the picture into the jar for its first sound; everything is spoken, zero reading needed.
+   Fixed levels; exactly one answer per word (seesaw-words-style check in letter-bakery-dev/verify.mjs).
+   No randomness, no timer, no fail state.
+   ========================================================================== */
+const GAME = {
+  id: "letter-bakery",
+  storageKey: "logicquest.minigame.letter-bakery.v1", // this game's own key
+  mainKey: "logicquest.v1",                            // main app key: READ ONLY, never written here
+  resultKey: "logicquest.interlude.result.v1",
+};
+const ECON = { firstClear: 3, firstThreeStars: 2, replay: 0 }; // contract §6 fixed-level rates; no caps of any kind
+const RM = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/*LEVELS-START*/
+/* Pictures for the big path (word -> emoji). */
+const PICS = { cat: "🐱", sun: "☀️", pig: "🐷", dog: "🐶", bed: "🛏️", bus: "🚌", cake: "🎂", kite: "🪁", bone: "🦴", hat: "🎩", bat: "🦇", bag: "👜",
+  frog: "🐸", star: "⭐", drum: "🥁", duck: "🦆", milk: "🥛", bell: "🔔", ship: "🚢", fish: "🐟", chips: "🍟", snake: "🐍", truck: "🚚", log: "🪵" };
+/* How a cookie is spoken on touch (big path: letter names; digraphs by sound). */
+const UNIT_SAY = { a: "A", b: "B", c: "C", d: "D", e: "E", f: "F", g: "G", h: "H", i: "I", k: "K", l: "L", m: "M", n: "N", o: "O", p: "P", r: "R", s: "S", t: "T", u: "U",
+  sh: "sh, like ship", ch: "ch, like chick" };
+/* Young path: jars (big letter + anchor picture) and the picture words, said with a stretched first sound. */
+const JARS = { s: { a: "🐍", name: "snake", snd: "sss" }, m: { a: "🐵", name: "monkey", snd: "mmm" }, b: { a: "🐻", name: "bear", snd: "buh" }, d: { a: "🦆", name: "duck", snd: "duh" },
+  f: { a: "🦊", name: "fox", snd: "fff" }, p: { a: "🍕", name: "pizza", snd: "puh" }, t: { a: "🐢", name: "turtle", snd: "tuh" }, l: { a: "🍋", name: "lemon", snd: "lll" }, n: { a: "🥜", name: "nut", snd: "nnn" } };
+const YPICS = { sun: { e: "☀️", say: "Sssun" }, moon: { e: "🌙", say: "Mmmoon" }, sock: { e: "🧦", say: "Sssock" }, ball: { e: "⚽", say: "Buh, ball" }, dog: { e: "🐶", say: "Duh, dog" },
+  bus: { e: "🚌", say: "Buh, bus" }, fish: { e: "🐟", say: "Fffish" }, mouse: { e: "🐭", say: "Mmmouse" }, seal: { e: "🦭", say: "Ssseal" }, pig: { e: "🐷", say: "Puh, pig" },
+  tiger: { e: "🐯", say: "Tuh, tiger" }, banana: { e: "🍌", say: "Buh, banana" }, lion: { e: "🦁", say: "Llllion" }, nose: { e: "👃", say: "Nnnose" }, star: { e: "⭐", say: "Ssstar" } };
+/* Round types: build (spell the pictured word), swap (change one letter of the last word; picture changes),
+   mystery (picture hidden behind a riddle; letters are exactly the word's), sound (young: picture -> first-sound jar).
+   units = the word split into cookies (sh / ch are one wide cookie). tray = the conveyor, in a fixed order. */
+const LEVELS = [
+  { id: "cvc1", name: "First Cookies", scene: "🍪", age: 7, rounds: [
+    { type: "build", word: "cat", units: ["c", "a", "t"], tray: ["t", "c", "m", "a"] },
+    { type: "build", word: "sun", units: ["s", "u", "n"], tray: ["n", "s", "u", "b"] },
+    { type: "build", word: "pig", units: ["p", "i", "g"], tray: ["g", "d", "i", "p"] } ] },
+  { id: "cvc2", name: "Warm Oven", scene: "🔥", age: 7, rounds: [
+    { type: "build", word: "dog", units: ["d", "o", "g"], tray: ["o", "t", "g", "d", "f"] },
+    { type: "build", word: "bed", units: ["b", "e", "d"], tray: ["d", "e", "p", "b", "a"] },
+    { type: "build", word: "bus", units: ["b", "u", "s"], tray: ["s", "b", "f", "u", "i"] } ] },
+  { id: "magice", name: "Magic e", scene: "🪄", age: 7.5, rounds: [
+    { type: "build", word: "cake", units: ["c", "a", "k", "e"], tray: ["e", "k", "c", "a", "t"] },
+    { type: "build", word: "kite", units: ["k", "i", "t", "e"], tray: ["t", "e", "i", "k", "d"] },
+    { type: "build", word: "bone", units: ["b", "o", "n", "e"], tray: ["n", "b", "e", "o", "s"] } ] },
+  { id: "swap", name: "Swap One", scene: "🔁", age: 7.5, twist: "swap", rounds: [
+    { type: "swap", from: "cat", word: "hat", units: ["h", "a", "t"], open: 0, tray: ["m", "h", "b"] },
+    { type: "swap", from: "hat", word: "bat", units: ["b", "a", "t"], open: 0, tray: ["r", "b", "s"] },
+    { type: "swap", from: "bat", word: "bag", units: ["b", "a", "g"], open: 2, tray: ["g", "d", "n"] } ] },
+  { id: "blends", name: "Blends", scene: "🌬️", age: 8, rounds: [
+    { type: "build", word: "frog", units: ["f", "r", "o", "g"], tray: ["r", "o", "f", "l", "g"] },
+    { type: "build", word: "star", units: ["s", "t", "a", "r"], tray: ["t", "a", "p", "s", "r"] },
+    { type: "build", word: "drum", units: ["d", "r", "u", "m"], tray: ["m", "r", "b", "u", "d"] } ] },
+  { id: "mystery", name: "Mystery Cookie", scene: "❓", age: 8, twist: "mystery", rounds: [
+    { type: "mystery", word: "duck", units: ["d", "u", "c", "k"], tray: ["k", "u", "c", "d"], riddle: "It says quack!" },
+    { type: "mystery", word: "milk", units: ["m", "i", "l", "k"], tray: ["l", "i", "k", "m"], riddle: "Cows give us this to drink." },
+    { type: "mystery", word: "bell", units: ["b", "e", "l", "l"], tray: ["l", "e", "b", "l"], riddle: "It rings: ding, dong!" } ] },
+  { id: "digraph", name: "Sh and Ch", scene: "🐟", age: 8.5, twist: "digraph", rounds: [
+    { type: "build", word: "ship", units: ["sh", "i", "p"], tray: ["i", "ch", "p", "sh"] },
+    { type: "build", word: "fish", units: ["f", "i", "sh"], tray: ["sh", "f", "i", "ch"] },
+    { type: "build", word: "chips", units: ["ch", "i", "p", "s"], tray: ["p", "sh", "i", "s", "ch"] } ] },
+  { id: "party", name: "Bakery Party", scene: "🎉", age: 9, rounds: [
+    { type: "build", word: "snake", units: ["s", "n", "a", "k", "e"], tray: ["e", "n", "a", "s", "k", "l"] },
+    { type: "build", word: "truck", units: ["t", "r", "u", "c", "k"], tray: ["k", "u", "t", "r", "c", "p"] },
+    { type: "swap", from: "dog", word: "log", units: ["l", "o", "g"], open: 0, tray: ["h", "l", "f"] } ] },
+  /* ---- young path (little-path profiles): first sounds, 2-3 jars, everything spoken ---- */
+  { id: "y-sm", young: true, name: "S or M", scene: "🐍", age: 6, rounds: [
+    { type: "sound", pic: "sun", answer: "s", jars: ["s", "m"] }, { type: "sound", pic: "moon", answer: "m", jars: ["s", "m"] }, { type: "sound", pic: "sock", answer: "s", jars: ["m", "s"] } ] },
+  { id: "y-bd", young: true, name: "B or D", scene: "🐻", age: 6, rounds: [
+    { type: "sound", pic: "ball", answer: "b", jars: ["b", "d"] }, { type: "sound", pic: "dog", answer: "d", jars: ["d", "b"] }, { type: "sound", pic: "bus", answer: "b", jars: ["b", "d"] } ] },
+  { id: "y-fsm", young: true, name: "F, S or M", scene: "🦊", age: 6, rounds: [
+    { type: "sound", pic: "fish", answer: "f", jars: ["s", "f", "m"] }, { type: "sound", pic: "mouse", answer: "m", jars: ["m", "f", "s"] }, { type: "sound", pic: "seal", answer: "s", jars: ["f", "s", "m"] } ] },
+  { id: "y-ptb", young: true, name: "P, T or B", scene: "🍕", age: 6, rounds: [
+    { type: "sound", pic: "pig", answer: "p", jars: ["p", "t", "b"] }, { type: "sound", pic: "tiger", answer: "t", jars: ["b", "p", "t"] }, { type: "sound", pic: "banana", answer: "b", jars: ["t", "b", "p"] } ] },
+  { id: "y-lns", young: true, name: "L, N or S", scene: "🍋", age: 6.5, rounds: [
+    { type: "sound", pic: "lion", answer: "l", jars: ["l", "n", "s"] }, { type: "sound", pic: "nose", answer: "n", jars: ["s", "l", "n"] }, { type: "sound", pic: "star", answer: "s", jars: ["n", "s", "l"] } ] },
+];
+/* Spots: big path "s0".."sN" (open cutter slots), young path "j:<letter>" (jars).
+   Cards: big path = tray index as a string ("0".."5"); young path = "pic". */
+function spotsOf(li, ri) {
+  const R = LEVELS[li].rounds[ri];
+  if (R.type === "sound") return R.jars.map(j => "j:" + j);
+  if (R.type === "swap") return ["s" + R.open];
+  return R.units.map((_, i) => "s" + i);
+}
+/* Which spots must be filled to finish the round (young: just the right jar). */
+function needOf(li, ri) { const R = LEVELS[li].rounds[ri]; return R.type === "sound" ? ["j:" + R.answer] : spotsOf(li, ri); }
+function fits(li, ri, spot, card) {
+  const R = LEVELS[li] && LEVELS[li].rounds[ri]; if (!R || typeof spot !== "string") return false;
+  if (R.type === "sound") return card === "pic" && spot === "j:" + R.answer;
+  const m = /^s(\d)$/.exec(spot); if (!m || !spotsOf(li, ri).includes(spot)) return false;
+  const u = R.tray[+card]; return /^\d$/.test(String(card)) && u !== undefined && R.units[+m[1]] === u;
+}
+/*LEVELS-END*/
+const trackOf = li => (LEVELS[li].young ? "young" : "big");
+const trackList = tr => LEVELS.map((L, i) => i).filter(i => trackOf(i) === tr);
+const BUDDIES = { big: "🐻", young: "🐼" };
+const KIND = { build: "🍪", swap: "🔁", mystery: "❓", sound: "🫙" };
+const TWIST = { swap: "🔁", mystery: "❓", digraph: "🐟" };
+
+/* ---------- utilities ---------- */
+const $app = document.getElementById("app"), $ov = document.getElementById("ov");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+function ymd(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+const todayStr = () => ymd(new Date());
+const starStr = n => "⭐".repeat(n) + `<span class="nostar">${"⭐".repeat(3 - n)}</span>`;
+const num = (v, d = 0) => (typeof v === "number" && isFinite(v) ? Math.max(0, Math.round(v)) : d);
+const unitSay = u => UNIT_SAY[u] || u;
+const jarSay = j => `${JARS[j].snd}, like ${JARS[j].name}`;
+
+/* ---------- launch params (interlude contract §3) ---------- */
+const Q = new URLSearchParams(location.search);
+function safeRet(r) { return typeof r === "string" && r.startsWith("../index.html") && !/[\\]|\/\//.test(r) ? r : "../index.html#home"; }
+const LAUNCH = {
+  elzee: Q.get("elzee") === "1",
+  mode: Q.get("mode") === "interlude" ? "interlude" : "free",
+  sid: Q.get("sid") || "", step: parseInt(Q.get("step"), 10) || 0,
+  min: Math.max(1, parseInt(Q.get("min"), 10) || 3),
+  ret: safeRet(Q.get("ret") || (Q.get("mode") === "interlude" ? "../index.html#session" : "../index.html#home")),
+};
+const INTERLUDE = LAUNCH.elzee && LAUNCH.mode === "interlude";
+
+/* ---------- main app profile (read only) ---------- */
+function readMainProfile() {
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem(GAME.mainKey)); } catch (e) { raw = null; }
+  const base = { id: "guest", name: "Guest", avatar: "🙂", little: false, sound: true, linked: false };
+  if (!raw || typeof raw !== "object" || !Array.isArray(raw.profiles)) return base;
+  const p = raw.profiles.find(x => x && x.id === raw.activeId);
+  const sound = typeof raw.sound === "boolean" ? raw.sound : true;
+  if (!p) return { ...base, sound };
+  return { id: String(p.id).slice(0, 40), name: typeof p.name === "string" && p.name.trim() ? p.name.slice(0, 40) : "Player",
+    avatar: typeof p.avatar === "string" && p.avatar ? p.avatar.slice(0, 16) : "🙂", little: p.pathId === "little", sound, linked: true, src: p };
+}
+
+/* ---------- this game's own store ---------- */
+function cleanCur(c) {
+  if (!c || typeof c !== "object" || !/^\d+$/.test(String(c.li)) || +c.li >= LEVELS.length) return null;
+  const li = +c.li, ri = num(c.ri);
+  if (ri >= LEVELS[li].rounds.length) return null;
+  const placed = {}, used = new Set();
+  for (const [spot, id] of Object.entries(c.placed && typeof c.placed === "object" ? c.placed : {})) if (fits(li, ri, spot, id) && !used.has(id)) { placed[spot] = id; used.add(id); }
+  return { li, ri, placed, hints: Math.min(9, num(c.hints)) };
+}
+const Store = {
+  data: null,
+  load() {
+    let raw = null;
+    try { raw = JSON.parse(localStorage.getItem(GAME.storageKey)); } catch (e) { raw = null; }
+    const d = { version: 1, kids: {} };
+    if (raw && typeof raw === "object" && raw.kids && typeof raw.kids === "object") {
+      for (const [id, k] of Object.entries(raw.kids)) {
+        if (!k || typeof k !== "object") continue;
+        const progress = {};
+        for (const [li, v] of Object.entries(k.progress && typeof k.progress === "object" ? k.progress : {})) {
+          if (/^\d+$/.test(li) && +li < LEVELS.length && v && typeof v === "object") progress[li] = { stars: Math.min(3, num(v.stars)), clears: num(v.clears) };
+        }
+        d.kids[String(id).slice(0, 40)] = {
+          progress, day: typeof k.day === "string" ? k.day : null,
+          earnedToday: num(k.earnedToday), pending: num(k.pending), lifetime: num(k.lifetime),
+          noRead: typeof k.noRead === "boolean" ? k.noRead : null, sound: typeof k.sound === "boolean" ? k.sound : null,
+          cur: cleanCur(k.cur), track: k.track === "young" || k.track === "big" ? k.track : null,
+        };
+      }
+    }
+    this.data = d;
+  },
+  save() { try { localStorage.setItem(GAME.storageKey, JSON.stringify(this.data)); } catch (e) { /* private mode / full */ } },
+};
+let me = readMainProfile();
+function kid() {
+  const d = Store.data;
+  if (!d.kids[me.id]) d.kids[me.id] = { progress: {}, day: null, earnedToday: 0, pending: 0, lifetime: 0, noRead: null, sound: null, cur: null, track: null };
+  const k = d.kids[me.id];
+  if (k.day !== todayStr()) { k.day = todayStr(); k.earnedToday = 0; }
+  return k;
+}
+/* Track: little path (pathId "little", same rule as Silly Stories and Jelly Jars) gets the picture levels by default.
+   A grown-up can flip it with the visible 🐣/🦁 button; the choice is stored per kid in this game's own key. */
+const curTrack = () => { const k = kid(); return k.track || (me.little ? "young" : "big"); };
+const noRead = () => { const k = kid(); return k.noRead === null ? (me.little || curTrack() === "young") : k.noRead; };
+const soundOn = () => { const k = kid(); return k.sound === null ? me.sound : k.sound; };
+const isCleared = li => !!(kid().progress[li] && kid().progress[li].clears);
+const isUnlocked = li => { const L = trackList(trackOf(li)), i = L.indexOf(li); return i <= 0 || isCleared(L[i - 1]); };
+const nextIn = li => { const L = trackList(trackOf(li)), i = L.indexOf(li); return i >= 0 && i < L.length - 1 ? L[i + 1] : -1; };
+const isFinal = li => nextIn(li) < 0;
+function pickLevel(tr) { // interlude round: in-progress level of this track, else next uncleared, else lowest stars
+  const k = kid(), L = trackList(tr);
+  if (k.cur && trackOf(k.cur.li) === tr) return k.cur.li;
+  const n = L.find(i => !isCleared(i)); if (n !== undefined) return n;
+  let lo = L[0]; L.forEach(i => { if (((k.progress[i] || {}).stars || 0) < ((k.progress[lo] || {}).stars || 0)) lo = i; }); return lo;
+}
+/* Award tokens for a finished level. lifetime only ever increases (the main app pays lifetime - claimed). */
+function award(li, stars) {
+  const k = kid(), prev = k.progress[li] || { stars: 0, clears: 0 };
+  let want = 0;
+  if (!prev.clears) want += ECON.firstClear; else want += ECON.replay;
+  if (stars === 3 && prev.stars < 3) want += ECON.firstThreeStars;
+  const got = want; // paid in full: no caps (contract §6); earnedToday is a display stat only
+  k.earnedToday += got; k.pending += got; k.lifetime += got;
+  k.progress[li] = { stars: Math.max(prev.stars, stars), clears: prev.clears + 1 };
+  k.cur = null;
+  Store.save();
+  return { want, got };
+}
+
+/* ---------- sound (Web Audio, created on the first tap only) ---------- */
+const Sound = {
+  ctx: null,
+  tone(f0, f1, dur, type = "triangle", vol = 0.18, delay = 0) {
+    if (!soundOn() || !started) return;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      this.ctx = this.ctx || new AC();
+      if (this.ctx.state === "suspended" && this.ctx.resume) this.ctx.resume().catch(() => {});
+      const t = this.ctx.currentTime + delay, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(this.ctx.destination); o.start(t); o.stop(t + dur + 0.03);
+    } catch (e) { /* no audio */ }
+  },
+  pick() { this.tone(300, 720, 0.13, "sine"); },
+  good() { this.tone(660, 660, 0.12); this.tone(880, 880, 0.18, "triangle", 0.18, 0.11); },
+  puff() { this.tone(200, 900, 0.35, "sine", 0.16); this.tone(900, 1200, 0.15, "triangle", 0.1, 0.3); },
+  munch() { [0, 0.18, 0.36].forEach(d => this.tone(160, 90, 0.09, "square", 0.08, d)); },
+  oops() { this.tone(330, 330, 0.14, "triangle", 0.14); this.tone(294, 294, 0.2, "triangle", 0.12, 0.13); },
+  roll() { this.tone(420, 180, 0.45, "sine", 0.1); },
+  win() { [523, 659, 784, 1047, 1319].forEach((f, i) => this.tone(f, f * 1.01, 0.22, "triangle", 0.18, i * 0.11)); },
+  pop() { this.tone(900, 300, 0.1, "sine", 0.15); },
+};
+
+/* ---------- read-aloud ----------
+   Calm, natural voice: rate 0.9, pitch 1.0, en-US preferred, novelty voices (macOS/iOS joke voices) never chosen.
+   iPad Safari rule: nothing is spoken until the first tap (the ▶️ start screen), which also unlocks speechSynthesis.
+   Anything asked for before that is queued; any failure (no API, no voices, throws) is silent and the game never waits. */
+const NOVELTY = /\b(albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|hysterical|jester|organ|pipe organ|princess|superstar|trinoids|whisper|wobble|zarvox|junior|ralph|fred|kathy|grandma|grandpa|eddy|flo|reed|rocko|sandy|shelley)\b/i;
+const PREFERRED = /\b(samantha|ava|allison|susan|nicky|joelle|zoe|evan|nathan|google us english|aria|jenny|guy|zira|alex)\b/i;
+function pickNaturalVoice(voices) {
+  const list = (Array.isArray(voices) ? voices : []).filter(v => v && typeof v.name === "string" && !NOVELTY.test(v.name));
+  const us = list.filter(v => /^en[-_]us/i.test(v.lang || "")), en = list.filter(v => /^en/i.test(v.lang || ""));
+  for (const pool of [us, en]) {
+    if (!pool.length) continue;
+    const local = pool.filter(v => v.localService !== false);
+    return local.find(v => PREFERRED.test(v.name)) || pool.find(v => PREFERRED.test(v.name)) || local[0] || pool[0];
+  }
+  return null;
+}
+/* THE single place a voice is chosen. Elzee 1.4.2 adds a per-player voice choice on the kid's profile; when Riker
+   sends the key/format, read it here (one line, e.g. `const want = profile && profile.voiceName;` and prefer the
+   matching voice if it exists and isn't a novelty voice). Until then: the natural en-US default. */
+// Elzee 1.4.2+: logicquest.v1 profiles[i].voice = the kid's chosen voice NAME (string <= 100 chars) or null.
+function profileVoicePref(profile) {
+  if (window.ElzeeVoice) return ElzeeVoice.prefFor(profile);
+  return profile && typeof profile.voice === "string" && profile.voice ? profile.voice.slice(0, 100) : null;
+}
+function pickVoice(profile, voices) {
+  const pref = profileVoicePref(profile), list = Array.isArray(voices) ? voices : [];
+  if (pref) { const v = list.find(x => x && x.name === pref && !NOVELTY.test(x.name || "")); if (v) return v; }
+  return pickNaturalVoice(voices);
+}
+let started = false;
+const Speech = {
+  RATE: 0.9, PITCH: 1.0,
+  get ok() { try { return !!(window.speechSynthesis && typeof window.speechSynthesis.speak === "function" && typeof window.SpeechSynthesisUtterance === "function"); } catch (e) { return false; } },
+  voice: null, token: 0, unlocked: false, queued: null,
+  pickVoice() { try { this.voice = pickVoice(me.src || null, speechSynthesis.getVoices() || []); } catch (e) { this.voice = null; } },
+  utter(text) {
+    const u = new SpeechSynthesisUtterance(text);
+    if (window.ElzeeVoice) ElzeeVoice.apply(u, profileVoicePref(me.src || null)); else { if (this.voice) u.voice = this.voice; u.lang = this.voice && this.voice.lang ? this.voice.lang : "en-US"; u.rate = this.RATE; u.pitch = this.PITCH; } // shared calm voice (kid's pick)
+    return u;
+  },
+  /* Called only from the ▶️ tap handler: a silent utterance inside the gesture unlocks speech on iOS. */
+  unlock() {
+    this.unlocked = true;
+    if (!this.ok) return;
+    try { this.pickVoice(); speechSynthesis.cancel(); const u = this.utter(" "); u.volume = 0; speechSynthesis.speak(u); } catch (e) { /* ignore */ }
+  },
+  seq(chunks, onDone) {
+    if (!this.unlocked) { this.queued = [chunks, onDone]; return; }
+    const my = ++this.token, speak = this.ok && soundOn();
+    if (speak) { try { speechSynthesis.cancel(); if (speechSynthesis.paused) speechSynthesis.resume(); } catch (e) { /* ignore */ } if (!this.voice) this.pickVoice(); }
+    let i = -1, timer = 0;
+    const next = () => {
+      clearTimeout(timer);
+      if (my !== this.token) return;
+      i++;
+      if (i >= chunks.length) { if (onDone) onDone(); return; }
+      const text = chunks[i], est = 900 + text.length * 75;
+      let advanced = false; const go = () => { if (!advanced) { advanced = true; next(); } };
+      timer = setTimeout(go, speak ? est + 2500 : Math.min(est, 3200)); // watchdog / silent pacing
+      if (!speak) return;
+      try { const u = this.utter(text); u.onend = () => setTimeout(go, 200); u.onerror = () => setTimeout(go, 200); speechSynthesis.speak(u); } catch (e) { /* timer carries on */ }
+    };
+    next();
+  },
+  say(text) { this.seq([text]); },
+  flush() { const q = this.queued; this.queued = null; if (q) this.seq(q[0], q[1]); },
+  stop() { this.token++; this.queued = null; if (this.ok && this.unlocked) try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } },
+};
+try { if (Speech.ok && "onvoiceschanged" in speechSynthesis) speechSynthesis.addEventListener("voiceschanged", () => Speech.pickVoice()); } catch (e) { /* ignore */ }
+
+/* ---------- state ---------- */
+let view = "map";
+let play = null; // { li, ri, placed:{spot:card}, hints, sel, busy, done }
+const session = { startedAt: Date.now(), solved: 0, tokens: 0, bannerShown: false, offerShown: false, finished: false };
+try { const s = JSON.parse(sessionStorage.getItem("lb.session." + LAUNCH.sid)); if (INTERLUDE && s && s.startedAt) Object.assign(session, { startedAt: num(s.startedAt), solved: num(s.solved), tokens: num(s.tokens) }); } catch (e) { /* ignore */ }
+const saveSession = () => { try { sessionStorage.setItem("lb.session." + LAUNCH.sid, JSON.stringify({ startedAt: session.startedAt, solved: session.solved, tokens: session.tokens })); } catch (e) { /* ignore */ } };
+const afterStart = []; // things to do (auto-read) once the ▶️ tap has happened
+function whenStarted(fn, ms = 300) { if (started) setTimeout(fn, ms); else afterStart.push(fn); }
+
+const R0 = () => LEVELS[play.li].rounds[play.ri];
+const isYoung = () => !!(play && LEVELS[play.li].young);
+const roundFull = () => needOf(play.li, play.ri).every(s => play.placed[s]);
+const cap = w => w.charAt(0).toUpperCase() + w.slice(1);
+function promptSay(R) {
+  if (R.type === "sound") return `${YPICS[R.pic].say}! Which jar?`;
+  if (R.type === "swap") return `${cap(R.from)} becomes ${R.word}! Change one letter to make ${R.word}.`;
+  if (R.type === "mystery") return `Mystery cookie! ${R.riddle} Bake the word.`;
+  return `Can you bake ${R.word}?`;
+}
+function promptHTML(R) {
+  if (R.type === "swap") return `<b>${esc(R.from)}</b> ➜ ${PICS[R.word]} Change one letter!`;
+  if (R.type === "mystery") return `<b>Mystery!</b> ${esc(R.riddle)}`;
+  return "Bake the word for this picture!";
+}
+function saveCur() { if (!play || play.done) return; kid().cur = { li: play.li, ri: play.ri, placed: { ...play.placed }, hints: play.hints }; Store.save(); }
+function startLevel(li, resume) {
+  Speech.stop(); clearGlow();
+  const c = resume && kid().cur && kid().cur.li === li ? kid().cur : null;
+  play = { li, ri: c ? c.ri : 0, placed: c ? { ...c.placed } : {}, hints: c ? c.hints : 0, sel: null, busy: false, done: false, roll: true };
+  view = "play"; if (started) $ov.innerHTML = ""; saveCur(); render();
+  startRound();
+}
+function startRound() {
+  const li = play.li, ri = play.ri, L = LEVELS[li];
+  const first = trackList(trackOf(li))[0] === li;
+  if (ri === 0 && !isCleared(li) && (L.twist || first) && !Object.keys(play.placed).length) whenStarted(() => { if (play && play.li === li && play.ri === ri) freeGlow(); }, 900);
+  whenStarted(() => { if (play && play.li === li && play.ri === ri && !play.done) Speech.say(promptSay(R0())); }); // every round is read aloud (the word or riddle is part of the puzzle)
+}
+function freeGlow() { const s = nextSpot(); const el = s && document.querySelector(`.stage [data-spot="${s}"]`); if (el) el.classList.add("glow"); }
+
+/* ---------- screens ---------- */
+function topBar(back) {
+  const k = kid(), nr = noRead(), y = curTrack() === "young";
+  let home = "";
+  if (INTERLUDE || LAUNCH.elzee) home = `<button class="iconbtn" data-act="home" aria-label="Back to Elzee">🏠</button>`;
+  else if (back) home = `<button class="iconbtn" data-act="map" aria-label="Back to levels">⬅️</button>`;
+  else if (me.linked) home = `<a class="iconbtn" href="../index.html#home" aria-label="Back to Elzee">🏠</a>`;
+  return `<div class="top">${home}
+    ${back && LAUNCH.elzee && !INTERLUDE ? `<button class="iconbtn" data-act="map" aria-label="Back to levels">🗺️</button>` : ""}
+    <div class="pill" aria-label="Player"><span class="av">${esc(me.avatar)}</span>${nr ? "" : `<span class="nm">${esc(me.name)}</span>`}</div>
+    <div class="pill" aria-label="Tokens earned today ${k.earnedToday}">🪙 <b>${k.earnedToday}</b></div>
+    <div class="spacer"></div>
+    <button class="iconbtn trackbtn" data-act="toggleTrack" aria-label="${y ? "Little bakery. Tap for big bakery" : "Big bakery. Tap for little bakery"}" aria-pressed="${y}">${y ? "🐣" : "🦁"}</button>
+    <button class="iconbtn ${nr ? "on" : ""}" data-act="toggleRead" aria-label="Picture mode (no reading)" aria-pressed="${nr}">${nr ? "🖼️" : "🔤"}</button>
+    <button class="iconbtn" data-act="toggleSound" aria-label="Sound" aria-pressed="${soundOn()}">${soundOn() ? "🔊" : "🔇"}</button>
+    ${back || INTERLUDE ? "" : `<button class="iconbtn" data-act="grown" aria-label="For grown-ups">ⓘ</button>`}
+  </div>`;
+}
+function bannerHTML() {
+  if (!INTERLUDE || !session.bannerShown || session.finished) return "";
+  return `<div class="banner" aria-label="Last level, then back to the trail">${noRead() ? "🕐 ➜ 🗺️" : "Last level, then back to the trail! 🗺️"}</div>`;
+}
+function renderMap() {
+  $app.classList.toggle("young", curTrack() === "young");
+  const nr = noRead(), k = kid(), y = curTrack() === "young";
+  const TL = trackList(curTrack()), next = TL.find(i => !isCleared(i));
+  $app.innerHTML = `${topBar(false)}
+    <div class="mapwrap">
+    <div class="hero"><span class="big" aria-hidden="true">🧁</span>
+      ${nr ? `<button class="iconbtn" data-act="sayIntro" aria-label="Hear how to play">🔈</button>${y ? `<span class="big" aria-hidden="true">🐣</span>` : ""}` : `<div class="bubble"><b>Letter Bakery!</b> Drag the letter cookies into the cookie cutter to bake the word for each picture. Tap a cookie to hear it.</div>`}
+    </div>
+    <div class="levels ${curTrack()}">${TL.map((i, n) => {
+      const L = LEVELS[i], un = isUnlocked(i), st = (k.progress[i] || {}).stars || 0;
+      return `<button class="lvl ${un ? "" : "locked"} ${i === next ? "next" : ""}" data-act="${un ? "start" : "locked"}" data-li="${i}" aria-label="Level ${n + 1}${un ? "" : ", locked"}">
+        <span class="num">${n + 1}</span>${L.twist && un ? `<span class="tw" aria-hidden="true">${TWIST[L.twist]}</span>` : ""}<span class="scene">${un ? L.scene : "🔒"}</span>
+        ${nr ? "" : `<b style="font-size:18px">${esc(L.name)}</b>`}<span class="stars">${un ? starStr(st) : ""}</span></button>`;
+    }).join("")}</div></div>`;
+}
+function cookieHTML(unit, cls, extra = "") {
+  return `<div class="cookie ${unit.length > 1 ? "wide" : ""} ${cls}" ${extra} role="button" aria-label="${esc(unitSay(unit))}"><span class="l">${esc(unit)}</span></div>`;
+}
+function stageHTML() {
+  const R = R0();
+  if (R.type === "sound") {
+    const inJar = Object.keys(play.placed)[0];
+    return `<div class="fit">
+      <div class="ypic ${inJar ? "used" : ""} ${play.sel === "pic" ? "sel" : ""}" data-card="pic" role="button" aria-label="${esc(YPICS[R.pic].say)}">${YPICS[R.pic].e}</div>
+      <div class="jars">${R.jars.map(j => `<div class="jar" data-spot="j:${j}" role="button" aria-label="${esc(jarSay(j))}"><span class="L" aria-hidden="true">${j}</span><span class="A" aria-hidden="true">${JARS[j].a}</span>${inJar === "j:" + j ? `<span class="in">${YPICS[R.pic].e}</span>` : ""}</div>`).join("")}</div></div>`;
+  }
+  const mysteryHidden = R.type === "mystery" && !roundFull();
+  const slots = R.units.map((u, i) => {
+    const spot = "s" + i, wide = u.length > 1 ? "wide" : "";
+    if (R.type === "swap" && i !== R.open) return cookieHTML(u, "fixed", `data-spot="${spot}"`);
+    const id = play.placed[spot];
+    if (id !== undefined) return cookieHTML(R.tray[+id], "placed", `data-spot="${spot}" data-card="${id}"`);
+    return `<div class="slot ${wide}" data-spot="${spot}" role="button" aria-label="Empty cookie spot">${R.type === "swap" ? esc(R.from.charAt(R.open)) : ""}</div>`;
+  }).join("");
+  return `<div class="fit">
+    <div class="plate ${mysteryHidden ? "mystery" : ""}" aria-hidden="true"><span class="pic">${mysteryHidden ? "❓" : PICS[R.word]}</span></div>
+    <div class="cutter">${slots}</div></div>`;
+}
+function renderPlay() {
+  const L = LEVELS[play.li], R = R0(), nr = noRead() || !!L.young;
+  $app.classList.toggle("young", !!L.young);
+  const used = new Set(Object.values(play.placed)), roll = play.roll && !RM(); play.roll = false; // cookies roll in only at round start
+  $app.innerHTML = `${topBar(true)}${bannerHTML()}
+    <div class="board">
+      <div class="kitchen">
+        <span class="deco" style="left:4%;top:18%" aria-hidden="true">🧁</span><span class="deco" style="right:5%;top:16%" aria-hidden="true">🥐</span>
+        <span class="buddy" aria-hidden="true">${BUDDIES[L.young ? "young" : "big"]}</span><span class="oven" aria-hidden="true">♨️</span>
+        <div class="prompt"><span class="kind" aria-hidden="true">${KIND[R.type]}</span>
+          ${nr ? "" : `<span class="ptxt">${promptHTML(R)}</span>`}
+          <span class="dots" aria-label="Round ${play.ri + 1} of ${L.rounds.length}">${L.rounds.map((_, i) => `<i class="${i < play.ri ? "done" : i === play.ri ? "cur" : ""}"></i>`).join("")}</span>
+          ${nr ? `<span class="spacer"></span>` : ""}<button class="iconbtn" data-act="sayPrompt" aria-label="Hear it">🔈</button></div>
+        <div class="stage">${stageHTML()}</div>
+      </div>
+      <div class="side">
+        ${R.type === "sound" ? `<div class="spacer"></div>` : `<div class="belt"><div class="tray ${roll ? "rollin" : ""}">${R.tray.map((u, i) => cookieHTML(u, (used.has(String(i)) ? "used " : "") + (play.sel === String(i) ? "sel" : ""), `data-card="${i}" style="animation-delay:${i * 0.08}s"`)).join("")}</div></div>`}
+        <div class="tools"><button class="iconbtn" data-act="hint" aria-label="Hint">💡</button></div>
+        ${R.type === "sound" ? `<div class="spacer"></div>` : ""}
+      </div>
+    </div>`;
+  fitStage();
+}
+function render() { if (view === "play" && play) renderPlay(); else renderMap(); }
+function fitStage() {
+  const st = document.querySelector(".stage"), el = st && st.querySelector(".fit"); if (!el) return;
+  el.style.transform = "";
+  const aw = st.clientWidth - 150, ah = st.clientHeight - 16; // leave room for the buddy and the oven at the sides
+  const s = Math.max(0.3, Math.min(1.5, aw / el.offsetWidth, ah / el.offsetHeight));
+  el.style.transform = `scale(${s.toFixed(3)})`;
+}
+
+/* ---------- placing ---------- */
+let toastT = 0;
+function toast(msg) { document.querySelectorAll(".toast").forEach(e => e.remove()); const d = document.createElement("div"); d.className = "toast"; d.textContent = msg; document.body.appendChild(d); clearTimeout(toastT); toastT = setTimeout(() => d.remove(), 2600); }
+function clearGlow() { document.querySelectorAll(".glow").forEach(e => e.classList.remove("glow")); }
+function nextSpot() { return needOf(play.li, play.ri).find(s => !play.placed[s]); }
+function cardFor(spot) { // a not-yet-used card that fits this spot
+  const R = R0(); if (R.type === "sound") return "pic";
+  const used = new Set(Object.values(play.placed));
+  const i = R.tray.findIndex((u, k) => !used.has(String(k)) && fits(play.li, play.ri, spot, String(k)));
+  return i < 0 ? null : String(i);
+}
+const cardSay = id => (isYoung() ? YPICS[R0().pic].say : unitSay(R0().tray[+id]));
+function why(R, id, spot) {
+  if (R.type === "sound") { const j = spot.slice(2); return `Hmm, ${JARS[j].snd}? ${YPICS[R.pic].say}! Try another jar.`; }
+  const u = R.tray[+id];
+  if (R.type === "mystery") return `Hmm, ${unitSay(u)} goes in a different spot. ${R.riddle}`;
+  return `Hmm, not ${unitSay(u)} there. Listen: ${R.word}. Try again!`;
+}
+function tryPlace(id, spot, ghost) {
+  if (!play || play.busy || play.done || play.placed[spot] !== undefined || !needOf(play.li, play.ri).concat(spotsOf(play.li, play.ri)).includes(spot)) { if (ghost) springHome(ghost, id); return; }
+  if (Object.values(play.placed).includes(id)) { if (ghost) ghost.remove(); return; }
+  const R = R0(), spotEl = document.querySelector(`.stage [data-spot="${spot}"]`);
+  clearGlow(); play.sel = null;
+  if (!fits(play.li, play.ri, spot, id)) { wrong(id, spotEl, ghost, spot); return; }
+  if (ghost) ghost.remove();
+  play.placed[spot] = id; saveCur(); Sound.good();
+  renderPlay();
+  if (!roundFull()) { Speech.say(cardSay(id)); return; }
+  bake(); roundDone();
+}
+/* The word bakes: cookies turn golden and puff up, then the buddy munches them. */
+function bake() {
+  const R = R0();
+  Sound.puff();
+  const said = R.type === "sound" ? `${cap(R.pic)} starts with ${JARS[R.answer].snd}! Yum!` : `${cap(R.word)}! Yum!`;
+  Speech.say(said);
+  const pieces = [...document.querySelectorAll(R.type === "sound" ? ".jar .in" : ".cutter .cookie")];
+  pieces.forEach(c => c.classList.add("baked"));
+  const plate = document.querySelector(".plate .pic"), buddy = document.querySelector(".buddy"), cut = document.querySelector(R.type === "sound" ? `.jar[data-spot="j:${R.answer}"]` : ".cutter");
+  if (cut) { const r = cut.getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top, 30, 0.9, 1); }
+  if (RM() || !buddy || !buddy.animate) return;
+  if (plate) plate.animate([{ transform: "scale(.4) rotate(-20deg)" }, { transform: "scale(1.15)" }, { transform: "scale(1)" }], { duration: 500 });
+  pieces.forEach((c, i) => c.animate([{ transform: "scale(1)" }, { transform: "scale(1.28)" }, { transform: "scale(1.12)" }], { duration: 450, delay: i * 70, fill: "forwards" }));
+  const b = buddy.getBoundingClientRect();
+  setTimeout(() => {
+    Sound.munch();
+    buddy.animate([{ transform: "scale(1)" }, { transform: "scale(1.25) rotate(-8deg)" }, { transform: "scale(1.1)" }, { transform: "scale(1.25) rotate(8deg)" }, { transform: "scale(1)" }], { duration: 900 });
+    const fit = document.querySelector(".stage .fit"), sc = fit && fit.offsetWidth ? fit.getBoundingClientRect().width / fit.offsetWidth : 1; // translate is in the scaled stage's units
+    pieces.forEach((c, i) => {
+      const r = c.getBoundingClientRect(), dx = (b.left + b.width / 2 - (r.left + r.width / 2)) / sc, dy = (b.top + b.height / 2 - (r.top + r.height / 2)) / sc;
+      const a = c.animate([{ transform: "scale(1.12)", opacity: 1 }, { transform: `translate(${dx}px,${dy}px) scale(.2)`, opacity: 0 }], { duration: 600, delay: i * 80, fill: "forwards", easing: "ease-in" });
+      a.onfinish = () => { c.style.visibility = "hidden"; }; // eaten
+    });
+  }, 800);
+}
+function wrong(id, spotEl, ghost, spot) {
+  const R = R0(), el = document.querySelector(`[data-card="${id}"]:not([data-spot])`);
+  Sound.oops(); const msg = why(R, id, spot); Speech.say(msg); toast(noRead() || isYoung() ? "🤔" : msg);
+  if (spotEl && spotEl.animate && !RM()) spotEl.animate([{ transform: "rotate(0)" }, { transform: "rotate(-6deg)" }, { transform: "rotate(5deg)" }, { transform: "rotate(0)" }], { duration: 450 });
+  rollBack(id, el, spotEl, ghost);
+}
+/* A cookie that doesn't fit lands on the spot, wobbles, and rolls back onto the belt. No fail state. */
+function rollBack(id, el, spotEl, ghost) {
+  let g = ghost;
+  if (!g && el) { const r = el.getBoundingClientRect(); g = ghostFor(id, r); g.style.transform = `translate(${r.left}px,${r.top}px)`; }
+  if (el) el.style.visibility = "hidden";
+  const done = () => { if (g) g.remove(); if (el) { el.style.visibility = ""; el.classList.remove("wob"); void el.offsetWidth; el.classList.add("wob"); } };
+  if (!g || RM() || !g.animate || !spotEl) { done(); return; }
+  play.busy = true;
+  const cur = g.getBoundingClientRect(), s = spotEl.getBoundingClientRect(), home = el ? el.getBoundingClientRect() : cur;
+  const sx = s.left + (s.width - cur.width) / 2, sy = s.top + (s.height - cur.height) / 2;
+  const a = g.animate([
+    { transform: `translate(${cur.left}px,${cur.top}px)` },
+    { transform: `translate(${sx}px,${sy}px) rotate(0)`, offset: 0.2 },
+    { transform: `translate(${sx}px,${sy}px) rotate(-14deg)`, offset: 0.3 },
+    { transform: `translate(${sx}px,${sy}px) rotate(12deg)`, offset: 0.4 },
+    { transform: `translate(${(sx + home.left) / 2}px,${Math.max(sy, home.top) + 20}px) rotate(200deg)`, offset: 0.72 },
+    { transform: `translate(${home.left}px,${home.top}px) rotate(360deg)` }], { duration: 1100, easing: "ease-in-out" });
+  setTimeout(() => Sound.roll(), 420);
+  let fin = false; const end = () => { if (fin) return; fin = true; if (play) play.busy = false; done(); };
+  a.onfinish = end; setTimeout(end, 1400);
+}
+function roundDone() {
+  play.busy = true;
+  const li = play.li, ri = play.ri, last = ri >= LEVELS[li].rounds.length - 1;
+  setTimeout(() => {
+    if (!play || play.li !== li || play.ri !== ri || play.done) return;
+    if (last) { winLevel(); return; }
+    play.ri++; play.placed = {}; play.busy = false; play.roll = true; saveCur(); renderPlay(); startRound();
+  }, last ? 2000 : 2300);
+}
+function hint() {
+  if (!play || play.busy || play.done) return;
+  const s = nextSpot(); if (!s) return;
+  play.hints++; saveCur(); clearGlow();
+  const spot = document.querySelector(`.stage [data-spot="${s}"]`), c = cardFor(s), card = c !== null && document.querySelector(`[data-card="${c}"]:not([data-spot])`);
+  if (spot) spot.classList.add("glow"); if (card) card.classList.add("glow");
+  Speech.say(promptSay(R0()));
+}
+
+/* ---------- drag / tap ---------- */
+let drag = null;
+function ghostFor(id, r) {
+  const g = document.createElement("div");
+  if (id === "pic") { g.className = "drag ypic"; g.textContent = YPICS[R0().pic].e; }
+  else { const u = R0().tray[+id]; g.className = "drag cookie" + (u.length > 1 ? " wide" : ""); g.innerHTML = `<span class="l">${esc(u)}</span>`; }
+  g.style.width = r.width + "px"; g.style.height = r.height + "px"; g.style.fontSize = getComputedStyle(document.querySelector(`[data-card="${id}"]`) || document.body).fontSize;
+  document.body.appendChild(g); return g;
+}
+function spotAt(x, y) { const el = document.elementFromPoint(x, y); return (el && el.closest && el.closest(".stage .slot, .stage .jar")) || null; }
+document.addEventListener("pointerdown", e => {
+  if (view !== "play" || !play || play.done || play.busy || $ov.firstChild) return;
+  const t = e.target.closest && e.target.closest(".tray .cookie, .stage .ypic");
+  if (!t || t.classList.contains("used")) return;
+  e.preventDefault();
+  const r = t.getBoundingClientRect();
+  drag = { id: t.dataset.card, el: t, x0: e.clientX, y0: e.clientY, ox: e.clientX - r.left, oy: e.clientY - r.top, r, moved: false, ghost: null, pid: e.pointerId, lx: e.clientX, vx: 0, hot: null };
+  try { t.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+  Speech.say(cardSay(drag.id)); // every cookie / picture is spoken on touch
+});
+document.addEventListener("pointermove", e => {
+  if (!drag || e.pointerId !== drag.pid) return;
+  const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+  if (!drag.moved && Math.hypot(dx, dy) > 10) {
+    drag.moved = true; clearGlow();
+    drag.ghost = ghostFor(drag.id, drag.r); drag.el.style.visibility = "hidden"; Sound.pick();
+  }
+  if (!drag.moved) return;
+  drag.vx = drag.vx * 0.7 + (e.clientX - drag.lx) * 0.3; drag.lx = e.clientX;
+  const tilt = RM() ? 0 : Math.max(-18, Math.min(18, drag.vx * 1.5));
+  drag.ghost.style.transform = `translate(${e.clientX - drag.ox}px,${e.clientY - drag.oy}px) rotate(${tilt}deg) scale(1.08)`;
+  const b = spotAt(e.clientX, e.clientY);
+  if (b !== drag.hot) { if (drag.hot) drag.hot.classList.remove("hot"); if (b) b.classList.add("hot"); drag.hot = b; }
+});
+function endDrag(e, cancel) {
+  if (!drag || e.pointerId !== drag.pid) return;
+  const d = drag; drag = null;
+  if (!d.moved) { if (!cancel) tapCard(d.id); return; }
+  if (d.hot) d.hot.classList.remove("hot");
+  const b = cancel ? null : spotAt(e.clientX, e.clientY);
+  if (b) { tryPlace(d.id, b.dataset.spot, d.ghost); return; }
+  springHome(d.ghost, d.id);
+}
+function springHome(g, id) {
+  const el = document.querySelector(`[data-card="${id}"]:not([data-spot])`);
+  const done = () => { g.remove(); if (el) el.style.visibility = ""; };
+  if (RM() || !g.animate || !el) { done(); return; }
+  const cur = g.getBoundingClientRect(), home = el.getBoundingClientRect();
+  const a = g.animate([{ transform: `translate(${cur.left}px,${cur.top}px) scale(1.08)` }, { transform: `translate(${home.left}px,${home.top}px) scale(1.1,.9)`, offset: 0.8 }, { transform: `translate(${home.left}px,${home.top}px) scale(1)` }], { duration: 380, easing: "ease-out" });
+  a.onfinish = done; setTimeout(() => { if (g.isConnected) done(); }, 700);
+}
+document.addEventListener("pointerup", e => endDrag(e, false));
+document.addEventListener("pointercancel", e => endDrag(e, true));
+document.addEventListener("contextmenu", e => { if (e.target.closest && e.target.closest(".cookie, .ypic, .jar")) e.preventDefault(); });
+function tapCard(id) {
+  Sound.pick();
+  play.sel = play.sel === id ? null : id;
+  document.querySelectorAll("[data-card]:not([data-spot])").forEach(el => el.classList.toggle("sel", el.dataset.card === play.sel));
+}
+
+/* ---------- clicks ---------- */
+document.addEventListener("click", e => {
+  const spot = e.target.closest && e.target.closest(".stage .slot, .stage .jar");
+  if (spot && view === "play" && play && !play.done && !play.busy && !$ov.firstChild) {
+    if (play.sel !== null && play.sel !== undefined) tryPlace(play.sel, spot.dataset.spot, null);
+    else if (spot.classList.contains("jar")) Speech.say(jarSay(spot.dataset.spot.slice(2)));
+    else Speech.say(promptSay(R0()));
+    return;
+  }
+  const pc = e.target.closest && e.target.closest(".cutter .cookie");
+  if (pc && view === "play" && !$ov.firstChild) { Speech.say(unitSay(pc.textContent.trim())); return; }
+  const b = e.target.closest && e.target.closest("[data-act]"); if (!b) return;
+  const act = b.dataset.act;
+  if (act === "begin") begin();
+  else if (act === "start") { pushNav(); startLevel(+b.dataset.li, true); }
+  else if (act === "locked") { Sound.oops(); if (b.animate) b.animate([{ transform: "rotate(0)" }, { transform: "rotate(-4deg)" }, { transform: "rotate(4deg)" }, { transform: "rotate(0)" }], { duration: 300 }); }
+  else if (act === "map") { try { if (history.state && history.state.lb === "play") history.replaceState({ lb: "map" }, ""); } catch (err) { /* ignore */ } toMap(); }
+  else if (act === "home") exitGame(session.finished ? "done" : "quit");
+  else if (act === "back") exitGame(session.solved ? "done" : "quit");
+  else if (act === "toggleRead") { const k = kid(); k.noRead = !noRead(); Store.save(); render(); }
+  else if (act === "toggleSound") { const k = kid(); k.sound = !soundOn(); Store.save(); if (!k.sound) Speech.stop(); render(); }
+  else if (act === "sayPrompt") Speech.say(promptSay(R0()));
+  else if (act === "sayIntro") Speech.say(curTrack() === "young" ? "Letter Bakery! Listen to the picture, and put it in the jar with the same first sound." : "Letter Bakery! Drag the letter cookies into the cookie cutter to bake the word for each picture.");
+  else if (act === "hint") hint();
+  else if (act === "next") { const n = nextIn(play.li); $ov.innerHTML = ""; if (n >= 0) startLevel(n, true); else toMap(); }
+  else if (act === "toggleTrack") {
+    const k = kid(); k.track = curTrack() === "young" ? "big" : "young"; Store.save(); Sound.pick();
+    Speech.say(k.track === "young" ? "Little bakery" : "Big bakery");
+    if (view === "play") { if (play && !play.done) saveCur(); if (INTERLUDE) startLevel(pickLevel(k.track), true); else { $ov.innerHTML = ""; view = "map"; play = null; render(); } }
+    else render();
+  }
+  else if (act === "replay") { $ov.innerHTML = ""; startLevel(play.li, false); }
+  else if (act === "keep") { $ov.innerHTML = ""; }
+  else if (act === "grown") showGrown();
+  else if (act === "closeOv") { $ov.innerHTML = ""; }
+});
+
+/* ---------- the ▶️ start tap (unlocks speech + audio on iPad) ---------- */
+function startScreen() {
+  const nr = noRead() || curTrack() === "young";
+  $ov.innerHTML = `<div class="ov startov"><div class="panel" style="background:transparent;box-shadow:none" role="dialog" aria-label="Letter Bakery. Tap to start">
+    ${nr ? "" : `<div class="title">Letter Bakery</div>`}
+    <div class="minisaw" aria-hidden="true"><span>${BUDDIES[curTrack()]}</span><span style="animation-delay:.5s">🍪</span><span style="animation-delay:.25s">🧁</span></div>
+    <button class="startbtn" data-act="begin" aria-label="Tap to start">▶️</button></div></div>`;
+}
+function begin() {
+  if (started) { $ov.innerHTML = ""; return; }
+  started = true;
+  Speech.unlock(); // inside the tap gesture
+  $ov.innerHTML = ""; Sound.pick();
+  if (view === "play") fitStage();
+  const q = afterStart.splice(0); q.forEach(fn => setTimeout(fn, 300));
+  Speech.flush();
+}
+
+/* ---------- navigation (back button) ---------- */
+function pushNav() { if (!INTERLUDE) try { history.pushState({ lb: "play" }, ""); } catch (e) { /* ignore */ } }
+function toMap() { Speech.stop(); clearGlow(); $ov.innerHTML = ""; if (play && !play.done) saveCur(); view = "map"; play = null; render(); }
+window.addEventListener("popstate", () => {
+  if (INTERLUDE) { exitGame(session.solved ? "done" : "quit"); return; }
+  if (view === "play") toMap();
+});
+function exitGame(status) {
+  Speech.stop();
+  if (LAUNCH.elzee) {
+    const now = Date.now();
+    const rec = { v: 1, gameId: GAME.id, sid: LAUNCH.sid, step: LAUNCH.step, profileId: me.id, status: status === "done" ? "done" : "quit",
+      rounds: INTERLUDE ? (session.finished ? 1 : 0) : session.solved, solved: session.solved, startedAt: session.startedAt, endedAt: now,
+      durationMs: Math.max(0, now - session.startedAt), tokensEarned: session.tokens };
+    try { localStorage.setItem(GAME.resultKey, JSON.stringify(rec)); } catch (e) { /* ignore */ }
+    try { sessionStorage.removeItem("lb.session." + LAUNCH.sid); } catch (e) { /* ignore */ }
+  }
+  window.__lbExit = LAUNCH.ret; // for tests
+  if (!window.__lbNoNav) location.replace(LAUNCH.ret);
+}
+
+
+/* ---------- winning ---------- */
+function winLevel() {
+  if (!play || play.done) return;
+  play.done = true; clearGlow();
+  const li = play.li, stars = Math.max(1, 3 - play.hints), final = isFinal(li);
+  const res = award(li, stars);
+  session.solved++; session.tokens += res.got; saveSession();
+  if (INTERLUDE) session.finished = true;
+  Sound.win();
+  showWin(li, stars, res, final);
+}
+function pairHTML(R, nr) {
+  if (R.type === "sound") return `${YPICS[R.pic].e} ➜ <b style="color:var(--brand-d)">${R.answer}</b>${JARS[R.answer].a}`;
+  return `${PICS[R.word]}${nr ? "" : ` <small>${esc(R.word)}</small>`}`;
+}
+function showWin(li, stars, res, final) {
+  const L = LEVELS[li], nr = noRead() || !!L.young, bud = BUDDIES[trackOf(li)];
+  const parade = final ? `<div class="parade" aria-hidden="true">${trackList(trackOf(li)).map((i, n) => `<span style="animation-delay:${n * 0.12}s">${LEVELS[i].scene}</span>`).join("")}<span>🏆</span></div>` : "";
+  const buttons = INTERLUDE
+    ? `<button class="btn" data-act="back" aria-label="Back to my adventure"><span class="ico">▶️</span>${nr ? "" : "Back to my adventure"}</button>`
+    : `<button class="btn ghost" data-act="map" aria-label="All levels"><span class="ico">🗺️</span></button>
+       <button class="btn ghost" data-act="replay" aria-label="Play again"><span class="ico">🔁</span></button>
+       ${final ? "" : `<button class="btn" data-act="next" aria-label="Next level"><span class="ico">▶️</span>${nr ? "" : "Next"}</button>`}`;
+  $ov.innerHTML = `<div class="ov"><div class="panel win ${final ? "final" : ""}" role="dialog" aria-label="Level complete">
+    <h2>${final ? "🏆" : "🎉"} ${nr ? "" : final ? "Master baker!" : esc(L.name) + "!"}</h2>
+    <div class="winscene" aria-hidden="true"><span class="wb">${bud}</span><span class="wc">🍪</span><span class="wc" style="animation-delay:.3s">🍪</span><span class="wc" style="animation-delay:.6s">${L.scene}</span></div>
+    <div class="pairs">${L.rounds.map(R => pairHTML(R, nr)).join(" &nbsp; ")}</div>
+    ${parade}
+    <div class="row" style="align-items:center"><span class="bigstars">${[0, 1, 2].map(i => `<span style="animation-delay:${0.3 + i * 0.2}s" class="${i < stars ? "" : "nostar"}">⭐</span>`).join("")}</span>
+      ${res.got ? `<span class="coins">+${res.got} 🪙</span>` : ""}</div>
+    <div class="row">${buttons}</div></div></div>`;
+  const pill = document.querySelector('.top .pill[aria-label^="Tokens"]'); if (pill) { pill.setAttribute("aria-label", "Tokens earned today " + kid().earnedToday); const b = pill.querySelector("b"); if (b) b.textContent = kid().earnedToday; }
+  if (!RM()) { FX.burst(innerWidth / 2, innerHeight * 0.35, final ? 120 : 80, 1.2, 1); if (final) for (let i = 1; i <= 6; i++) setTimeout(() => { if (!$ov.querySelector(".final")) return; FX.burst(innerWidth * (0.15 + 0.7 * ((i * 37) % 10) / 10), innerHeight * (0.15 + 0.1 * (i % 3)), 60, 1, 0); Sound.pop(); }, 500 + i * 450); }
+  const lines = [final ? (L.young ? "Hooray! You filled all the little jars!" : "Hooray! You are a master baker!") : (L.young ? "Hooray! You did it!" : "Hooray! Level complete!")];
+  if (res.got) lines.push(`You earned ${res.got} tokens!`);
+  setTimeout(() => { if ($ov.querySelector(".win")) Speech.seq(lines); }, 400);
+}
+function showGrown() {
+  const k = kid();
+  $ov.innerHTML = `<div class="ov"><div class="panel grown" role="dialog" aria-label="For grown-ups"><h2>ⓘ For grown-ups</h2>
+    <p><b>Letter Bakery</b> practices phonics and spelling: short-vowel words (cat), magic e (cake), blends (frog), one-letter swaps (cat, hat, bat), and sh / ch. The little bakery practices first sounds. Each word has exactly one answer; extra letters are there to think about. Wrong letters just roll back.</p>
+    <p><b>Tokens:</b> first time a level is finished +${ECON.firstClear}, first time with no hints +${ECON.firstThreeStars}, replays ${ECON.replay}. No daily limits. No purchases, no ads, no timer.</p>
+    <p>Today: ${k.earnedToday} · Waiting to go into the Elzee jar: <b>${k.pending}</b> · All-time: ${k.lifetime}</p>
+    <p>🐣 little bakery: first sounds with pictures, everything read aloud. 🖼️ hides the instructions. 🔈 uses the device's own voice.</p>
+    <div class="row"><button class="btn" data-act="closeOv" aria-label="Close"><span class="ico">👍</span></button></div></div></div>`;
+}
+
+/* ---------- confetti ---------- */
+const FX = {
+  cv: document.getElementById("fx"), ctx: null, parts: [], on: false,
+  size() { const d = window.devicePixelRatio || 1; this.cv.width = innerWidth * d; this.cv.height = innerHeight * d; this.ctx = this.cv.getContext("2d"); if (this.ctx) this.ctx.setTransform(d, 0, 0, d, 0, 0); },
+  burst(x, y, n = 40, spread = 1, up = 1) {
+    if (RM()) return;
+    const cols = ["#7c4dff", "#3ccf4e", "#ffc83d", "#ff6b3d", "#ff8fab", "#4dc3ff", "#ff5d73"];
+    for (let i = 0; i < n; i++) { // decorative only; never affects play or rewards
+      const a = up ? -Math.PI / 2 + (Math.random() - 0.5) * 1.6 * spread : Math.random() * Math.PI * 2, v = 380 + Math.random() * 520;
+      this.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: Math.random() * 6, vr: (Math.random() - 0.5) * 14, w: 8 + Math.random() * 7, h: 10 + Math.random() * 8, c: cols[i % cols.length], life: 2.2 + Math.random(), round: i % 4 === 0 });
+    }
+    if (!this.on) { this.on = true; this.size(); if (!this.ctx) { this.on = false; this.parts = []; return; } this.t = performance.now(); requestAnimationFrame(t => this.tick(t)); }
+  },
+  tick(t) {
+    const dt = Math.min(0.033, (t - this.t) / 1000); this.t = t;
+    const g = this.ctx; g.clearRect(0, 0, innerWidth, innerHeight);
+    this.parts = this.parts.filter(p => (p.life -= dt) > 0 && p.y < innerHeight + 40);
+    for (const p of this.parts) {
+      p.vy += 900 * dt; p.vx *= 0.985; p.vy *= 0.985; p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+      g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.c; g.globalAlpha = Math.min(1, p.life);
+      if (p.round) { g.beginPath(); g.arc(0, 0, p.w / 2, 0, 7); g.fill(); } else g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.r * 2)) + 2);
+      g.restore();
+    }
+    if (this.parts.length) requestAnimationFrame(tt => this.tick(tt)); else { this.on = false; g.clearRect(0, 0, innerWidth, innerHeight); }
+  },
+};
+
+/* ---------- soft time budget (interlude §4.3) ---------- */
+function tickBudget() {
+  if (!INTERLUDE || session.finished || !started) return;
+  const m = (Date.now() - session.startedAt) / 60000;
+  if (m >= LAUNCH.min && !session.bannerShown) { session.bannerShown = true; if (view === "play" && !drag && !(play && play.busy)) renderPlay(); }
+  if (m >= LAUNCH.min + 3 && !session.offerShown && !$ov.firstChild) {
+    session.offerShown = true; const nr = noRead() || isYoung();
+    $ov.innerHTML = `<div class="ov"><div class="panel" role="dialog" aria-label="Back to the trail?"><h2>🗺️ ${nr ? "" : "Time for the trail?"}</h2>
+      <div class="row"><button class="btn ghost" data-act="keep" aria-label="Keep playing"><span class="ico">🍪</span></button>
+      <button class="btn" data-act="back" aria-label="Back to my adventure"><span class="ico">▶️</span>${nr ? "" : "Back to my adventure"}</button></div></div></div>`;
+  }
+}
+setInterval(tickBudget, 5000);
+
+/* ---------- boot ---------- */
+Store.load();
+window.addEventListener("pagehide", () => { if (play && !play.done) saveCur(); });
+window.addEventListener("storage", ev => { if (ev.key === GAME.mainKey) { me = readMainProfile(); if (!(play && play.busy)) render(); } });
+window.addEventListener("resize", () => { if (FX.on) FX.size(); if (view === "play" && play && !drag && !play.busy) renderPlay(); });
+(function boot() {
+  const k = kid(); Store.save();
+  if (INTERLUDE) {
+    try { history.replaceState({ lb: "base" }, ""); history.pushState({ lb: "game" }, ""); } catch (e) { /* ignore */ }
+    startLevel(pickLevel(curTrack()), true);
+  } else if (k.cur) { pushNav(); startLevel(k.cur.li, true); }
+  else render();
+  startScreen(); // every boot (interlude and resume too): one big ▶️ tap, which unlocks speech on iPad
+})();
+
+/* Read-only hooks for automated tests (cannot change game state). */
+window.LetterBakery = Object.freeze({
+  levels: LEVELS, pics: PICS, jars: JARS, ypics: YPICS, fits, spotsOf, needOf, pickNaturalVoice, pickVoice,
+  track: () => curTrack(),
+  state: () => JSON.parse(JSON.stringify({ view, play, session, kid: kid(), launch: LAUNCH, started, unlocked: Speech.unlocked, voice: Speech.voice ? Speech.voice.name : null })),
+});
+</script>
+</body>
+</html>

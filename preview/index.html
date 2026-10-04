@@ -15,7 +15,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="app-version" content="1.4.2-preview">
+<meta name="app-version" content="1.4.3-preview">
 <style>
 /* Fredoka (SIL Open Font License, see OFL-Fredoka.txt), self-hosted so the app never waits on a third-party server */
 @font-face{font-family:"Fredoka";font-style:normal;font-weight:300 700;font-display:swap;src:url("fredoka-latin.woff2") format("woff2")}
@@ -245,6 +245,12 @@ h1,h2,h3{margin:0;font-weight:700}
 .gamecard b{display:block;font-size:24px}
 .gamecard small{color:var(--muted);font-size:17px}
 .gamecard .go{margin-left:auto;font-size:30px}
+.gamecard[hidden]{display:none}
+/* 1.4.3: 🧠 / 🔤 game group tabs (big icons; no reading needed) */
+.ggtabs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 16px}
+.ggtab{display:flex;flex-direction:column;align-items:center;gap:2px;border:4px solid var(--line);background:#fff;border-radius:22px;padding:8px 6px;min-height:96px;box-shadow:0 5px 0 var(--line);color:var(--ink)}
+.ggtab .gge{font-size:44px;line-height:1}.ggtab .ggn{font-size:18px;font-weight:700}.ggtab .ggc{font-size:18px;letter-spacing:2px;opacity:.85}
+.ggtab.on{border-color:var(--brand);background:#f1ecff;box-shadow:0 5px 0 var(--brand-d)}
 /* ---------- avatar closet (1.4.0) ---------- */
 .who .elzee-avatar{width:44px;height:44px;border-radius:50%;background:#efe9ff;flex:none}
 .playercard .elzee-avatar{width:88px;height:88px;border-radius:50%;background:#efe9ff}
@@ -1985,7 +1991,7 @@ const APP = {
   mascot: "🦉",
   mascotName: "Professor Hoot",
   pinLength: 4,
-  version: "1.4.2-preview",
+  version: "1.4.3-preview",
 };
 const AVATARS = ["🦊","🐼","🦄","🐯","🐸","🐙","🦖","🐰","🐨","🦁","🐧","🐝","🐬","🦋","🐱","🐶"];
 const REWARDS = {
@@ -2304,7 +2310,7 @@ const MINIGAMES = [
   { id: "sprouttrail", name: "Sprout Trail", emoji: "🌱", blurb: "Grow a garden trail!", href: "games/sprout-trail.html",
     key: "logicquest.minigame.sprouttrail.v1" },
   { id: "sillystories", name: "Silly Stories", emoji: "📖", blurb: "Fill in the silly story!", href: "games/silly-stories.html",
-    key: "logicquest.minigame.sillystories.v1",
+    key: "logicquest.minigame.sillystories.v1", group: "words",
     interlude: true, role: "interlude", roundLabel: "1 story", minutes: 3, enabled: true },
   // Climb the Quiz (1.3.6): free play from the home tile. Tokens use Climb's own rates (no daily cap).
   // 1.3.8: Steve's younger (non-reader, picture-only) mode shipped, so Little Thinkers see the tile too (hideForYounger removed).
@@ -2316,7 +2322,26 @@ const MINIGAMES = [
   // for Little Thinkers. The game's kids[id].lifetime is paid through the claim ledger; Reset progress clears it.
   { id: "lilybridge", name: "Lily Bridge", emoji: "🌉", blurb: "Build a bridge for Boba Frog!", href: "games/lily-bridge.html",
     key: "logicquest.minigame.lilybridge.v1", clearOnReset: true },
+  // Seesaw Words (1.4.3, Bob 2): vocabulary (opposites, same-meaning, shades). Fixed-level rates, no caps; picture path
+  // for Little Thinkers. kids[id].lifetime is paid through the claim ledger. Reads the kid's chosen voice (ElzeeVoice).
+  { id: "seesaw-words", name: "Seesaw Words", emoji: "🎢", blurb: "Balance the word seesaw!", href: "games/seesaw-words.html",
+    key: "logicquest.minigame.seesaw-words.v1", group: "words",
+    interlude: true, role: "interlude", roundLabel: "1 level", minutes: 3, enabled: true },
+  // Word Family Garden (1.4.3, Bob 2): phonics word families. Fixed-level rates, no caps; picture path for Little Thinkers.
+  // Its profileVoicePref() reads profile.voice (the kid's 🔈 pick) through ElzeeVoice.
+  { id: "word-family-garden", name: "Word Family Garden", emoji: "🌻", blurb: "Grow real words in the garden!", href: "games/word-family-garden.html",
+    key: "logicquest.minigame.word-family-garden.v1", group: "words",
+    interlude: true, role: "interlude", roundLabel: "1 level", minutes: 3, enabled: true },
+  // Letter Bakery (1.4.3, Bob 2): letters and sounds. Fixed-level rates, no caps; picture path for Little Thinkers.
+  { id: "letter-bakery", name: "Letter Bakery", emoji: "🧁", blurb: "Bake words from letter cookies!", href: "games/letter-bakery.html",
+    key: "logicquest.minigame.letter-bakery.v1", group: "words",
+    interlude: true, role: "interlude", roundLabel: "1 level", minutes: 3, enabled: true },
 ];
+// 1.4.3: the home splits the games into two icon tabs a non-reader can tell apart: 🧠 thinking games and 🔤 word games.
+const GAME_GROUPS = [{ id: "think", emoji: "🧠", name: "Thinking games" }, { id: "words", emoji: "🔤", name: "Word games" }];
+const gameGroupOf = g => (g && g.group === "words" ? "words" : "think");
+function homeGroup() { try { const v = sessionStorage.getItem("elzee.gameGroup"); return v === "words" ? "words" : "think"; } catch (e) { return "think"; } }
+function setHomeGroup(v) { try { sessionStorage.setItem("elzee.gameGroup", v === "words" ? "words" : "think"); } catch (e) { /* private mode */ } }
 const isYoungerProfile = pl => !!pl && pl.pathId === "little";
 const homeGames = pl => MINIGAMES.filter(g => !(g.hideForYounger && isYoungerProfile(pl)));
 /* Climb question pack (spec §6.1): review items only from levels this kid has finished. Returns null if there
@@ -2770,7 +2795,9 @@ function renderHome() {
   const offsets = [0, 80, -80, 40, -40];
   $app.innerHTML = topBar(pl) + `
     <div class="hello">${AV ? `<button class="heroav" data-act="openCloset" aria-label="My closet">${avatarHTML(pl, { crop: "full", size: 150, idPrefix: "hero" })}</button>` : ""}<div class="mascot">${APP.mascot}</div><div class="bubble">${greeting(pl)}</div></div>
-    ${homeGames(pl).map(g => `<a class="gamecard" href="${g.href}" data-game="${g.id}"${g.act ? ` data-act="${g.act}"` : ""}><span class="ge">${g.emoji}</span>
+    ${(() => { const gs = homeGames(pl), cur = homeGroup(), has = id => gs.some(g => gameGroupOf(g) === id);
+      return GAME_GROUPS.filter(G => has(G.id)).length > 1 ? `<div class="ggtabs" role="tablist">${GAME_GROUPS.map(G => `<button class="ggtab ${G.id === cur ? "on" : ""}" role="tab" aria-selected="${G.id === cur}" data-act="gameGroup" data-g="${G.id}" aria-label="${G.name}"><span class="gge" aria-hidden="true">${G.emoji}</span><span class="ggn">${G.name}</span><span class="ggc" aria-hidden="true">${gs.filter(g => gameGroupOf(g) === G.id).map(g => g.emoji).join("")}</span></button>`).join("")}</div>` : ""; })()}
+    ${homeGames(pl).map(g => `<a class="gamecard" href="${g.href}" data-game="${g.id}" data-group="${gameGroupOf(g)}"${gameGroupOf(g) === homeGroup() || !homeGames(pl).some(x => gameGroupOf(x) !== gameGroupOf(g)) ? "" : " hidden"}${g.act ? ` data-act="${g.act}"` : ""}><span class="ge">${g.emoji}</span>
       <span><b>${esc(g.name)}</b><small>${esc(g.blurb)}</small></span><span class="go">▶</span></a>`).join("")}
     <div class="tabs">${PATHS.map(p => `<button class="tab ${p.id === pathId ? "on" : ""}" data-act="viewPath" data-v="${p.id}">${p.emoji} ${esc(p.title)}</button>`).join("")}</div>
     ${path.tracks.map((t, ti) => `
@@ -3166,6 +3193,12 @@ const actions = {
   },
   changePin() { createPin(() => {}); },
   voicePick(el) { voicePicker(el.dataset.id || (player() ? player().id : null)); },
+  gameGroup(el) { // 1.4.3: switch the home between 🧠 thinking and 🔤 word games, and say which (for non-readers)
+    const g = el.dataset.g === "words" ? "words" : "think"; setHomeGroup(g); Sound.tap();
+    document.querySelectorAll(".ggtab").forEach(b => { const on = b.dataset.g === g; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); });
+    document.querySelectorAll("a.gamecard[data-group]").forEach(a => { a.hidden = a.dataset.group !== g; });
+    Speech.say(g === "words" ? "Word games!" : "Thinking games!");
+  },
 };
 /* ---------- Avatar closet screen ---------- */
 const CLOSET_TABS = ["skin", "hair", "hairColor", "eyes", "top", "dress", "bottom", "shoes", "acc"];

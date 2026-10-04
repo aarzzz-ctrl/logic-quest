@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Offline-only: the page may not load anything from anywhere (no fonts, images, scripts, or fetches). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; media-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#7c4dff">
+<title>Word Family Garden · Elzee</title>
+<style>
+:root{
+  --bg:#fff8e7; --ink:#2d2a4a; --muted:#7a7699; --card:#fff; --line:#e7e2f5;
+  --brand:#7c4dff; --brand-d:#5a2fd6; --brand-l:#efe9ff;
+  --good:#3ccf4e; --good-d:#2a9d38; --good-l:#e6fbe9;
+  --oops:#ff9f43; --oops-d:#e07b15; --oops-l:#fff3e3;
+  --gold:#ffc83d; --gold-d:#e0a400;
+  --radius:22px;
+  --font:"Fredoka","Chalkboard SE","Comic Sans MS","Arial Rounded MT Bold",system-ui,sans-serif;
+  --sky1:#bfe6ff; --sky2:#eef9ff; --grass:#8fdc7a; --soil:#9b6a43; --soil-d:#6e4a2d; --pot:#e2774a; --pot-d:#b4552f; --stem:#3aa655;
+  --cw:104px; --ch:92px; --pw:232px; --bloom:62px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:20px;line-height:1.3;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%;overscroll-behavior:none}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2,h3{margin:0}
+#app{max-width:1180px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 10px) calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 14px) calc(env(safe-area-inset-left) + 16px)}
+.btn{border:none;border-radius:18px;padding:12px 24px;min-height:64px;min-width:64px;font-size:23px;font-weight:600;
+  background:var(--good);color:#fff;box-shadow:0 5px 0 var(--good-d);display:inline-flex;align-items:center;justify-content:center;gap:10px}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--good-d)}
+.btn.ghost{background:#fff;color:var(--ink);box-shadow:0 5px 0 var(--line);border:2px solid var(--line)}
+.btn .ico{font-size:30px;line-height:1}
+.iconbtn{border:none;background:#fff;border-radius:18px;width:64px;height:64px;font-size:30px;flex:none;text-decoration:none;
+  box-shadow:0 4px 0 var(--line);display:inline-flex;align-items:center;justify-content:center;position:relative}
+.iconbtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.iconbtn.on{background:var(--brand-l);box-shadow:0 4px 0 #cbbcff}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex:none}
+.pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:6px 16px;min-height:56px;font-size:22px;font-weight:700;box-shadow:0 4px 0 var(--line)}
+.pill .av{font-size:32px}.pill .nm{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pill b{color:var(--gold-d)}
+.spacer{flex:1}
+.banner{flex:none;background:var(--gold);border-radius:16px;padding:8px 16px;margin-bottom:8px;font-weight:700;text-align:center}
+.mapwrap{flex:1;min-height:0;overflow:auto;padding:4px 2px 8px}
+.hero{display:flex;align-items:center;gap:14px;margin:4px 0 16px}
+.hero .big{font-size:60px;animation:bob 2.4s ease-in-out infinite}
+.bubble{background:#fff;border-radius:22px;padding:14px 18px;box-shadow:0 4px 0 var(--line);font-size:21px}
+.levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}
+.lvl{position:relative;border:none;background:#fff;border-radius:24px;box-shadow:0 6px 0 var(--line);min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px}
+.lvl .num{position:absolute;top:10px;left:14px;font-weight:700;color:var(--muted)}
+.lvl .tw{position:absolute;top:8px;right:12px;font-size:22px}
+.lvl .scene{font-size:54px;line-height:1}
+.lvl.next{box-shadow:0 6px 0 #cbbcff,0 0 0 4px var(--brand) inset}.lvl.next .scene{animation:bob 1.8s ease-in-out infinite}
+.lvl.locked{opacity:.55}
+.stars{font-size:22px;letter-spacing:2px}.nostar{opacity:.2}
+.board{flex:1;min-height:0;display:flex;flex-direction:column;gap:12px}
+.park{flex:1;min-height:0;position:relative;border-radius:28px;overflow:hidden;background:linear-gradient(var(--sky1),var(--sky2) 62%,var(--grass) 62%,#76c765);box-shadow:0 6px 0 var(--line);display:flex;flex-direction:column}
+.park .deco{position:absolute;font-size:44px;opacity:.9;pointer-events:none;animation:floaty 4s ease-in-out infinite}
+.prompt{position:relative;z-index:2;display:flex;align-items:center;gap:12px;padding:12px 14px 0;flex:none}
+.prompt .ptxt{font-size:clamp(20px,2.4vw,25px);font-weight:600;background:rgba(255,255,255,.88);border-radius:18px;padding:8px 14px;flex:1}
+.prompt .ptxt b{color:var(--brand-d)}
+.prompt .kind{font-size:40px;background:rgba(255,255,255,.88);border-radius:18px;padding:4px 12px;line-height:1.2}
+.dots{display:flex;gap:6px}.dots i{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.9);box-shadow:inset 0 0 0 2px #b9a6ff}.dots i.done{background:var(--good);box-shadow:none}.dots i.cur{background:var(--gold);box-shadow:none}
+.stage{position:relative;flex:1;min-height:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:3%}
+.bed{display:flex;align-items:flex-end;gap:18px;padding:0 6px}
+.pot{position:relative;width:var(--pw);display:flex;flex-direction:column;align-items:center;touch-action:none}
+.blooms{position:relative;z-index:0;display:flex;flex-wrap:wrap-reverse;justify-content:center;align-items:flex-start;align-content:flex-start;gap:0 4px;min-height:calc(2 * (var(--bloom) + 44px));width:100%;padding:0 4px;margin-bottom:-22px}
+.potbody{position:relative;z-index:1;width:88%;height:104px;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.potbody::before{content:"";position:absolute;inset:18px 8% 0;background:linear-gradient(90deg,var(--pot-d),var(--pot) 30%,var(--pot) 70%,var(--pot-d));clip-path:polygon(0 0,100% 0,88% 100%,12% 100%);border-radius:0 0 14px 14px}
+.potbody::after{content:"";position:absolute;left:0;right:0;top:0;height:30px;border-radius:12px;background:linear-gradient(#f09a6e,var(--pot));box-shadow:0 4px 0 var(--pot-d)}
+.potbody .lab{position:relative;z-index:1;margin-top:26px;font-size:40px;font-weight:700;color:#fff;text-shadow:0 3px 0 var(--pot-d);letter-spacing:1px;pointer-events:none}
+.potbody .lab .dash{opacity:.55}
+.potbody .anc{position:relative;z-index:1;margin-top:20px;font-size:58px;line-height:1;pointer-events:none;filter:drop-shadow(0 3px 0 rgba(0,0,0,.15))}
+.pot.hot .potbody{transform:scale(1.08)}.pot.hot .potbody::after{background:linear-gradient(#ffd36b,var(--gold))}
+.compost{position:relative;width:168px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;touch-action:none}
+.compost .heap{font-size:30px;letter-spacing:-4px;min-height:44px;display:flex;align-items:flex-end;justify-content:center;flex-wrap:wrap;max-width:150px}
+.compost .heap .sd{font-size:20px;font-weight:700;color:#fff;background:var(--soil);border-radius:12px;padding:2px 8px;margin:2px;letter-spacing:0}
+.compost .heap .wd{font-size:30px}
+.compost .bin{width:150px;height:110px;border-radius:16px 16px 22px 22px;background:repeating-linear-gradient(90deg,var(--soil) 0 22px,var(--soil-d) 22px 26px);box-shadow:0 5px 0 var(--soil-d);display:flex;align-items:center;justify-content:center;font-size:44px;transition:transform .15s}
+.compost.hot .bin{transform:scale(1.08);box-shadow:0 0 0 5px var(--gold),0 5px 0 var(--soil-d)}
+.flower{position:relative;display:flex;flex-direction:column;align-items:center;width:calc(var(--bloom) + 10px);touch-action:none}
+.flower .head{width:var(--bloom);height:var(--bloom);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:calc(var(--bloom) * .5);line-height:1;
+  background:radial-gradient(circle,#fffbe6 0 47%,transparent 48%),repeating-conic-gradient(var(--pa,#ff8fab) 0 24deg,var(--pb,#ffc2d4) 24deg 45deg);box-shadow:0 3px 0 rgba(0,0,0,.08)}
+.flower .stem{width:7px;height:34px;background:var(--stem);border-radius:4px;position:relative}
+.flower .stem::after{content:"";position:absolute;left:6px;top:8px;width:16px;height:9px;border-radius:0 12px 0 12px;background:var(--stem)}
+.flower .fw{position:relative;z-index:1;font-size:19px;font-weight:700;background:rgba(255,255,255,.94);border-radius:10px;padding:0 6px;margin:-6px 0 -4px;white-space:nowrap;box-shadow:0 2px 0 rgba(0,0,0,.08)}
+.flower .fw b{color:var(--brand-d)}
+.flower.pull{cursor:grab}
+.flower.grow{animation:grow .7s cubic-bezier(.3,1.6,.5,1)}
+.flower.dance{animation:hop .8s ease-in-out 2}
+.sign{position:absolute;left:50%;top:38%;transform:translateX(-50%);z-index:5;background:#fff8e7;border:4px solid var(--soil);border-radius:14px;padding:4px 14px;font-size:30px;font-weight:700;color:var(--soil-d);white-space:nowrap;pointer-events:none;animation:pop .3s}
+.side{flex:none;display:flex;flex-direction:column;align-items:center}
+.tray{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px;padding:4px 8px;min-height:var(--ch)}
+.card{position:relative;width:var(--cw);height:var(--ch);border-radius:20px;flex:none;border:none;background:#fff;box-shadow:0 6px 0 #d9d0f5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;touch-action:none;padding:4px}
+.card.seed{background:linear-gradient(#fff 0 64%,#f6e3c8 64%);box-shadow:0 6px 0 #e3c9a3}
+.card .on{font-size:44px;font-weight:700;color:var(--brand-d);line-height:1;pointer-events:none}
+.card .sdot{position:absolute;bottom:5px;font-size:16px;pointer-events:none}
+.card .e{font-size:48px;line-height:1;pointer-events:none}
+.tray .card.used{visibility:hidden}
+.tray .card.sel{transform:translateY(-10px) scale(1.06);box-shadow:0 10px 0 #cbbcff,0 0 0 4px var(--brand) inset}
+.card.wob,.flower.wob{animation:wiggle .5s}
+.glow{animation:glow 1s ease-in-out infinite!important;border-radius:20px}
+.weedtip{font-size:64px;line-height:1;animation:bob 2s ease-in-out infinite}
+.tools{display:flex;gap:10px;justify-content:center;margin-top:10px}
+.drag{position:fixed;left:0;top:0;z-index:50;pointer-events:none;border-radius:20px;background:#fff;box-shadow:0 18px 30px rgba(45,42,74,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;will-change:transform}
+.drag.seed{background:linear-gradient(#fff 0 64%,#f6e3c8 64%)}
+.drag .on{font-size:44px;font-weight:700;color:var(--brand-d);line-height:1}.drag .e{font-size:50px;line-height:1}
+.drag.fl{background:transparent;box-shadow:none}
+.toast{pointer-events:none;position:fixed;left:50%;top:86px;transform:translateX(-50%);background:#fff;border-radius:18px;padding:10px 18px;box-shadow:0 6px 0 var(--line);font-size:21px;z-index:40;max-width:90vw;text-align:center}
+.ov{position:fixed;inset:0;background:rgba(45,42,74,.45);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
+.panel{background:#fff;border-radius:30px;padding:20px 22px;max-width:720px;width:100%;max-height:calc(100dvh - 32px);overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;animation:pop .35s}
+.panel h2{font-size:32px}
+.row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.startov{background:linear-gradient(var(--sky1),var(--sky2) 62%,var(--grass) 62%)}
+.startbtn{border:none;border-radius:50%;width:200px;height:200px;font-size:96px;background:var(--good);color:#fff;box-shadow:0 10px 0 var(--good-d);animation:pulse 1.6s ease-in-out infinite}
+.title{font-size:44px;font-weight:700;color:var(--brand-d);text-shadow:0 3px 0 #fff}
+.minisaw{font-size:70px;display:flex;gap:30px;justify-content:center}.minisaw span{animation:hop 1s ease-in-out infinite}
+.winscene{position:relative;width:100%;height:clamp(140px,22vh,240px);border-radius:24px;overflow:hidden;background:linear-gradient(var(--sky1),var(--sky2) 64%,var(--grass) 64%);display:flex;align-items:flex-end;justify-content:center;gap:6px;padding-bottom:10px}
+.winscene .flower{--bloom:min(64px,8vh)}.winscene .flower .stem{height:min(40px,5vh)}
+.winscene .bud{position:absolute;font-size:min(48px,7vh);animation:hop .9s ease-in-out infinite}
+.grownlist{font-size:clamp(20px,3vh,28px);line-height:1.4;display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;max-width:100%}
+.grownlist span{background:var(--good-l);border-radius:12px;padding:0 10px}.grownlist b{color:var(--brand-d)}
+.bigstars{font-size:42px}.bigstars span{display:inline-block;animation:pop .4s backwards}
+.coins{font-size:30px;font-weight:700;color:var(--gold-d)}
+.parade{display:flex;gap:10px;font-size:46px;flex-wrap:wrap;justify-content:center}.parade span{animation:hop 1s ease-in-out infinite}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:70}
+.grown p{text-align:left;font-size:18px;margin:4px 0}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08);opacity:1}100%{transform:scale(1)}}
+@keyframes grow{0%{transform:scale(0,0) translateY(40px);opacity:0}60%{transform:scale(1.15,1.2) translateY(-8px);opacity:1}100%{transform:scale(1) translateY(0)}}
+@keyframes wiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg)}40%{transform:rotate(8deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(4deg)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-20px)}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(255,200,61,0)}50%{box-shadow:0 0 0 10px rgba(255,200,61,.8)}}
+#app.young{--cw:132px;--ch:120px;--bloom:84px;--pw:240px}#app.young .card .e{font-size:72px}
+@media (orientation:landscape) and (min-width:900px){.board{flex-direction:row}.side{width:276px;justify-content:center}.tray{max-width:276px}#app.young{--cw:118px;--ch:106px}#app.young .card .e{font-size:62px}}
+@media (max-width:600px){#app{--cw:76px;--ch:70px;padding-left:10px;padding-right:10px}#app.young{--cw:96px;--ch:88px}.card .e{font-size:36px}.card .on{font-size:32px}
+  .top{gap:6px}.top .pill[aria-label=Player],[data-act=grown]{display:none!important}.pill{padding:6px 10px}.tray{gap:8px}.prompt .ptxt{font-size:17px}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="ov"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<script>
+/*VOICE-START v1.0.0*/
+/* ElzeeVoice v1.0.0 - one shared read-aloud voice for Elzee and its games (1.4.2).
+   Source of truth: workspace/build142/elzee-voice.js, pasted unchanged between the VOICE markers of
+   index.html and games/*.html (the pages are offline single files, so no <script src>).
+   - Calm, natural voices first (iPad Safari: Ava Premium/Enhanced, Samantha Enhanced, Allison, Susan, Karen, Samantha).
+   - Novelty voices (Fred, Zarvox, Bubbles, ...) are never used.
+   - One calm rate (0.9) and normal pitch (1.0) everywhere, younger mode included.
+   - Each kid picks their own voice in Elzee (🔈 on the top bar). It is saved on their profile as profile.voice
+     in logicquest.v1; games only READ it (active profile). No network, on-device voices only. */
+(function (root) {
+  "use strict";
+  var VERSION = "1.0.0", RATE = 0.9, PITCH = 1.0, MAIN_KEY = "logicquest.v1";
+  var NOVELTY = /(^|[\s.\-_(])(Fred|Albert|Bad News|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Pipe Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Bahh|Junior|Ralph|Kathy|Deranged|Hysterical)($|[\s.\-_)])/i;
+  var PREFER = [/^Ava\b.*\((Premium|Enhanced)\)/i, /^Samantha\b.*\(Enhanced\)/i, /^Allison\b/i, /^Susan\b/i, /^Karen\b/i, /^Samantha\b/i];
+  // Friendly characters for the kids' voice cards (picture-only; no reading needed).
+  var CHARS = [{ e: "🦉", n: "Owl" }, { e: "🐻", n: "Bear" }, { e: "🐰", n: "Bunny" }, { e: "🐢", n: "Turtle" }, { e: "🐳", n: "Whale" }];
+  function isNovelty(v) { return !!v && (NOVELTY.test(String(v.name || "")) || NOVELTY.test(String(v.voiceURI || ""))); }
+  function score(v) {
+    var name = String(v.name || ""), i;
+    for (i = 0; i < PREFER.length; i++) if (PREFER[i].test(name)) return i;
+    return /^en[-_]US/i.test(v.lang || "") ? 20 : 30;
+  }
+  function voices() {
+    var all = [];
+    try { all = (root.speechSynthesis && root.speechSynthesis.getVoices && root.speechSynthesis.getVoices()) || []; } catch (e) { all = []; }
+    var seen = {}, out = [];
+    for (var i = 0; i < all.length; i++) {
+      var v = all[i];
+      if (!v || !/^en/i.test(v.lang || "") || v.localService === false || isNovelty(v) || seen[v.name]) continue; // on-device English only
+      seen[v.name] = 1; out.push(v);
+    }
+    return out.map(function (v, i) { return { v: v, s: score(v), i: i }; })
+      .sort(function (a, b) { return a.s - b.s || a.i - b.i; }).map(function (x) { return x.v; });
+  }
+  // Active Elzee profile, read only (games never write logicquest.v1).
+  function activeProfile() {
+    try {
+      var d = JSON.parse(root.localStorage.getItem(MAIN_KEY));
+      if (!d || !Array.isArray(d.profiles)) return null;
+      for (var i = 0; i < d.profiles.length; i++) if (d.profiles[i] && d.profiles[i].id === d.activeId) return d.profiles[i];
+    } catch (e) {}
+    return null;
+  }
+  function prefFor(p) { return p && typeof p.voice === "string" && p.voice ? p.voice.slice(0, 100) : null; }
+  function pick(name) {
+    var list = voices();
+    if (name) for (var i = 0; i < list.length; i++) if (list[i].name === name) return list[i];
+    return list[0] || null; // calm default
+  }
+  // Voice cards for the kid picker: the best few voices, each with a friendly character.
+  function choices(max) {
+    var list = voices().slice(0, Math.min(max || CHARS.length, CHARS.length));
+    return list.map(function (v, i) { return { name: v.name, lang: v.lang, emoji: CHARS[i].e, char: CHARS[i].n }; });
+  }
+  // Set voice, calm rate and normal pitch on an utterance. name undefined = the active profile's pick.
+  function apply(u, name) {
+    if (name === undefined) name = prefFor(activeProfile());
+    var v = pick(name);
+    if (v) { try { u.voice = v; } catch (e) { /* not a real voice object */ } u.lang = v.lang || "en-US"; } else u.lang = "en-US";
+    u.rate = RATE; u.pitch = PITCH;
+    api.last = v ? v.name : null;
+    return u;
+  }
+  var api = { version: VERSION, RATE: RATE, PITCH: PITCH, CHARS: CHARS, isNovelty: isNovelty, voices: voices, pick: pick,
+    choices: choices, apply: apply, prefFor: prefFor, activeProfile: activeProfile, last: null };
+  root.ElzeeVoice = api;
+})(typeof window !== "undefined" ? window : this);
+/*VOICE-END*/
+</script>
+<script>
+"use strict";
+/* ==========================================================================
+   WORD FAMILY GARDEN: a phonics / word-family interlude for Elzee.
+   Flower pots hold word endings (-at, -ug, -ake ...). Kids drag starting-letter
+   seeds into pots: only real words sprout into a flower (and are read aloud);
+   a seed that makes a non-word wobbles and hops back out. Seeds that make no
+   word in any pot go in the compost. Twists: pull the one weed that doesn't
+   rhyme, and grow a picture in the pot its word ends with.
+   Young path (little-path profiles): rhyme by ear with pictures only.
+   Fixed levels; every seed has exactly one home (word-family-garden-dev/verify.mjs).
+   No randomness, no timer, no fail state.
+   ========================================================================== */
+const GAME = {
+  id: "word-family-garden",
+  storageKey: "logicquest.minigame.word-family-garden.v1", // this game's own key
+  mainKey: "logicquest.v1",                                 // main app key: READ ONLY, never written here
+  resultKey: "logicquest.interlude.result.v1",
+};
+const ECON = { firstClear: 3, firstThreeStars: 2, replay: 0 }; // contract §6 fixed-level rates; no caps of any kind
+const RM = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/*LEVELS-START*/
+/* Real words the garden knows. e = picture (emoji; omitted = plain flower), rh = rhyme sound (young path),
+   say = spoken form when it differs. A seed grows only if onset + ending is one of these words. */
+const WORDS = {
+  cat: { e: "🐱", rh: "at" }, hat: { e: "🎩", rh: "at" }, bat: { e: "🦇", rh: "at" }, rat: { e: "🐀" }, bag: { e: "👜" },
+  bug: { e: "🐛", rh: "ug" }, hug: { e: "🤗" }, mug: { e: "☕", rh: "ug" }, king: { e: "👑", rh: "ing" }, sing: { e: "🎤" },
+  can: { e: "🥫" }, man: { e: "👨" }, van: { e: "🚐" }, lip: { e: "👄" }, zip: { e: "🤐" }, ship: { e: "🚢" }, chip: { e: "🍟" }, shop: { e: "🏪" },
+  cake: { e: "🎂", rh: "ake" }, snake: { e: "🐍", rh: "ake" }, shake: { e: "🥤" }, lake: { e: "🏞️" }, bike: { e: "🚲" },
+  night: { e: "🌙" }, fright: { e: "😱" }, light: { e: "💡" }, bright: { e: "🔆" },
+  frog: { e: "🐸", rh: "og" }, dog: { e: "🐶", rh: "og" }, log: { e: "🪵", rh: "og" }, pig: { e: "🐷" }, bell: { e: "🔔" }, shell: { e: "🐚" }, fish: { e: "🐟" },
+  star: { e: "⭐", rh: "ar" }, scar: { e: "🩹" }, flip: { e: "🤸" }, clip: { e: "📎" }, grip: { e: "✊" }, plug: { e: "🔌" },
+  rain: { e: "🌧️" }, drain: {}, flame: { e: "🔥" }, frame: { e: "🖼️" }, name: { e: "📛" }, joke: { e: "😂" }, smoke: { e: "💨" },
+  // young path pictures (rhyme by ear; never shown as words)
+  bee: { e: "🐝", rh: "ee" }, tree: { e: "🌳", rh: "ee" }, key: { e: "🔑", rh: "ee" }, car: { e: "🚗", rh: "ar" }, guitar: { e: "🎸", rh: "ar" },
+  moon: { e: "🌙", rh: "oon" }, spoon: { e: "🥄", rh: "oon" }, balloon: { e: "🎈", rh: "oon" }, ring: { e: "💍", rh: "ing" },
+  sock: { e: "🧦", rh: "ock" }, clock: { e: "⏰", rh: "ock" }, rock: { e: "🪨", rh: "ock" },
+  bear: { e: "🐻", rh: "air" }, pear: { e: "🍐", rh: "air" }, chair: { e: "🪑", rh: "air" },
+  snail: { e: "🐌", rh: "ail" }, whale: { e: "🐳", rh: "ail" }, pail: { e: "🪣", rh: "ail" },
+  fox: { e: "🦊", rh: "ox" }, box: { e: "📦", rh: "ox" }, ox: { e: "🐂", rh: "ox" },
+  bed: { e: "🛏️", rh: "ed" }, bread: { e: "🍞", rh: "ed" }, sled: { e: "🛷", rh: "ed" },
+};
+/* Endings: say = how the ending is spoken on a pot tap, ex = an example word NOT grown in that level's pots. */
+const RIMES = {
+  at: { say: "at", ex: "sat" }, ug: { say: "ug", ex: "rug" }, ing: { say: "ing", ex: "wing" }, an: { say: "an", ex: "pan" }, ip: { say: "ip", ex: "dip" },
+  ake: { say: "ake", ex: "bake" }, ight: { say: "ite", ex: "sight" }, og: { say: "og", ex: "hog" }, ig: { say: "ig", ex: "wig" }, ell: { say: "ell", ex: "well" },
+  ar: { say: "ar", ex: "far" }, ain: { say: "ain", ex: "pain" }, ame: { say: "ame", ex: "game" }, oke: { say: "oke", ex: "poke" },
+};
+/* Round types:
+   seed  : pots = endings, seeds = onsets. A seed grows in the one pot where onset+ending is a word; no word anywhere = compost.
+   pic   : pots = endings, pics = words. A picture grows in the pot its word ends with; none = compost.          (twist)
+   weed  : beds = grown pots. Exactly one flower doesn't end with (or rhyme with) its pot: pull it to the compost. (twist)
+   rhyme : young path. pots = anchor pictures, pics = pictures. A picture goes to the pot it rhymes with (by ear). */
+const LEVELS = [
+  { id: "at", name: "The At Pot", scene: "🐱", age: 7, rounds: [
+    { type: "seed", pots: ["at"], seeds: ["c", "h", "z", "b", "r"] } ] },
+  { id: "bugking", name: "Bug and King", scene: "🐛", age: 7, rounds: [
+    { type: "seed", pots: ["ug", "ing"], seeds: ["b", "k", "y", "h", "s", "m"] } ] },
+  { id: "ship", name: "Ship Shape", scene: "🚢", age: 7.5, rounds: [
+    { type: "seed", pots: ["an", "ip"], seeds: ["c", "l", "sh", "v", "gl", "m", "z", "ch"] } ] },
+  { id: "weeds", name: "Weed Patrol", scene: "🌿", age: 7.5, twist: "weed", rounds: [
+    { type: "weed", beds: [{ rime: "at", flowers: ["cat", "hat", "bag", "rat"] }, { rime: "ug", flowers: ["bug", "mug", "hug"] }] },
+    { type: "weed", beds: [{ rime: "an", flowers: ["can", "van", "man"] }, { rime: "ip", flowers: ["lip", "ship", "shop", "zip"] }] } ] },
+  { id: "long", name: "Long Pots", scene: "🌙", age: 8, twist: "long", rounds: [
+    { type: "seed", pots: ["ake", "ight"], seeds: ["c", "n", "sn", "g", "fr", "sh"] } ] },
+  { id: "pics", name: "Picture Pots", scene: "🐸", age: 8, twist: "pic", rounds: [
+    { type: "pic", pots: ["og", "ig", "ell"], pics: ["frog", "pig", "bell", "fish", "dog", "shell", "log"] } ] },
+  { id: "blends", name: "Blend Garden", scene: "⭐", age: 8.5, twist: "blend", rounds: [
+    { type: "seed", pots: ["ar", "ip", "ug"], seeds: ["st", "fl", "pl", "sw", "cl", "sc", "gr"] } ] },
+  { id: "grand", name: "Grand Garden", scene: "🌻", age: 9, rounds: [
+    { type: "seed", pots: ["ain", "ame", "oke"], seeds: ["r", "fl", "sm", "j", "gl", "fr", "dr", "n"] },
+    { type: "weed", beds: [{ rime: "ake", flowers: ["cake", "lake", "bike", "snake"] }, { rime: "ight", flowers: ["night", "light", "bright"] }] } ] },
+  /* ---- young path (little-path profiles): rhyme by ear, pictures only, everything spoken ---- */
+  { id: "y-hat", young: true, name: "Hat and Dog", scene: "🎩", age: 6, rounds: [
+    { type: "rhyme", pots: ["hat", "dog"], pics: ["cat", "frog", "bat", "log"] } ] },
+  { id: "y-bee", young: true, name: "Bee and Car", scene: "🐝", age: 6, rounds: [
+    { type: "rhyme", pots: ["bee", "car"], pics: ["star", "tree", "key", "guitar"] } ] },
+  { id: "y-king", young: true, name: "King, Cake, Moon", scene: "👑", age: 6, rounds: [
+    { type: "rhyme", pots: ["king", "cake", "moon"], pics: ["spoon", "ring", "snake", "balloon"] } ] },
+  { id: "y-sock", young: true, name: "Sock, Bear, Snail", scene: "🐌", age: 6.5, rounds: [
+    { type: "rhyme", pots: ["sock", "bear", "snail"], pics: ["pear", "clock", "whale", "chair", "rock", "pail"] } ] },
+  { id: "y-bed", young: true, name: "Bug, Fox, Bed", scene: "🛏️", age: 6.5, rounds: [
+    { type: "rhyme", pots: ["bug", "fox", "bed"], pics: ["box", "bread", "mug", "sled", "ox"] } ] },
+];
+/* ---- the rules (shared by the game and verify.mjs) ---- */
+const isWord = w => Object.prototype.hasOwnProperty.call(WORDS, w);
+/* Items to place in a round: seeds / pictures, or the grown flowers of a weed round (flattened). */
+function itemsOf(li, ri) {
+  const R = LEVELS[li].rounds[ri];
+  if (R.type === "seed") return R.seeds.map(o => ({ kind: "seed", o }));
+  if (R.type === "weed") return R.beds.flatMap((b, bi) => b.flowers.map(w => ({ kind: "flower", w, bed: bi })));
+  return R.pics.map(w => ({ kind: "pic", w }));
+}
+const hasCompost = (li, ri) => LEVELS[li].rounds[ri].type !== "rhyme";
+const spotsOf = (li, ri) => { const R = LEVELS[li].rounds[ri], n = R.type === "weed" ? R.beds.length : R.pots.length; return [...Array(n).keys()].map(i => "p" + i).concat(hasCompost(li, ri) ? ["compost"] : []); };
+/* Which pots would accept item i (by the rule of the round). */
+function potsFor(li, ri, i) {
+  const R = LEVELS[li].rounds[ri], it = itemsOf(li, ri)[i]; if (!it) return [];
+  const out = [];
+  if (R.type === "seed") R.pots.forEach((r, p) => { if (isWord(it.o + r)) out.push("p" + p); });
+  else if (R.type === "pic") R.pots.forEach((r, p) => { if (it.w.endsWith(r)) out.push("p" + p); });
+  else if (R.type === "rhyme") R.pots.forEach((a, p) => { if (WORDS[it.w].rh && WORDS[it.w].rh === WORDS[a].rh) out.push("p" + p); });
+  else if (R.type === "weed") { if (it.w.endsWith(R.beds[it.bed].rime)) out.push("p" + it.bed); }
+  return out;
+}
+/* The one home of item i: its single pot, else the compost. (Weed round: good flowers stay put, the weed goes to the compost.) */
+function targetOf(li, ri, i) {
+  const p = potsFor(li, ri, i), R = LEVELS[li].rounds[ri];
+  if (R.type === "weed") return p.length ? null : "compost";
+  return p.length === 1 ? p[0] : p.length === 0 && hasCompost(li, ri) ? "compost" : null;
+}
+function fits(li, ri, spot, i) {
+  const R = LEVELS[li] && LEVELS[li].rounds[ri]; if (!R || !itemsOf(li, ri)[i]) return false;
+  return !!spot && targetOf(li, ri, i) === spot;
+}
+/* The word an item makes in a pot (shown on the sign / flower). */
+function wordIn(li, ri, i, spot) {
+  const R = LEVELS[li].rounds[ri], it = itemsOf(li, ri)[i], p = /^p(\d)$/.exec(spot || "");
+  if (!it) return "";
+  if (R.type === "seed") return p ? it.o + R.pots[+p[1]] : it.o;
+  return it.w;
+}
+const movable = (li, ri) => itemsOf(li, ri).map((_, i) => i).filter(i => targetOf(li, ri, i) !== null);
+/*LEVELS-END*/
+const trackOf = li => (LEVELS[li].young ? "young" : "big");
+const trackList = tr => LEVELS.map((L, i) => i).filter(i => trackOf(i) === tr);
+const BUDDIES = { big: ["🐞", "🐝"], young: ["🐛", "🦋"] };
+const KIND = { seed: "🌱", pic: "🖼️", weed: "🌿", rhyme: "👂" };
+const TWIST = { weed: "🌿", long: "📏", pic: "🖼️", blend: "🔗" };
+
+/* ---------- utilities ---------- */
+const $app = document.getElementById("app"), $ov = document.getElementById("ov");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+function ymd(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+const todayStr = () => ymd(new Date());
+const starStr = n => "⭐".repeat(n) + `<span class="nostar">${"⭐".repeat(3 - n)}</span>`;
+const num = (v, d = 0) => (typeof v === "number" && isFinite(v) ? Math.max(0, Math.round(v)) : d);
+const wSay = w => (WORDS[w] && WORDS[w].say) || w;
+const pic = w => esc((WORDS[w] && WORDS[w].e) || "🌼");
+/* Letter names for speaking a seed ("sh" -> "S, H"): uppercase single letters are read as letter names. */
+const onsetSay = o => o.toUpperCase().split("").join(", ");
+const listSay = a => (a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1]);
+
+/* ---------- launch params (interlude contract §3) ---------- */
+const Q = new URLSearchParams(location.search);
+function safeRet(r) { return typeof r === "string" && r.startsWith("../index.html") && !/[\\]|\/\//.test(r) ? r : "../index.html#home"; }
+const LAUNCH = {
+  elzee: Q.get("elzee") === "1",
+  mode: Q.get("mode") === "interlude" ? "interlude" : "free",
+  sid: Q.get("sid") || "", step: parseInt(Q.get("step"), 10) || 0,
+  min: Math.max(1, parseInt(Q.get("min"), 10) || 3),
+  ret: safeRet(Q.get("ret") || (Q.get("mode") === "interlude" ? "../index.html#session" : "../index.html#home")),
+};
+const INTERLUDE = LAUNCH.elzee && LAUNCH.mode === "interlude";
+
+/* ---------- main app profile (read only) ---------- */
+function readMainProfile() {
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem(GAME.mainKey)); } catch (e) { raw = null; }
+  const base = { id: "guest", name: "Guest", avatar: "🙂", little: false, sound: true, linked: false };
+  if (!raw || typeof raw !== "object" || !Array.isArray(raw.profiles)) return base;
+  const p = raw.profiles.find(x => x && x.id === raw.activeId);
+  const sound = typeof raw.sound === "boolean" ? raw.sound : true;
+  if (!p) return { ...base, sound };
+  return { id: String(p.id).slice(0, 40), name: typeof p.name === "string" && p.name.trim() ? p.name.slice(0, 40) : "Player",
+    avatar: typeof p.avatar === "string" && p.avatar ? p.avatar.slice(0, 16) : "🙂", little: p.pathId === "little", sound, linked: true,
+    raw: p }; // the whole (read-only) profile, handed to pickVoice(profile) for Elzee 1.4.2's per-player voice
+}
+
+/* ---------- this game's own store ---------- */
+function cleanCur(c) {
+  if (!c || typeof c !== "object" || !/^\d+$/.test(String(c.li)) || +c.li >= LEVELS.length) return null;
+  const li = +c.li, ri = num(c.ri);
+  if (ri >= LEVELS[li].rounds.length) return null;
+  const placed = {}; // { itemIndex: spot } — only placements that are actually right survive a reload
+  for (const [i, spot] of Object.entries(c.placed && typeof c.placed === "object" ? c.placed : {})) if (/^\d+$/.test(i) && fits(li, ri, spot, +i)) placed[i] = spot;
+  return { li, ri, placed, hints: Math.min(9, num(c.hints)) };
+}
+const Store = {
+  data: null,
+  load() {
+    let raw = null;
+    try { raw = JSON.parse(localStorage.getItem(GAME.storageKey)); } catch (e) { raw = null; }
+    const d = { version: 1, kids: {} };
+    if (raw && typeof raw === "object" && raw.kids && typeof raw.kids === "object") {
+      for (const [id, k] of Object.entries(raw.kids)) {
+        if (!k || typeof k !== "object") continue;
+        const progress = {};
+        for (const [li, v] of Object.entries(k.progress && typeof k.progress === "object" ? k.progress : {})) {
+          if (/^\d+$/.test(li) && +li < LEVELS.length && v && typeof v === "object") progress[li] = { stars: Math.min(3, num(v.stars)), clears: num(v.clears) };
+        }
+        d.kids[String(id).slice(0, 40)] = {
+          progress, day: typeof k.day === "string" ? k.day : null,
+          earnedToday: num(k.earnedToday), pending: num(k.pending), lifetime: num(k.lifetime),
+          noRead: typeof k.noRead === "boolean" ? k.noRead : null, sound: typeof k.sound === "boolean" ? k.sound : null,
+          cur: cleanCur(k.cur), track: k.track === "young" || k.track === "big" ? k.track : null,
+        };
+      }
+    }
+    this.data = d;
+  },
+  save() { try { localStorage.setItem(GAME.storageKey, JSON.stringify(this.data)); } catch (e) { /* private mode / full */ } },
+};
+let me = readMainProfile();
+function kid() {
+  const d = Store.data;
+  if (!d.kids[me.id]) d.kids[me.id] = { progress: {}, day: null, earnedToday: 0, pending: 0, lifetime: 0, noRead: null, sound: null, cur: null, track: null };
+  const k = d.kids[me.id];
+  if (k.day !== todayStr()) { k.day = todayStr(); k.earnedToday = 0; }
+  return k;
+}
+/* Track: little path (pathId "little", same rule as Silly Stories and Jelly Jars) gets the picture levels by default.
+   A grown-up can flip it with the visible 🐣/🦁 button; the choice is stored per kid in this game's own key. */
+const curTrack = () => { const k = kid(); return k.track || (me.little ? "young" : "big"); };
+const noRead = () => { const k = kid(); return k.noRead === null ? (me.little || curTrack() === "young") : k.noRead; };
+const soundOn = () => { const k = kid(); return k.sound === null ? me.sound : k.sound; };
+const isCleared = li => !!(kid().progress[li] && kid().progress[li].clears);
+const isUnlocked = li => { const L = trackList(trackOf(li)), i = L.indexOf(li); return i <= 0 || isCleared(L[i - 1]); };
+const nextIn = li => { const L = trackList(trackOf(li)), i = L.indexOf(li); return i >= 0 && i < L.length - 1 ? L[i + 1] : -1; };
+const isFinal = li => nextIn(li) < 0;
+function pickLevel(tr) { // interlude round: in-progress level of this track, else next uncleared, else lowest stars
+  const k = kid(), L = trackList(tr);
+  if (k.cur && trackOf(k.cur.li) === tr) return k.cur.li;
+  const n = L.find(i => !isCleared(i)); if (n !== undefined) return n;
+  let lo = L[0]; L.forEach(i => { if (((k.progress[i] || {}).stars || 0) < ((k.progress[lo] || {}).stars || 0)) lo = i; }); return lo;
+}
+/* Award tokens for a finished level. lifetime only ever increases (the main app pays lifetime - claimed). */
+function award(li, stars) {
+  const k = kid(), prev = k.progress[li] || { stars: 0, clears: 0 };
+  let want = 0;
+  if (!prev.clears) want += ECON.firstClear; else want += ECON.replay;
+  if (stars === 3 && prev.stars < 3) want += ECON.firstThreeStars;
+  const got = want; // paid in full: no caps (contract §6); earnedToday is a display stat only
+  k.earnedToday += got; k.pending += got; k.lifetime += got;
+  k.progress[li] = { stars: Math.max(prev.stars, stars), clears: prev.clears + 1 };
+  k.cur = null;
+  Store.save();
+  return { want, got };
+}
+
+/* ---------- sound (Web Audio, created on the first tap only) ---------- */
+const Sound = {
+  ctx: null,
+  tone(f0, f1, dur, type = "triangle", vol = 0.18, delay = 0) {
+    if (!soundOn() || !started) return;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      this.ctx = this.ctx || new AC();
+      if (this.ctx.state === "suspended" && this.ctx.resume) this.ctx.resume().catch(() => {});
+      const t = this.ctx.currentTime + delay, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(this.ctx.destination); o.start(t); o.stop(t + dur + 0.03);
+    } catch (e) { /* no audio */ }
+  },
+  pick() { this.tone(300, 720, 0.13, "sine"); },
+  good() { this.tone(660, 660, 0.12); this.tone(880, 880, 0.18, "triangle", 0.18, 0.11); },
+  boing() { this.tone(140, 560, 0.18, "sine", 0.22); this.tone(560, 220, 0.22, "sine", 0.16, 0.17); this.tone(220, 380, 0.16, "sine", 0.1, 0.38); },
+  oops() { this.tone(330, 330, 0.14, "triangle", 0.14); this.tone(294, 294, 0.2, "triangle", 0.12, 0.13); },
+  slide() { this.tone(520, 160, 0.4, "sine", 0.1); },
+  win() { [523, 659, 784, 1047, 1319].forEach((f, i) => this.tone(f, f * 1.01, 0.22, "triangle", 0.18, i * 0.11)); },
+  pop() { this.tone(900, 300, 0.1, "sine", 0.15); },
+  sprout() { this.tone(330, 990, 0.32, "sine", 0.16); this.tone(660, 1320, 0.2, "triangle", 0.12, 0.25); },
+  hop() { this.tone(260, 520, 0.09, "sine", 0.14); this.tone(260, 520, 0.09, "sine", 0.12, 0.22); },
+  plop() { this.tone(220, 90, 0.18, "sine", 0.18); },
+};
+
+/* ---------- read-aloud ----------
+   Calm, natural voice: rate 0.9, pitch 1.0, en-US preferred, novelty voices (macOS/iOS joke voices) never chosen.
+   iPad Safari rule: nothing is spoken until the first tap (the ▶️ start screen), which also unlocks speechSynthesis.
+   Anything asked for before that is queued; any failure (no API, no voices, throws) is silent and the game never waits. */
+const NOVELTY = /\b(albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|hysterical|jester|organ|pipe organ|princess|superstar|trinoids|whisper|wobble|zarvox|junior|ralph|fred|kathy|grandma|grandpa|eddy|flo|reed|rocko|sandy|shelley)\b/i;
+const PREFERRED = /\b(samantha|ava|allison|susan|nicky|joelle|zoe|evan|nathan|google us english|aria|jenny|guy|zira|alex)\b/i;
+function pickNaturalVoice(voices) {
+  const list = (Array.isArray(voices) ? voices : []).filter(v => v && typeof v.name === "string" && !NOVELTY.test(v.name));
+  const us = list.filter(v => /^en[-_]us/i.test(v.lang || "")), en = list.filter(v => /^en/i.test(v.lang || ""));
+  for (const pool of [us, en]) {
+    if (!pool.length) continue;
+    const local = pool.filter(v => v.localService !== false);
+    return local.find(v => PREFERRED.test(v.name)) || pool.find(v => PREFERRED.test(v.name)) || local[0] || pool[0];
+  }
+  return null;
+}
+/* pickVoice(profile): the ONE place a voice is chosen. Elzee 1.4.2 adds a per-player voice choice on the kid's
+   profile (key and format still TBD). When it lands, map it in profileVoicePref() below; nothing else changes.
+   A preferred voice is used only if the device has it and it is not a novelty voice; otherwise the natural default. */
+function profileVoicePref(profile) { // Elzee 1.4.2+: logicquest.v1 profiles[i].voice = the kid's chosen voice NAME (string <= 100 chars) or null
+  if (window.ElzeeVoice) return ElzeeVoice.prefFor(profile);
+  return profile && typeof profile.voice === "string" && profile.voice ? profile.voice.slice(0, 100) : null;
+}
+function pickVoice(profile, voices) {
+  const list = Array.isArray(voices) ? voices : [];
+  const pref = profileVoicePref(profile);
+  if (pref) { const v = list.find(x => x && (x.voiceURI === pref || x.name === pref) && !NOVELTY.test(x.name || "")); if (v) return v; }
+  return pickNaturalVoice(list);
+}
+let started = false;
+const Speech = {
+  RATE: 0.9, PITCH: 1.0,
+  get ok() { try { return !!(window.speechSynthesis && typeof window.speechSynthesis.speak === "function" && typeof window.SpeechSynthesisUtterance === "function"); } catch (e) { return false; } },
+  voice: null, token: 0, unlocked: false, queued: null,
+  pickVoice() { try { this.voice = pickVoice(me.raw || null, speechSynthesis.getVoices() || []); } catch (e) { this.voice = null; } },
+  utter(text) {
+    const u = new SpeechSynthesisUtterance(text);
+    if (window.ElzeeVoice) ElzeeVoice.apply(u, profileVoicePref(me.raw || null)); else { if (this.voice) u.voice = this.voice; u.lang = this.voice && this.voice.lang ? this.voice.lang : "en-US"; u.rate = this.RATE; u.pitch = this.PITCH; } // shared calm voice (kid's pick)
+    return u;
+  },
+  /* Called only from the ▶️ tap handler: a silent utterance inside the gesture unlocks speech on iOS. */
+  unlock() {
+    this.unlocked = true;
+    if (!this.ok) return;
+    try { this.pickVoice(); speechSynthesis.cancel(); const u = this.utter(" "); u.volume = 0; speechSynthesis.speak(u); } catch (e) { /* ignore */ }
+  },
+  seq(chunks, onDone) {
+    if (!this.unlocked) { this.queued = [chunks, onDone]; return; }
+    const my = ++this.token, speak = this.ok && soundOn();
+    if (speak) { try { speechSynthesis.cancel(); if (speechSynthesis.paused) speechSynthesis.resume(); } catch (e) { /* ignore */ } if (!this.voice) this.pickVoice(); }
+    let i = -1, timer = 0;
+    const next = () => {
+      clearTimeout(timer);
+      if (my !== this.token) return;
+      i++;
+      if (i >= chunks.length) { if (onDone) onDone(); return; }
+      const text = chunks[i], est = 900 + text.length * 75;
+      let advanced = false; const go = () => { if (!advanced) { advanced = true; next(); } };
+      timer = setTimeout(go, speak ? est + 2500 : Math.min(est, 3200)); // watchdog / silent pacing
+      if (!speak) return;
+      try { const u = this.utter(text); u.onend = () => setTimeout(go, 200); u.onerror = () => setTimeout(go, 200); speechSynthesis.speak(u); } catch (e) { /* timer carries on */ }
+    };
+    next();
+  },
+  say(text) { this.seq([text]); },
+  flush() { const q = this.queued; this.queued = null; if (q) this.seq(q[0], q[1]); },
+  stop() { this.token++; this.queued = null; if (this.ok && this.unlocked) try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } },
+};
+try { if (Speech.ok && "onvoiceschanged" in speechSynthesis) speechSynthesis.addEventListener("voiceschanged", () => Speech.pickVoice()); } catch (e) { /* ignore */ }
+
+/* ---------- state ---------- */
+let view = "map";
+let play = null; // { li, ri, placed:{itemIndex:spot}, hints, sel, busy, done }
+const session = { startedAt: Date.now(), solved: 0, tokens: 0, bannerShown: false, offerShown: false, finished: false };
+try { const s = JSON.parse(sessionStorage.getItem("wfg.session." + LAUNCH.sid)); if (INTERLUDE && s && s.startedAt) Object.assign(session, { startedAt: num(s.startedAt), solved: num(s.solved), tokens: num(s.tokens) }); } catch (e) { /* ignore */ }
+const saveSession = () => { try { sessionStorage.setItem("wfg.session." + LAUNCH.sid, JSON.stringify({ startedAt: session.startedAt, solved: session.solved, tokens: session.tokens })); } catch (e) { /* ignore */ } };
+const afterStart = []; // things to do (auto-read) once the ▶️ tap has happened
+function whenStarted(fn, ms = 300) { if (started) setTimeout(fn, ms); else afterStart.push(fn); }
+
+const R0 = () => LEVELS[play.li].rounds[play.ri];
+const isYoung = () => !!(play && LEVELS[play.li].young);
+const items = () => itemsOf(play.li, play.ri);
+const roundFull = () => movable(play.li, play.ri).every(i => play.placed[i]);
+const hideWords = () => noRead() || isYoung();
+const PETALS = [["#ff8fab", "#ffc2d4"], ["#ffc83d", "#ffe59a"], ["#a98bff", "#d9ccff"], ["#4dc3ff", "#b5e6ff"], ["#ff9f43", "#ffd2a3"], ["#3ccf4e", "#b6f0be"]];
+function promptSay(R) {
+  if (R.type === "seed") return "Drag a seed into a pot. Only real words grow! A seed that makes no word goes in the compost.";
+  if (R.type === "pic") return "Grow the pictures! Put each one in the pot its word ends with. No pot fits? Compost!";
+  if (R.type === "weed") return "One flower doesn't rhyme with its pot. It's a weed! Pull it out and drop it in the compost.";
+  return "Tap a picture to hear it. Then put it in the pot that rhymes!";
+}
+function promptHTML(R) {
+  if (R.type === "seed") return "Drag a <b>seed</b> into a pot. Only <b>real words</b> grow!";
+  if (R.type === "pic") return "Put each picture in the pot its word <b>ends with</b>.";
+  if (R.type === "weed") return "One flower doesn't rhyme. Pull the <b>weed</b>!";
+  return "Which pot rhymes?";
+}
+function itemSay(i) { const it = items()[i]; return it.kind === "seed" ? onsetSay(it.o) : wSay(it.w); }
+function potSay(p) {
+  const R = R0();
+  if (R.type === "rhyme") return wSay(R.pots[p]);
+  const r = R.type === "weed" ? R.beds[p].rime : R.pots[p];
+  return `The ${RIMES[r].say} pot. Like ${RIMES[r].ex}.`;
+}
+function saveCur() { if (!play || play.done) return; kid().cur = { li: play.li, ri: play.ri, placed: { ...play.placed }, hints: play.hints }; Store.save(); }
+function startLevel(li, resume) {
+  Speech.stop(); clearGlow();
+  const c = resume && kid().cur && kid().cur.li === li ? kid().cur : null;
+  play = { li, ri: c ? c.ri : 0, placed: c ? { ...c.placed } : {}, hints: c ? c.hints : 0, sel: null, busy: false, done: false };
+  view = "play"; if (started) $ov.innerHTML = ""; saveCur(); render();
+  startRound();
+}
+function startRound() {
+  const li = play.li, ri = play.ri, L = LEVELS[li];
+  const first = trackList(trackOf(li))[0] === li;
+  if (ri === 0 && !isCleared(li) && (L.twist || first) && !Object.keys(play.placed).length) whenStarted(() => { if (play && play.li === li && play.ri === ri) freeGlow(); }, 900);
+  if (L.young || noRead()) whenStarted(() => { if (play && play.li === li && play.ri === ri && !play.done) Speech.say(promptSay(R0())); });
+}
+function freeGlow() { const s = document.querySelector(".tray .card:not(.used)") || document.querySelector(".stage .compost"); if (s) s.classList.add("glow"); }
+
+/* ---------- screens ---------- */
+function topBar(back) {
+  const k = kid(), nr = noRead(), y = curTrack() === "young";
+  let home = "";
+  if (INTERLUDE || LAUNCH.elzee) home = `<button class="iconbtn" data-act="home" aria-label="Back to Elzee">🏠</button>`;
+  else if (back) home = `<button class="iconbtn" data-act="map" aria-label="Back to levels">⬅️</button>`;
+  else if (me.linked) home = `<a class="iconbtn" href="../index.html#home" aria-label="Back to Elzee">🏠</a>`;
+  return `<div class="top">${home}
+    ${back && LAUNCH.elzee && !INTERLUDE ? `<button class="iconbtn" data-act="map" aria-label="Back to levels">🗺️</button>` : ""}
+    <div class="pill" aria-label="Player"><span class="av">${esc(me.avatar)}</span>${nr ? "" : `<span class="nm">${esc(me.name)}</span>`}</div>
+    <div class="pill" aria-label="Tokens earned today ${k.earnedToday}">🪙 <b>${k.earnedToday}</b></div>
+    <div class="spacer"></div>
+    <button class="iconbtn trackbtn" data-act="toggleTrack" aria-label="${y ? "Little garden. Tap for big garden" : "Big garden. Tap for little garden"}" aria-pressed="${y}">${y ? "🐣" : "🦁"}</button>
+    <button class="iconbtn ${nr ? "on" : ""}" data-act="toggleRead" aria-label="Picture mode (no reading)" aria-pressed="${nr}">${nr ? "🖼️" : "🔤"}</button>
+    <button class="iconbtn" data-act="toggleSound" aria-label="Sound" aria-pressed="${soundOn()}">${soundOn() ? "🔊" : "🔇"}</button>
+    ${back || INTERLUDE ? "" : `<button class="iconbtn" data-act="grown" aria-label="For grown-ups">ⓘ</button>`}
+  </div>`;
+}
+function bannerHTML() {
+  if (!INTERLUDE || !session.bannerShown || session.finished) return "";
+  return `<div class="banner" aria-label="Last level, then back to the trail">${noRead() ? "🕐 ➜ 🗺️" : "Last level, then back to the trail! 🗺️"}</div>`;
+}
+function renderMap() {
+  $app.classList.toggle("young", curTrack() === "young");
+  const nr = noRead(), k = kid(), y = curTrack() === "young";
+  const TL = trackList(curTrack()), next = TL.find(i => !isCleared(i));
+  $app.innerHTML = `${topBar(false)}
+    <div class="mapwrap">
+    <div class="hero"><span class="big" aria-hidden="true">🌻</span>
+      ${nr ? `<button class="iconbtn" data-act="sayIntro" aria-label="Hear how to play">🔈</button>${y ? `<span class="big" aria-hidden="true">🐣</span>` : ""}` : `<div class="bubble"><b>Word Family Garden!</b> Drag seeds into pots. Only real words grow into flowers. A seed that makes no word goes in the compost.</div>`}
+    </div>
+    <div class="levels ${curTrack()}">${TL.map((i, n) => {
+      const L = LEVELS[i], un = isUnlocked(i), st = (k.progress[i] || {}).stars || 0;
+      return `<button class="lvl ${un ? "" : "locked"} ${i === next ? "next" : ""}" data-act="${un ? "start" : "locked"}" data-li="${i}" aria-label="Level ${n + 1}${un ? "" : ", locked"}">
+        <span class="num">${n + 1}</span>${L.twist && un ? `<span class="tw" aria-hidden="true">${TWIST[L.twist]}</span>` : ""}<span class="scene">${un ? L.scene : "🔒"}</span>
+        ${nr ? "" : `<b style="font-size:18px">${esc(L.name)}</b>`}<span class="stars">${un ? starStr(st) : ""}</span></button>`;
+    }).join("")}</div></div>`;
+}
+function wordHTML(w, onset) { return onset ? `<b>${esc(onset)}</b>${esc(w.slice(onset.length))}` : esc(w); }
+function flowerHTML(w, opts = {}) {
+  const [pa, pb] = PETALS[(opts.n || 0) % PETALS.length];
+  return `<div class="flower ${opts.cls || ""}" ${opts.item !== undefined ? `data-item="${opts.item}"` : ""} style="--pa:${pa};--pb:${pb}" ${opts.role ? `role="button" aria-label="${esc(wSay(w))}"` : ""}>
+    <div class="head">${pic(w)}</div>${hideWords() || opts.noLabel ? "" : `<div class="fw">${wordHTML(w, opts.onset)}</div>`}<div class="stem"></div></div>`;
+}
+function cardHTML(i, cls) {
+  const it = items()[i];
+  if (it.kind === "seed") return `<div class="card seed ${cls}" data-item="${i}" role="button" aria-label="Seed ${esc(it.o)}"><span class="on">${esc(it.o)}</span><span class="sdot" aria-hidden="true">🌱</span></div>`;
+  return `<div class="card ${cls}" data-item="${i}" role="button" aria-label="${esc(wSay(it.w))}"><span class="e">${pic(it.w)}</span></div>`;
+}
+function stageHTML() {
+  const R = R0(), its = items();
+  let pots = "";
+  const nPots = R.type === "weed" ? R.beds.length : R.pots.length;
+  for (let p = 0; p < nPots; p++) {
+    let fl = "";
+    if (R.type === "weed") its.forEach((it, i) => { if (it.bed === p && play.placed[i] !== "compost") fl += flowerHTML(it.w, { item: i, n: i, cls: "pull", role: 1 }); });
+    else its.forEach((it, i) => { if (play.placed[i] === "p" + p) fl += flowerHTML(it.kind === "seed" ? it.o + R.pots[p] : it.w, { item: i, n: i, onset: it.kind === "seed" ? it.o : "", role: 1 }); });
+    const r = R.type === "weed" ? R.beds[p].rime : R.pots[p];
+    const body = R.type === "rhyme" ? `<span class="anc">${pic(r)}</span>` : `<span class="lab"><span class="dash">-</span>${esc(r)}</span>`;
+    pots += `<div class="pot" data-spot="p${p}" role="button" aria-label="${R.type === "rhyme" ? "Pot " + esc(wSay(r)) : "Pot ending " + esc(r)}"><div class="blooms">${fl}</div><div class="potbody">${body}</div></div>`;
+  }
+  let compost = "";
+  if (hasCompost(play.li, play.ri)) {
+    const heap = its.map((it, i) => (play.placed[i] === "compost" ? (it.kind === "seed" ? `<span class="sd">${esc(it.o)}</span>` : `<span class="wd">${R.type === "weed" ? "🌿" : pic(it.w)}</span>`) : "")).join("");
+    compost = `<div class="compost" data-spot="compost" role="button" aria-label="Compost"><div class="heap">${heap}</div><div class="bin" aria-hidden="true">🪱</div></div>`;
+  }
+  return `<div class="bed fit">${pots}${compost}</div>`;
+}
+function renderPlay() {
+  const L = LEVELS[play.li], R = R0(), nr = hideWords();
+  $app.classList.toggle("young", !!L.young);
+  $app.innerHTML = `${topBar(true)}${bannerHTML()}
+    <div class="board">
+      <div class="park">
+        <span class="deco" style="left:4%;top:16%" aria-hidden="true">☁️</span><span class="deco" style="right:6%;top:8%;animation-delay:1s" aria-hidden="true">${L.young ? "🌈" : "☀️"}</span>
+        <span class="deco" style="left:30%;top:30%;font-size:32px;animation-delay:.4s" aria-hidden="true">🦋</span><span class="deco" style="right:22%;top:22%;font-size:30px;animation-delay:1.4s" aria-hidden="true">🐝</span>
+        <div class="prompt"><span class="kind" aria-hidden="true">${KIND[R.type]}</span>
+          ${nr ? "" : `<span class="ptxt">${promptHTML(R)}</span>`}
+          <span class="dots" aria-label="Round ${play.ri + 1} of ${L.rounds.length}">${L.rounds.map((_, i) => `<i class="${i < play.ri ? "done" : i === play.ri ? "cur" : ""}"></i>`).join("")}</span>
+          ${nr ? `<span class="spacer"></span>` : ""}<button class="iconbtn" data-act="sayPrompt" aria-label="Hear it">🔈</button></div>
+        <div class="stage">${stageHTML()}</div>
+      </div>
+      <div class="side">
+        <div class="tray">${R.type === "weed" ? `<span class="weedtip" aria-hidden="true">🧤🌿</span>` : items().map((_, i) => cardHTML(i, (play.placed[i] ? "used " : "") + (play.sel === i ? "sel" : ""))).join("")}</div>
+        <div class="tools"><button class="iconbtn" data-act="hint" aria-label="Hint">💡</button></div>
+      </div>
+    </div>`;
+  fitStage();
+}
+function render() { if (view === "play" && play) renderPlay(); else renderMap(); }
+function fitStage() {
+  const st = document.querySelector(".stage"), el = st && st.querySelector(".fit"); if (!el) return;
+  el.style.transform = ""; el.style.transformOrigin = "50% 100%";
+  const pad = 20, aw = st.clientWidth - pad, ah = st.clientHeight - pad - st.clientHeight * 0.03;
+  const s = Math.max(0.3, Math.min(1.5, aw / el.offsetWidth, ah / el.offsetHeight));
+  el.style.transform = `scale(${s.toFixed(3)})`;
+}
+
+/* ---------- placing ---------- */
+let toastT = 0;
+function toast(msg) { document.querySelectorAll(".toast").forEach(e => e.remove()); const d = document.createElement("div"); d.className = "toast"; d.textContent = msg; document.body.appendChild(d); clearTimeout(toastT); toastT = setTimeout(() => d.remove(), 2600); }
+function clearGlow() { document.querySelectorAll(".glow").forEach(e => e.classList.remove("glow")); }
+function nextItem() { return movable(play.li, play.ri).find(i => !play.placed[i]); }
+const spotEl = spot => document.querySelector(`.stage [data-spot="${spot}"]`);
+const itemEl = i => document.querySelector(`.tray .card[data-item="${i}"]`) || document.querySelector(`.stage .flower[data-item="${i}"]`);
+function why(i, spot) {
+  const R = R0(), it = items()[i];
+  if (R.type === "rhyme") return `${wSay(it.w)}, ${wSay(R.pots[+spot.slice(1)])}. Those don't rhyme. Try again!`;
+  if (R.type === "weed") { const mates = R.beds[it.bed].flowers.filter(w => w !== it.w); return `${wSay(it.w)} rhymes with ${wSay(mates[0])}. It belongs in its pot!`; }
+  if (spot === "compost") return R.type === "seed" ? "That seed can grow a real word! Find its pot." : `${wSay(it.w)} can grow in a pot! Look at the endings.`;
+  if (R.type === "seed") return "Hmm, that's not a real word. Try another pot!";
+  return `${wSay(it.w)} doesn't end like that. Try another pot!`;
+}
+function praise(i, spot) {
+  const R = R0(), it = items()[i];
+  if (spot === "compost") return R.type === "weed" ? `${wSay(it.w)} doesn't rhyme. Weed pulled!` : R.type === "seed" ? "Into the compost! No word grows from that seed." : `No pot for ${wSay(it.w)}. Into the compost!`;
+  if (R.type === "rhyme") return `${wSay(it.w)}, ${wSay(R.pots[+spot.slice(1)])}! They rhyme!`;
+  return wSay(wordIn(play.li, play.ri, i, spot)) + "!";
+}
+function tryPlace(i, spot, ghost) {
+  if (!play || play.busy || play.done || play.placed[i] || !spot) { if (ghost) ghost.remove(); return; }
+  if (R0().type === "weed" && spot !== "compost") { if (ghost) ghost.remove(); renderPlay(); return; }
+  clearGlow(); play.sel = null;
+  if (!fits(play.li, play.ri, spot, i)) { wrong(i, spot, ghost); return; }
+  if (ghost) ghost.remove();
+  play.placed[i] = spot; saveCur();
+  if (spot === "compost") Sound.plop(); else { Sound.good(); setTimeout(() => Sound.sprout(), 120); }
+  renderPlay();
+  Speech.say(praise(i, spot));
+  const s = spotEl(spot);
+  if (s && !RM()) {
+    const body = s.querySelector(".potbody,.bin"); if (body && body.animate) body.animate([{ transform: "translateY(0)" }, { transform: "translateY(-14px) scale(1.05,.95)" }, { transform: "translateY(0)" }], { duration: 420, easing: "ease-out" });
+    const f = spot !== "compost" && s.querySelector(`.flower[data-item="${i}"]`);
+    if (f) { f.classList.add("grow"); const r = f.getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top + 20, 22, 0.7, 1); }
+    else { const r = s.getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top + 30, 10, 0.5, 1); }
+  }
+  if (roundFull()) roundDone();
+}
+function wrong(i, spot, ghost) {
+  const R = R0(), el = itemEl(i), s = spotEl(spot);
+  Sound.oops(); const msg = why(i, spot); Speech.say(msg); toast(hideWords() ? "🤔" : msg);
+  if (R.type === "seed" && spot !== "compost" && s && !hideWords()) { // show the made-up word on a little sign
+    s.querySelectorAll(".sign").forEach(x => x.remove());
+    const sg = document.createElement("div"); sg.className = "sign"; sg.textContent = wordIn(play.li, play.ri, i, spot) + "?"; s.appendChild(sg);
+    setTimeout(() => sg.remove(), 1500);
+  }
+  const body = s && s.querySelector(".potbody,.bin");
+  if (body && body.animate && !RM()) body.animate([{ transform: "rotate(0)" }, { transform: "rotate(-4deg)" }, { transform: "rotate(3deg)" }, { transform: "rotate(0)" }], { duration: 450 });
+  hopBack(i, el, s, ghost);
+}
+/* A seed that doesn't grow drops into the pot, wobbles, and hops back out to the tray. No fail state. */
+function hopBack(i, el, s, ghost) {
+  let g = ghost;
+  if (!g && el) { const r = el.getBoundingClientRect(); g = ghostFor(i, r, el); g.style.transform = `translate(${r.left}px,${r.top}px)`; }
+  if (el) el.style.visibility = "hidden";
+  const done = () => { if (g) g.remove(); if (el) { el.style.visibility = ""; el.classList.remove("wob"); void el.offsetWidth; el.classList.add("wob"); } };
+  if (!g || RM() || !g.animate || !s) { done(); return; }
+  play.busy = true;
+  const cur = g.getBoundingClientRect(), t = (s.querySelector(".potbody,.bin") || s).getBoundingClientRect(), home = el ? el.getBoundingClientRect() : cur;
+  const sx = t.left + (t.width - cur.width) / 2, sy = t.top - cur.height * 0.45;
+  const top = Math.min(sy, home.top) - 120;
+  const a = g.animate([
+    { transform: `translate(${cur.left}px,${cur.top}px)` },
+    { transform: `translate(${sx}px,${sy}px) scale(1)`, offset: 0.16 },
+    { transform: `translate(${sx}px,${sy + 22}px) scale(1.1,.85)`, offset: 0.24 },
+    { transform: `translate(${sx}px,${sy + 10}px) rotate(-12deg)`, offset: 0.32 },
+    { transform: `translate(${sx}px,${sy + 10}px) rotate(10deg)`, offset: 0.4 },
+    { transform: `translate(${sx}px,${sy + 18}px) rotate(0) scale(1.08,.9)`, offset: 0.46 },
+    { transform: `translate(${(sx * 2 + home.left) / 3}px,${top}px) rotate(-14deg)`, offset: 0.64 },
+    { transform: `translate(${(sx + home.left * 2) / 3}px,${home.top + 6}px) rotate(6deg) scale(1.08,.9)`, offset: 0.82 },
+    { transform: `translate(${(sx + home.left * 5) / 6}px,${home.top - 40}px) rotate(-4deg)`, offset: 0.91 },
+    { transform: `translate(${home.left}px,${home.top}px) rotate(0)` }], { duration: 1250, easing: "ease-in-out" });
+  setTimeout(() => Sound.hop(), 650);
+  let fin = false; const end = () => { if (fin) return; fin = true; play && (play.busy = false); done(); };
+  a.onfinish = end; setTimeout(end, 1550);
+}
+function roundDone() {
+  play.busy = true;
+  const li = play.li, ri = play.ri, last = ri >= LEVELS[li].rounds.length - 1;
+  setTimeout(() => { if (!RM()) document.querySelectorAll(".stage .flower").forEach((f, n) => { f.style.animationDelay = n * 0.06 + "s"; f.classList.remove("grow"); f.classList.add("dance"); }); Sound.boing(); }, 700);
+  setTimeout(() => {
+    if (!play || play.li !== li || play.ri !== ri || play.done) return;
+    if (last) { winLevel(); return; }
+    play.ri++; play.placed = {}; play.busy = false; saveCur(); renderPlay(); startRound();
+  }, last ? 1900 : 2300);
+}
+function hint() {
+  if (!play || play.busy || play.done) return;
+  const i = nextItem(); if (i === undefined) return;
+  play.hints++; saveCur(); clearGlow();
+  const el = itemEl(i), s = spotEl(targetOf(play.li, play.ri, i));
+  if (el) el.classList.add("glow"); if (s) s.classList.add("glow");
+  Speech.say(R0().type === "rhyme" ? `${wSay(items()[i].w)}. Which pot rhymes?` : promptSay(R0()));
+}
+
+/* ---------- drag / tap ---------- */
+let drag = null;
+function ghostFor(i, r, src) {
+  const it = items()[i], g = document.createElement("div");
+  if (it.kind === "flower") { g.className = "drag fl"; g.innerHTML = src ? src.innerHTML : flowerHTML(it.w); g.style.setProperty("--bloom", getComputedStyle(src || document.body).getPropertyValue("--bloom")); g.style.setProperty("--pa", src ? src.style.getPropertyValue("--pa") : ""); g.style.setProperty("--pb", src ? src.style.getPropertyValue("--pb") : ""); g.classList.add("flower"); }
+  else if (it.kind === "seed") { g.className = "drag seed"; g.innerHTML = `<span class="on">${esc(it.o)}</span>`; }
+  else { g.className = "drag"; g.innerHTML = `<span class="e">${pic(it.w)}</span>`; }
+  g.style.width = r.width + "px"; g.style.height = r.height + "px"; document.body.appendChild(g); return g;
+}
+function targetAt(x, y) {
+  const el = document.elementFromPoint(x, y); const t = (el && el.closest && el.closest(".stage .pot, .stage .compost")) || null;
+  if (t && play && R0().type === "weed" && t.dataset.spot !== "compost") return null;
+  return t;
+}
+document.addEventListener("pointerdown", e => {
+  if (view !== "play" || !play || play.done || play.busy || $ov.firstChild) return;
+  const t = e.target.closest && (e.target.closest(".tray .card") || e.target.closest(".stage .flower.pull"));
+  if (!t || t.classList.contains("used")) return;
+  e.preventDefault();
+  const r = t.getBoundingClientRect(), i = +t.dataset.item;
+  drag = { i, el: t, x0: e.clientX, y0: e.clientY, ox: e.clientX - r.left, oy: e.clientY - r.top, r, moved: false, ghost: null, pid: e.pointerId, lx: e.clientX, vx: 0, hot: null };
+  try { t.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+  Speech.say(itemSay(i)); // every seed / picture / flower is spoken on touch
+});
+document.addEventListener("pointermove", e => {
+  if (!drag || e.pointerId !== drag.pid) return;
+  const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+  if (!drag.moved && Math.hypot(dx, dy) > 10) {
+    drag.moved = true; clearGlow();
+    drag.ghost = ghostFor(drag.i, drag.r, drag.el); drag.el.style.visibility = "hidden"; Sound.pick();
+  }
+  if (!drag.moved) return;
+  drag.vx = drag.vx * 0.7 + (e.clientX - drag.lx) * 0.3; drag.lx = e.clientX;
+  const tilt = RM() ? 0 : Math.max(-18, Math.min(18, drag.vx * 1.5));
+  drag.ghost.style.transform = `translate(${e.clientX - drag.ox}px,${e.clientY - drag.oy}px) rotate(${tilt}deg) scale(1.08)`;
+  const b = targetAt(e.clientX, e.clientY);
+  if (b !== drag.hot) { if (drag.hot) drag.hot.classList.remove("hot"); if (b) b.classList.add("hot"); drag.hot = b; }
+});
+function endDrag(e, cancel) {
+  if (!drag || e.pointerId !== drag.pid) return;
+  const d = drag; drag = null;
+  if (!d.moved) { if (!cancel) tapItem(d.i); return; }
+  if (d.hot) d.hot.classList.remove("hot");
+  const b = cancel ? null : targetAt(e.clientX, e.clientY);
+  if (b) { tryPlace(d.i, b.dataset.spot, d.ghost); return; }
+  springHome(d);
+}
+function springHome(d) {
+  const g = d.ghost, el = d.el;
+  const cur = g.getBoundingClientRect(), home = el.getBoundingClientRect();
+  const done = () => { g.remove(); el.style.visibility = ""; };
+  if (RM() || !g.animate) { done(); return; }
+  const a = g.animate([{ transform: `translate(${cur.left}px,${cur.top}px) scale(1.08)` }, { transform: `translate(${home.left}px,${home.top}px) scale(1.1,.9)`, offset: 0.8 }, { transform: `translate(${home.left}px,${home.top}px) scale(1)` }], { duration: 380, easing: "ease-out" });
+  a.onfinish = done; setTimeout(() => { if (g.isConnected) done(); }, 700);
+}
+document.addEventListener("pointerup", e => endDrag(e, false));
+document.addEventListener("pointercancel", e => endDrag(e, true));
+document.addEventListener("contextmenu", e => { if (e.target.closest && e.target.closest(".card,.flower")) e.preventDefault(); });
+function tapItem(i) {
+  Sound.pick();
+  play.sel = play.sel === i ? null : i;
+  document.querySelectorAll(".tray .card, .stage .flower.pull").forEach(el => el.classList.toggle("sel", +el.dataset.item === play.sel));
+}
+
+/* ---------- clicks ---------- */
+document.addEventListener("click", e => {
+  const spot = e.target.closest && e.target.closest(".stage .pot, .stage .compost");
+  const fl = e.target.closest && e.target.closest(".stage .flower");
+  if (spot && view === "play" && play && !play.done && !play.busy && !$ov.firstChild && !(fl && fl.classList.contains("pull"))) {
+    if (play.sel !== null && play.sel !== undefined) { tryPlace(play.sel, spot.dataset.spot, null); return; }
+    if (fl) { Speech.say(wSay(fl.querySelector(".fw") ? fl.querySelector(".fw").textContent : items()[+fl.dataset.item].w)); return; }
+    Speech.say(spot.dataset.spot === "compost" ? (R0().type === "weed" ? "The compost. Drop the weed in here." : "The compost. Things that grow no word go here.") : potSay(+spot.dataset.spot.slice(1)));
+    return;
+  }
+  const b = e.target.closest && e.target.closest("[data-act]"); if (!b) return;
+  const act = b.dataset.act;
+  if (act === "begin") begin();
+  else if (act === "start") { pushNav(); startLevel(+b.dataset.li, true); }
+  else if (act === "locked") { Sound.oops(); if (b.animate) b.animate([{ transform: "rotate(0)" }, { transform: "rotate(-4deg)" }, { transform: "rotate(4deg)" }, { transform: "rotate(0)" }], { duration: 300 }); }
+  else if (act === "map") { try { if (history.state && history.state.wfg === "play") history.replaceState({ wfg: "map" }, ""); } catch (err) { /* ignore */ } toMap(); }
+  else if (act === "home") exitGame(session.finished ? "done" : "quit");
+  else if (act === "back") exitGame(session.solved ? "done" : "quit");
+  else if (act === "toggleRead") { const k = kid(); k.noRead = !noRead(); Store.save(); render(); }
+  else if (act === "toggleSound") { const k = kid(); k.sound = !soundOn(); Store.save(); if (!k.sound) Speech.stop(); render(); }
+  else if (act === "sayPrompt") Speech.say(promptSay(R0()));
+  else if (act === "sayIntro") Speech.say(curTrack() === "young" ? "Word Family Garden! Tap a picture to hear it. Then put it in the pot that rhymes." : "Word Family Garden! Drag seeds into pots. Only real words grow into flowers. A seed that makes no word goes in the compost.");
+  else if (act === "hint") hint();
+  else if (act === "next") { const n = nextIn(play.li); $ov.innerHTML = ""; if (n >= 0) startLevel(n, true); else toMap(); }
+  else if (act === "toggleTrack") {
+    const k = kid(); k.track = curTrack() === "young" ? "big" : "young"; Store.save(); Sound.pick();
+    Speech.say(k.track === "young" ? "Little garden" : "Big garden");
+    if (view === "play") { if (play && !play.done) saveCur(); if (INTERLUDE) startLevel(pickLevel(k.track), true); else { $ov.innerHTML = ""; view = "map"; play = null; render(); } }
+    else render();
+  }
+  else if (act === "replay") { $ov.innerHTML = ""; startLevel(play.li, false); }
+  else if (act === "keep") { $ov.innerHTML = ""; }
+  else if (act === "grown") showGrown();
+  else if (act === "closeOv") { $ov.innerHTML = ""; }
+});
+
+/* ---------- the ▶️ start tap (unlocks speech + audio on iPad) ---------- */
+function startScreen() {
+  const nr = noRead() || curTrack() === "young", [b1, b2] = BUDDIES[curTrack()];
+  $ov.innerHTML = `<div class="ov startov"><div class="panel" style="background:transparent;box-shadow:none" role="dialog" aria-label="Word Family Garden. Tap to start">
+    ${nr ? "" : `<div class="title">Word Family Garden</div>`}
+    <div class="minisaw" aria-hidden="true"><span>${b1}</span><span style="animation-delay:.5s">🌻</span><span style="animation-delay:.25s">🪴</span><span style="animation-delay:.7s">${b2}</span></div>
+    <button class="startbtn" data-act="begin" aria-label="Tap to start">▶️</button></div></div>`;
+}
+function begin() {
+  if (started) { $ov.innerHTML = ""; return; }
+  started = true;
+  Speech.unlock(); // inside the tap gesture
+  $ov.innerHTML = ""; Sound.pick();
+  if (view === "play") fitStage();
+  const q = afterStart.splice(0); q.forEach(fn => setTimeout(fn, 300));
+  Speech.flush();
+}
+
+/* ---------- navigation (back button) ---------- */
+function pushNav() { if (!INTERLUDE) try { history.pushState({ wfg: "play" }, ""); } catch (e) { /* ignore */ } }
+function toMap() { Speech.stop(); clearGlow(); $ov.innerHTML = ""; if (play && !play.done) saveCur(); view = "map"; play = null; render(); }
+window.addEventListener("popstate", () => {
+  if (INTERLUDE) { exitGame(session.solved ? "done" : "quit"); return; }
+  if (view === "play") toMap();
+});
+function exitGame(status) {
+  Speech.stop();
+  if (LAUNCH.elzee) {
+    const now = Date.now();
+    const rec = { v: 1, gameId: GAME.id, sid: LAUNCH.sid, step: LAUNCH.step, profileId: me.id, status: status === "done" ? "done" : "quit",
+      rounds: INTERLUDE ? (session.finished ? 1 : 0) : session.solved, solved: session.solved, startedAt: session.startedAt, endedAt: now,
+      durationMs: Math.max(0, now - session.startedAt), tokensEarned: session.tokens };
+    try { localStorage.setItem(GAME.resultKey, JSON.stringify(rec)); } catch (e) { /* ignore */ }
+    try { sessionStorage.removeItem("wfg.session." + LAUNCH.sid); } catch (e) { /* ignore */ }
+  }
+  window.__wfgExit = LAUNCH.ret; // for tests
+  if (!window.__wfgNoNav) location.replace(LAUNCH.ret);
+}
+
+/* ---------- winning ---------- */
+function winLevel() {
+  if (!play || play.done) return;
+  play.done = true; clearGlow();
+  const li = play.li, stars = Math.max(1, 3 - play.hints), final = isFinal(li);
+  const res = award(li, stars);
+  session.solved++; session.tokens += res.got; saveSession();
+  if (INTERLUDE) session.finished = true;
+  Sound.win();
+  showWin(li, stars, res, final);
+}
+/* Everything the level grew: [{w, onset}] (seed words, pictures, and the flowers left after weeding). */
+function grownOf(li) {
+  const out = [];
+  LEVELS[li].rounds.forEach((R, ri) => itemsOf(li, ri).forEach((it, i) => {
+    const t = targetOf(li, ri, i);
+    if (R.type === "weed") { if (t === null) out.push({ w: it.w }); return; }
+    if (t && t !== "compost") out.push({ w: wordIn(li, ri, i, t), onset: it.kind === "seed" ? it.o : "" });
+  }));
+  return out;
+}
+function showWin(li, stars, res, final) {
+  const L = LEVELS[li], nr = noRead() || !!L.young, [b1, b2] = BUDDIES[trackOf(li)];
+  const grown = grownOf(li), shown = grown.slice(0, 9);
+  const parade = final ? `<div class="parade" aria-hidden="true">${trackList(trackOf(li)).map((i, n) => `<span style="animation-delay:${n * 0.12}s">${LEVELS[i].scene}</span>`).join("")}<span>🏆</span></div>` : "";
+  const buttons = INTERLUDE
+    ? `<button class="btn" data-act="back" aria-label="Back to my adventure"><span class="ico">▶️</span>${nr ? "" : "Back to my adventure"}</button>`
+    : `<button class="btn ghost" data-act="map" aria-label="All levels"><span class="ico">🗺️</span></button>
+       <button class="btn ghost" data-act="replay" aria-label="Play again"><span class="ico">🔁</span></button>
+       ${final ? "" : `<button class="btn" data-act="next" aria-label="Next level"><span class="ico">▶️</span>${nr ? "" : "Next"}</button>`}`;
+  $ov.innerHTML = `<div class="ov"><div class="panel win ${final ? "final" : ""}" role="dialog" aria-label="Level complete">
+    <h2>${final ? "🏆" : "🎉"} ${nr ? "" : final ? "Garden champion!" : esc(L.name) + "!"}</h2>
+    <div class="winscene" aria-hidden="true"><span class="bud" style="left:4%;top:12%">${b1}</span><span class="bud" style="right:4%;top:18%;animation-delay:.45s">${b2}</span>
+      ${shown.map((g, n) => flowerHTML(g.w, { n, cls: "dance", noLabel: true })).join("")}</div>
+    ${nr ? "" : `<div class="grownlist">${grown.map(g => `<span>${wordHTML(g.w, g.onset)}</span>`).join("")}</div>`}
+    ${parade}
+    <div class="row" style="align-items:center"><span class="bigstars">${[0, 1, 2].map(i => `<span style="animation-delay:${0.3 + i * 0.2}s" class="${i < stars ? "" : "nostar"}">⭐</span>`).join("")}</span>
+      ${res.got ? `<span class="coins">+${res.got} 🪙</span>` : ""}</div>
+    <div class="row">${buttons}</div></div></div>`;
+  $ov.querySelectorAll(".winscene .flower").forEach((f, n) => { f.style.animationDelay = n * 0.1 + "s"; f.style.animationIterationCount = "infinite"; });
+  const pill = document.querySelector('.top .pill[aria-label^="Tokens"]'); if (pill) { pill.setAttribute("aria-label", "Tokens earned today " + kid().earnedToday); const b = pill.querySelector("b"); if (b) b.textContent = kid().earnedToday; }
+  if (!RM()) { FX.burst(innerWidth / 2, innerHeight * 0.35, final ? 120 : 80, 1.2, 1); if (final) for (let i = 1; i <= 6; i++) setTimeout(() => { if (!$ov.querySelector(".final")) return; FX.burst(innerWidth * (0.15 + 0.7 * ((i * 37) % 10) / 10), innerHeight * (0.15 + 0.1 * (i % 3)), 60, 1, 0); Sound.pop(); }, 500 + i * 450); }
+  const lines = [final ? (L.young ? "Hooray! You grew the whole little garden!" : "Hooray! You are a garden champion!") : (L.young ? "Hooray! You did it!" : "Hooray! Your garden grew!")];
+  if (!L.young && grown.length) lines.push("You grew " + listSay(grown.map(g => wSay(g.w))) + ".");
+  if (res.got) lines.push(`You earned ${res.got} tokens!`);
+  setTimeout(() => { if ($ov.querySelector(".win")) Speech.seq(lines); }, 400);
+}
+function showGrown() {
+  const k = kid();
+  $ov.innerHTML = `<div class="ov"><div class="panel grown" role="dialog" aria-label="For grown-ups"><h2>ⓘ For grown-ups</h2>
+    <p><b>Word Family Garden</b> practices word families (phonics): a starting sound plus an ending makes a word (c + at = cat). Only real words grow; every seed has exactly one pot, and seeds that make no word go in the compost. Twists: pull the weed that doesn't rhyme, and grow a picture in the pot its word ends with. Wrong tries just hop back out.</p>
+    <p><b>Tokens:</b> first time a level is finished +${ECON.firstClear}, first time with no hints +${ECON.firstThreeStars}, replays ${ECON.replay}. No daily limits. No purchases, no ads, no timer.</p>
+    <p>Today: ${k.earnedToday} · Waiting to go into the Elzee jar: <b>${k.pending}</b> · All-time: ${k.lifetime}</p>
+    <p>🐣 little garden: rhyming by ear with pictures, everything read aloud. 🖼️ hides the words around the game. 🔈 uses the device's own voice.</p>
+    <div class="row"><button class="btn" data-act="closeOv" aria-label="Close"><span class="ico">👍</span></button></div></div></div>`;
+}
+
+/* ---------- confetti ---------- */
+const FX = {
+  cv: document.getElementById("fx"), ctx: null, parts: [], on: false,
+  size() { const d = window.devicePixelRatio || 1; this.cv.width = innerWidth * d; this.cv.height = innerHeight * d; this.ctx = this.cv.getContext("2d"); if (this.ctx) this.ctx.setTransform(d, 0, 0, d, 0, 0); },
+  burst(x, y, n = 40, spread = 1, up = 1) {
+    if (RM()) return;
+    const cols = ["#7c4dff", "#3ccf4e", "#ffc83d", "#ff6b3d", "#ff8fab", "#4dc3ff", "#ff5d73"];
+    for (let i = 0; i < n; i++) { // decorative only; never affects play or rewards
+      const a = up ? -Math.PI / 2 + (Math.random() - 0.5) * 1.6 * spread : Math.random() * Math.PI * 2, v = 380 + Math.random() * 520;
+      this.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: Math.random() * 6, vr: (Math.random() - 0.5) * 14, w: 8 + Math.random() * 7, h: 10 + Math.random() * 8, c: cols[i % cols.length], life: 2.2 + Math.random(), round: i % 4 === 0 });
+    }
+    if (!this.on) { this.on = true; this.size(); if (!this.ctx) { this.on = false; this.parts = []; return; } this.t = performance.now(); requestAnimationFrame(t => this.tick(t)); }
+  },
+  tick(t) {
+    const dt = Math.min(0.033, (t - this.t) / 1000); this.t = t;
+    const g = this.ctx; g.clearRect(0, 0, innerWidth, innerHeight);
+    this.parts = this.parts.filter(p => (p.life -= dt) > 0 && p.y < innerHeight + 40);
+    for (const p of this.parts) {
+      p.vy += 900 * dt; p.vx *= 0.985; p.vy *= 0.985; p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+      g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.c; g.globalAlpha = Math.min(1, p.life);
+      if (p.round) { g.beginPath(); g.arc(0, 0, p.w / 2, 0, 7); g.fill(); } else g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.r * 2)) + 2);
+      g.restore();
+    }
+    if (this.parts.length) requestAnimationFrame(tt => this.tick(tt)); else { this.on = false; g.clearRect(0, 0, innerWidth, innerHeight); }
+  },
+};
+
+/* ---------- soft time budget (interlude §4.3) ---------- */
+function tickBudget() {
+  if (!INTERLUDE || session.finished || !started) return;
+  const m = (Date.now() - session.startedAt) / 60000;
+  if (m >= LAUNCH.min && !session.bannerShown) { session.bannerShown = true; if (view === "play" && !drag && !(play && play.busy)) renderPlay(); }
+  if (m >= LAUNCH.min + 3 && !session.offerShown && !$ov.firstChild) {
+    session.offerShown = true; const nr = noRead() || isYoung();
+    $ov.innerHTML = `<div class="ov"><div class="panel" role="dialog" aria-label="Back to the trail?"><h2>🗺️ ${nr ? "" : "Time for the trail?"}</h2>
+      <div class="row"><button class="btn ghost" data-act="keep" aria-label="Keep playing"><span class="ico">🌻</span></button>
+      <button class="btn" data-act="back" aria-label="Back to my adventure"><span class="ico">▶️</span>${nr ? "" : "Back to my adventure"}</button></div></div></div>`;
+  }
+}
+setInterval(tickBudget, 5000);
+
+/* ---------- boot ---------- */
+Store.load();
+window.addEventListener("pagehide", () => { if (play && !play.done) saveCur(); });
+window.addEventListener("storage", ev => { if (ev.key === GAME.mainKey) { me = readMainProfile(); if (!(play && play.busy)) render(); } });
+window.addEventListener("resize", () => { if (FX.on) FX.size(); if (view === "play" && play && !drag && !play.busy) renderPlay(); });
+(function boot() {
+  const k = kid(); Store.save();
+  if (INTERLUDE) {
+    try { history.replaceState({ wfg: "base" }, ""); history.pushState({ wfg: "game" }, ""); } catch (e) { /* ignore */ }
+    startLevel(pickLevel(curTrack()), true);
+  } else if (k.cur) { pushNav(); startLevel(k.cur.li, true); }
+  else render();
+  startScreen(); // every boot (interlude and resume too): one big ▶️ tap, which unlocks speech on iPad
+})();
+
+/* Read-only hooks for automated tests (cannot change game state). */
+window.WordFamilyGarden = Object.freeze({
+  levels: LEVELS, words: WORDS, rimes: RIMES, fits, spotsOf, itemsOf, targetOf, movable, wordIn, pickNaturalVoice, pickVoice,
+  track: () => curTrack(),
+  state: () => JSON.parse(JSON.stringify({ view, play, session, kid: kid(), launch: LAUNCH, started, unlocked: Speech.unlocked, voice: Speech.voice ? Speech.voice.name : null })),
+});
+</script>
+</body>
+</html>

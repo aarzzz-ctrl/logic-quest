@@ -127,6 +127,10 @@ h1,h2,h3{margin:0}
 @media (max-width:600px){.top{gap:6px}.top .pill[aria-label=Player],[data-act=grown]{display:none!important}.pill{padding:6px 10px}#app{padding-left:calc(env(safe-area-inset-left) + 10px);padding-right:calc(env(safe-area-inset-right) + 10px)}.story{padding:10px}.sline{gap:6px}.tray{gap:10px}.side{flex-direction:row;align-items:center}.side .tray{flex:1;min-height:0;padding-top:8px;gap:8px}.tools{margin-top:0}.sline{padding:0 4px}.lines{gap:2px}.stitle .sh{font-size:38px}.tile{width:78px;height:78px}.tile .e{font-size:40px}.tile .w{font-size:14px}.drag{width:78px;height:78px}.blank{min-width:80px;height:66px}.blank .e{font-size:38px}.sline .pic{display:none}.levels{grid-template-columns:repeat(2,1fr)}}
 @media (max-height:900px){.recap .txt{font-size:17px}.recap .pic{font-size:22px}.parade{font-size:40px}.panel{gap:6px;padding:14px 20px}.bigstars{font-size:34px}}
 @media (max-height:700px){.tile{width:92px;height:92px}.tile .e{font-size:46px}.tray{min-height:110px;padding-top:8px}.blank{height:72px}}
+.startov{background:linear-gradient(#bfe6ff,#eef9ff 65%,#8fdc7a 65%)}
+.startbtn{border:none;border-radius:50%;width:200px;height:200px;font-size:96px;background:var(--good);color:#fff;box-shadow:0 10px 0 var(--good-d);animation:pulse 1.6s ease-in-out infinite}
+.sttitle{font-size:44px;font-weight:700;color:var(--brand-d);text-shadow:0 3px 0 #fff}
+.stbuddies{font-size:70px;display:flex;gap:40px;justify-content:center}.stbuddies span{animation:hop 1s ease-in-out infinite}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -497,7 +501,7 @@ function award(si, stars) {
 const Sound = {
   ctx: null,
   tone(f0, f1, dur, type = "triangle", vol = 0.18, delay = 0) {
-    if (!soundOn()) return;
+    if (!soundOn() || !started) return;
     try {
       const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
       this.ctx = this.ctx || new AC();
@@ -514,19 +518,37 @@ const Sound = {
   win() { [523, 659, 784, 1047, 1319].forEach((f, i) => this.tone(f, f * 1.01, 0.22, "triangle", 0.18, i * 0.11)); },
   pop() { this.tone(900, 300, 0.1, "sine", 0.15); },
 };
+/* Calm, natural voice (same rule as Seesaw Words): rate 0.9, pitch 1.0, en-US preferred, novelty voices never chosen. */
+const NOVELTY = /\b(albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|hysterical|jester|organ|pipe organ|princess|superstar|trinoids|whisper|wobble|zarvox|junior|ralph|fred|kathy|grandma|grandpa|eddy|flo|reed|rocko|sandy|shelley)\b/i;
+const PREFERRED = /\b(samantha|ava|allison|susan|nicky|joelle|zoe|evan|nathan|google us english|aria|jenny|guy|zira|alex)\b/i;
+function pickNaturalVoice(voices) {
+  const list = (Array.isArray(voices) ? voices : []).filter(v => v && typeof v.name === "string" && !NOVELTY.test(v.name));
+  const us = list.filter(v => /^en[-_]us/i.test(v.lang || "")), en = list.filter(v => /^en/i.test(v.lang || ""));
+  for (const pool of [us, en]) {
+    if (!pool.length) continue;
+    const local = pool.filter(v => v.localService !== false);
+    return local.find(v => PREFERRED.test(v.name)) || pool.find(v => PREFERRED.test(v.name)) || local[0] || pool[0];
+  }
+  return null;
+}
+/* iPad Safari rule (same as Seesaw Words): nothing is spoken until the first tap on the ▶️ start screen, which unlocks
+   speechSynthesis inside the gesture. Anything asked for earlier (the young auto-read) is queued and played right after. */
+let started = false;
 const Speech = {
+  unlocked: false, queued: null,
+  unlock() {
+    this.unlocked = true;
+    if (!this.ok) return;
+    try { this.pickVoice(); speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(" "); if (window.ElzeeVoice) ElzeeVoice.apply(u); else { if (this.voice) u.voice = this.voice; u.lang = "en-US"; u.rate = 0.9; u.pitch = 1.0; } u.volume = 0; speechSynthesis.speak(u); } catch (e) { /* ignore */ }
+  },
+  flush() { const q = this.queued; this.queued = null; if (q) this.seq(q[0], q[1], q[2]); },
   get ok() { try { return !!(window.speechSynthesis && typeof window.speechSynthesis.speak === "function" && typeof window.SpeechSynthesisUtterance === "function"); } catch (e) { return false; } },
   voice: null, token: 0,
-  pickVoice() {
-    try {
-      const vs = (speechSynthesis.getVoices() || []).filter(v => /^en/i.test(v.lang));
-      const local = vs.filter(v => v.localService !== false);
-      this.voice = local.find(v => /samantha|karen|female|zira|aria/i.test(v.name)) || local[0] || null;
-    } catch (e) { this.voice = null; }
-  },
+  pickVoice() { try { this.voice = pickNaturalVoice(speechSynthesis.getVoices() || []); } catch (e) { this.voice = null; } },
   /* Speak a list of chunks in order; onChunk(i) fires as each starts, onDone at the end.
      If speech is off, missing, or stalls, a timer walks through the chunks anyway, so nothing ever waits forever. */
   seq(chunks, onChunk, onDone) {
+    if (!this.unlocked) { this.queued = [chunks, onChunk, onDone]; return; }
     const my = ++this.token, speak = this.ok && soundOn();
     if (speak) { try { speechSynthesis.cancel(); if (speechSynthesis.paused) speechSynthesis.resume(); } catch (e) { /* ignore */ } if (!this.voice) this.pickVoice(); }
     let i = -1, timer = 0;
@@ -542,7 +564,7 @@ const Speech = {
       if (!speak) return;
       try {
         const u = new SpeechSynthesisUtterance(text);
-        if (window.ElzeeVoice) ElzeeVoice.apply(u); else { if (this.voice) u.voice = this.voice; u.lang = "en-US"; u.rate = 0.9; u.pitch = 1; } // 1.4.2: shared calm voice
+        if (window.ElzeeVoice) ElzeeVoice.apply(u); else { if (this.voice) u.voice = this.voice; u.lang = this.voice && this.voice.lang ? this.voice.lang : "en-US"; u.rate = 0.9; u.pitch = 1.0; } // shared calm voice (kid's pick)
         u.onend = () => setTimeout(go, 250); u.onerror = () => setTimeout(go, 250);
         speechSynthesis.speak(u);
       } catch (e) { /* timer carries on */ }
@@ -550,7 +572,7 @@ const Speech = {
     next();
   },
   say(text) { this.seq([text]); },
-  stop() { this.token++; if (this.ok) try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } },
+  stop() { this.token++; this.queued = null; if (this.ok && this.unlocked) try { speechSynthesis.cancel(); } catch (e) { /* ignore */ } },
 };
 try { if (Speech.ok && "onvoiceschanged" in speechSynthesis) speechSynthesis.addEventListener("voiceschanged", () => Speech.pickVoice()); } catch (e) { /* ignore */ }
 
@@ -714,6 +736,7 @@ function hint() {
   Speech.say(sentence(play.si, li));
 }
 function demoHand() {
+  if (!started) { setTimeout(demoHand, 500); return; }
   if (!play || view !== "play" || Object.keys(play.placed).length) return;
   const li = firstEmpty(), b = document.querySelector(`.blank[data-line="${li}"]`), t = document.querySelector(`.tile[data-tile="${STORIES[play.si].lines[li].a}"]`);
   if (!b || !t) return;
@@ -817,6 +840,7 @@ document.addEventListener("click", e => {
   else if (act === "sayLine") { const li = +b.dataset.l; const L = STORIES[play.si].lines[li]; Speech.say(sentence(play.si, li, L.a && play.placed[li] ? tileSay(tileOf(play.si, play.placed[li])).replace(/^a bat, .*/, "bat") : null)); }
   else if (act === "sayAll") { if (STORIES[play.si].young) readLines(visibleUpTo(), 0, []); else readStory(document.querySelectorAll(".lines .sline"), false); }
   else if (act === "sayIntro") Speech.say(curTrack() === "young" ? "Silly Stories! Listen. Then put the right picture in the story." : "Silly Stories! Listen to the story. Drag the picture that makes sense into each blank. Tap a picture to hear it.");
+  else if (act === "begin") begin();
   else if (act === "hint") hint();
   else if (act === "next") { const n = nextIn(play.si); $ov.innerHTML = ""; if (n >= 0) startStory(n, true); else toMap(); }
   else if (act === "toggleTrack") {
@@ -940,7 +964,7 @@ const FX = {
 
 /* ---------- soft time budget (interlude §4.3) ---------- */
 function tickBudget() {
-  if (!INTERLUDE || session.finished) return;
+  if (!INTERLUDE || session.finished || !started) return;
   const m = (Date.now() - session.startedAt) / 60000;
   if (m >= LAUNCH.min && !session.bannerShown) { session.bannerShown = true; if (view === "play") render(); }
   if (m >= LAUNCH.min + 3 && !session.offerShown && !$ov.firstChild) {
@@ -964,13 +988,31 @@ window.addEventListener("resize", () => { if (FX.on) FX.size(); if (view === "pl
     startStory(pickStory(curTrack()), true);
   } else if (k.cur) { pushNav(); startStory(k.cur.si, true); }
   else render();
+  startScreen(); // every boot (interlude and resume too): one big ▶️ tap, which unlocks speech on iPad
 })();
+function startScreen() {
+  const nr = noRead();
+  $ov.innerHTML = `<div class="ov startov"><div class="panel" style="background:transparent;box-shadow:none" role="dialog" aria-label="Silly Stories. Tap to start">
+    ${nr ? "" : `<div class="sttitle">Silly Stories</div>`}
+    <div class="stbuddies" aria-hidden="true"><span>📖</span><span style="animation-delay:.3s">${curTrack() === "young" ? "🐣" : "🦁"}</span></div>
+    <button class="startbtn" data-act="begin" aria-label="Tap to start">▶️</button></div></div>`;
+}
+function begin() {
+  if (started) { $ov.innerHTML = ""; return; }
+  started = true;
+  Speech.unlock(); // inside the tap gesture
+  $ov.innerHTML = ""; Sound.pick();
+  if (view === "play" && play) fitStory();
+  Speech.flush();
+}
 
 /* Read-only hooks for automated tests (cannot change game state). */
 window.SillyStories = Object.freeze({
   stories: STORIES,
+  pickNaturalVoice,
+  voice: () => (Speech.voice ? Speech.voice.name : null),
   track: () => curTrack(),
-  state: () => JSON.parse(JSON.stringify({ view, play, session, kid: kid(), launch: LAUNCH })),
+  state: () => JSON.parse(JSON.stringify({ view, play, session, kid: kid(), launch: LAUNCH, started, unlocked: Speech.unlocked })),
 });
 </script>
 </body>
