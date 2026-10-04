@@ -15,7 +15,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="app-version" content="1.3.6-preview">
+<meta name="app-version" content="1.4.0-preview">
 <style>
 /* Fredoka (SIL Open Font License, see OFL-Fredoka.txt), self-hosted so the app never waits on a third-party server */
 @font-face{font-family:"Fredoka";font-style:normal;font-weight:300 700;font-display:swap;src:url("fredoka-latin.woff2") format("woff2")}
@@ -235,8 +235,9 @@ h1,h2,h3{margin:0;font-weight:700}
 .confetti{position:fixed;top:-20px;width:12px;height:18px;z-index:70;pointer-events:none;border-radius:3px;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
 /* ---------- preview-only ---------- */
-.preview-tag{position:fixed;left:calc(env(safe-area-inset-left) + 6px);bottom:calc(env(safe-area-inset-bottom) + 6px);z-index:80;pointer-events:none;
-  background:#ff5d8f;color:#fff;font-size:13px;font-weight:700;padding:3px 10px;border-radius:10px;opacity:.9}
+.preview-tag{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 2px);z-index:80;pointer-events:none;
+  background:#ff5d8f;color:#fff;font-size:12px;font-weight:700;padding:2px 10px;border-radius:0 0 10px 10px;opacity:.9} /* 1.4.0: top center, clear of ↶ undo and the bottom bar */
+/* ---------- mini-games ---------- */
 .gamecard{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--ink);background:#fff;border-radius:var(--radius);
   padding:14px 18px;margin:0 0 18px;box-shadow:0 6px 0 var(--line);min-height:76px}
 .gamecard:active{transform:translateY(4px);box-shadow:0 2px 0 var(--line)}
@@ -244,12 +245,1102 @@ h1,h2,h3{margin:0;font-weight:700}
 .gamecard b{display:block;font-size:24px}
 .gamecard small{color:var(--muted);font-size:17px}
 .gamecard .go{margin-left:auto;font-size:30px}
+/* ---------- avatar closet (1.4.0) ---------- */
+.who .elzee-avatar{width:44px;height:44px;border-radius:50%;background:#efe9ff;flex:none}
+.playercard .elzee-avatar{width:88px;height:88px;border-radius:50%;background:#efe9ff}
+.heroav{background:none;border:none;padding:0;flex:none;animation:bob 2.4s ease-in-out infinite;border-radius:20px}
+.heroav .elzee-avatar{height:150px;width:auto}
+.heroav .avemoji{font-size:72px}
+.closet{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding-bottom:96px}
+.cstage{position:relative;background:#fff;border-radius:var(--radius);box-shadow:0 6px 0 var(--line);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:10px;min-height:min(40vh,330px)}
+.cstage.previewing .cav{outline:4px dashed var(--gold);outline-offset:4px;border-radius:24px}
+.cav{display:flex;justify-content:center}
+.cav .elzee-avatar{height:min(24vh,230px);width:auto}
+@media (orientation:portrait){.cstage{position:sticky;top:70px;z-index:4;min-height:0}} /* try-on stays in view while scrolling tiles */
+.cav.pop{animation:cpop .15s ease-out}
+@keyframes cpop{50%{transform:scale(1.08)}}
+.cav.spin{animation:cspin .5s ease-out}
+@keyframes cspin{from{transform:rotate(-360deg) scale(.7)}}
+.cav.dance{animation:cdance .5s ease-in-out 2}
+@keyframes cdance{25%{transform:rotate(-7deg) translateY(-6px)}75%{transform:rotate(7deg) translateY(-6px)}}
+.sparkles{position:absolute;top:10px;right:16px;font-size:40px;animation:bob 1.2s ease-in-out infinite;pointer-events:none}
+.cfirst{position:absolute;top:8px;left:8px;right:8px;margin:0;z-index:1}
+.cfirst .mascot{font-size:44px}.cfirst .bubble{font-size:18px;padding:8px 12px}
+.buybar{min-height:0;display:flex;justify-content:center;margin-top:8px}
+.buybtn{display:flex;align-items:center;gap:10px;font-size:30px;min-height:72px;padding:6px 28px 6px 14px;border-radius:999px;background:var(--gold);color:var(--ink);
+  box-shadow:0 6px 0 var(--gold-d);border:4px dashed #fff;outline:3px solid var(--gold-d)}
+.buybtn:active{box-shadow:0 2px 0 var(--gold-d)}
+.buybtn .bag{font-size:40px;background:#fff;border-radius:50%;width:56px;height:56px;display:flex;align-items:center;justify-content:center}
+.buybtn .bw{font-size:24px;font-weight:700}
+.buybtn .bp{background:#fff7da;border-radius:14px;padding:2px 10px;font-weight:700}
+.needbox{display:flex;align-items:center;gap:10px;background:#f4f2fa;border:3px dashed #bdb9cf;border-radius:18px;padding:8px 16px;font-size:30px;min-height:72px;color:#6b6788}
+.needbox b{font-size:30px;color:var(--oops-d)}
+.needbox .needtxt{font-size:22px;font-weight:700;white-space:nowrap}
+.needbox .mini{font-size:18px;letter-spacing:-2px;max-width:150px;overflow-wrap:anywhere;line-height:1.1}
+.needbar{position:relative;width:110px;height:18px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 2px #d9d5ea;overflow:hidden;flex:none}
+.needbar i{position:absolute;left:0;top:0;bottom:0;background:var(--gold);border-radius:9px}
+.needbox .more{font-size:30px;white-space:nowrap}
+.jar{position:relative;display:inline-block;font-size:44px;line-height:1}
+.jar i{position:absolute;left:18%;right:18%;bottom:10%;background:var(--gold);opacity:.7;border-radius:4px;max-height:70%}
+.cpanel{min-width:0}
+.ctabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;justify-content:center}
+.ctab{width:62px;height:62px;border:3px solid var(--line);background:#fff;border-radius:18px;font-size:30px;display:flex;align-items:center;justify-content:center;padding:0;flex:none}
+.ctab.on{border-color:var(--brand);background:#efe9ff;box-shadow:inset 0 -5px 0 var(--brand);transform:scale(1.06)}
+.ctab.hint{animation:hintp 1.2s ease-in-out infinite}
+@keyframes hintp{50%{box-shadow:0 0 0 8px rgba(124,77,255,.25)}}
+.ctabs.sub .ctab{width:58px;height:58px;font-size:26px}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:12px}
+.ctile{position:relative;min-height:104px;border:3px solid var(--line);background:#fff;border-radius:20px;padding:4px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.ctile .elzee-avatar{max-width:100%;height:auto;max-height:92px}
+.ctile.worn{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold)}
+.ctile.prev{border-style:dashed;border-color:var(--brand)}
+.wornck{position:absolute;top:4px;right:4px;background:var(--good);color:#fff;border-radius:50%;width:26px;height:26px;font-size:17px;line-height:26px;font-weight:700}
+.ptag{position:absolute;left:4px;bottom:4px;background:var(--gold);color:var(--ink);border-radius:12px;padding:1px 7px;font-size:17px;font-weight:700;box-shadow:0 2px 0 var(--gold-d)}
+.ptag.reward{background:#ffd6e7;box-shadow:0 2px 0 #f39abf}
+.plock{position:absolute;top:3px;left:5px;font-size:16px}
+.hanger{font-size:46px;opacity:.6}
+.swatches{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:14px}
+.swatch{width:56px;height:56px;border-radius:50%;border:4px solid #fff;box-shadow:0 0 0 3px var(--line);padding:0}
+.swatch.on{box-shadow:0 0 0 4px var(--gold)}
+.cbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:10px calc(env(safe-area-inset-right) + 18px) calc(env(safe-area-inset-bottom) + 10px) calc(env(safe-area-inset-left) + 18px);
+  background:linear-gradient(transparent,var(--bg) 30%);max-width:860px;margin:0 auto}
+.iconbtn.big{width:68px;height:68px;font-size:34px}
+.iconbtn[disabled]{opacity:.4}
+.donebtn{min-width:120px;min-height:68px;font-size:30px;border-radius:18px;display:flex;align-items:center;gap:8px;justify-content:center}
+.donebtn .dw{font-size:22px}
+.iconbtn.big.gone{visibility:hidden} /* 1.4.0: nothing to undo -> no dead button */
+.bconfirm .bcav{display:flex;justify-content:center}
+.bconfirm .bcav .elzee-avatar{height:min(34vh,260px);width:auto}
+.bconfirm .bcprice{display:inline-flex;align-items:center;gap:8px;font-size:34px;font-weight:700;background:#fff7da;border-radius:16px;padding:4px 16px;margin:6px 0}
+.bconfirm .yn{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px}
+.ynbtn{border:none;border-radius:24px;min-height:110px;font-size:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#fff}
+.ynbtn small{font-size:20px;font-weight:700}
+.ynbtn.yes{background:var(--good);box-shadow:0 7px 0 var(--good-d)}
+.ynbtn.no{background:#ff5d6c;box-shadow:0 7px 0 #d23c4b}
+.ynbtn:active{transform:translateY(4px)}
+.flycoin{position:fixed;z-index:90;font-size:44px;pointer-events:none}
+.bigcoin{position:fixed;left:50%;top:40%;z-index:91;font-size:120px;pointer-events:none;transform:translate(-50%,-50%);animation:bigcoin 1.2s ease-out forwards;text-align:center;line-height:1}
+.bigcoin b{display:block;font-size:44px;color:var(--gold-d);-webkit-text-stroke:2px #fff}
+@keyframes bigcoin{0%{transform:translate(-50%,-50%) scale(.2) rotateY(0)}30%{transform:translate(-50%,-50%) scale(1.2) rotateY(360deg)}70%{opacity:1}100%{transform:translate(-50%,-80%) scale(1);opacity:0}}
+@media (orientation:landscape) and (min-width:700px){
+  .closet{grid-template-columns:minmax(0,48%) minmax(0,1fr);align-items:start}
+  .cstage{position:sticky;top:84px;min-height:calc(100vh - 200px)}
+  .cav .elzee-avatar{height:min(52vh,420px)}
+}
+@media (max-width:430px){
+  .top{gap:4px;flex-wrap:wrap}
+  .top .iconbtn{width:48px;height:48px;font-size:24px}
+  .top .pill{padding:6px 8px;font-size:18px;min-height:44px;gap:3px}
+  .top .who{padding:2px;min-height:48px}
+  .top .who span:last-child{display:none}
+  .heroav .elzee-avatar{height:120px}
+}
+@media (prefers-reduced-motion:reduce){.heroav,.sparkles,.ctab.hint{animation:none}.cav.pop,.cav.spin,.cav.dance{animation:none}.bigcoin{animation:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div id="app"></div>
 <div class="preview-tag" aria-hidden="true">PREVIEW</div>
+<div id="app"></div>
+<script>
+/*AVATAR-START v1.2.0*/
+/* ElzeeAvatar v1.2.0 - shared avatar renderer for Elzee (closet + Climb the Quiz).
+   Source of truth: lq-games/shared/avatar.js. Inline it into a page between the
+   AVATAR markers (see shared/elzee-avatar.md); never load it with <script src>.
+   One global: window.ElzeeAvatar. No imports, no network, no fonts, no images,
+   no randomness. Pure functions (readLook/normalizeLook/render/poseAt) never touch
+   the DOM; only create()/mount() do. Original art, drawn to one body template:
+   viewBox 0 0 200 300, head crop 40 10 120 120, limbs pivot at shoulders/elbows/hips/knees. */
+(function (root) {
+  "use strict";
+  var VERSION = "1.2.0";
+  var INK = "#2d2a4a";
+
+  /* ---------------- data: palette, skins, hair colors, eyes ---------------- */
+  var PALETTE = {
+    pink: "#ff7aa2", red: "#e8413c", orange: "#ff9f43", gold: "#ffc83d", lime: "#9be15d",
+    green: "#3ccf4e", teal: "#3fb5a6", sky: "#7fd0ff", blue: "#2f63e0", purple: "#7c4dff", lilac: "#c7b3ff",
+    white: "#ffffff", cream: "#fff3dc", gray: "#9a98b0", black: "#3a3650", brown: "#9b6b43", denim: "#4a6fa5",
+    mint: "#b8f0d8", peach: "#ffc9a8", coral: "#ff8a7a",
+    rainbow: "url(#rainbow)", sparkle: "url(#sparkle)", galaxy: "url(#galaxy)", gold_foil: "url(#goldfoil)"
+  };
+  // Outline shade used for the 4 gradient "colors" (a gradient can't be darkened).
+  var GRAD_SHADE = { rainbow: "#7c4dff", sparkle: "#9d86e0", galaxy: "#1f1846", gold_foil: "#c08a00" };
+  var SKINS = {
+    s1: { name: "Skin 1", c: "#ffe4d3" }, s2: { name: "Skin 2", c: "#f7d1bf" },
+    s3: { name: "Skin 3", c: "#f0bf96" }, s4: { name: "Skin 4", c: "#dda274" },
+    s5: { name: "Skin 5", c: "#c3865a" }, s6: { name: "Skin 6", c: "#a06a44" },
+    s7: { name: "Skin 7", c: "#7d4d31" }, s8: { name: "Skin 8", c: "#5b3624" }
+  };
+  // Hair colors. unlock.type "free" | "tokens" (cost) | "reward". Locked colors need ownership in readLook().
+  var HAIR_COLORS = {
+    black: { name: "Black", c: "#2e2a3a", unlock: { type: "free" } },
+    dark_brown: { name: "Dark brown", c: "#4b3022", unlock: { type: "free" } },
+    brown: { name: "Brown", c: "#7a4a2c", unlock: { type: "free" } },
+    auburn: { name: "Auburn", c: "#94402a", unlock: { type: "free" } },
+    ginger: { name: "Ginger", c: "#d9692f", unlock: { type: "free" } },
+    blonde: { name: "Blonde", c: "#f0c65a", unlock: { type: "free" } },
+    platinum: { name: "Platinum", c: "#f1e6c8", unlock: { type: "free" } },
+    gray: { name: "Gray", c: "#a9a6b5", unlock: { type: "free" } },
+    pink: { name: "Pink", c: "#ff8fc0", unlock: { type: "free" } },
+    sky_blue: { name: "Sky blue", c: "#7cc6ff", unlock: { type: "free" } },
+    rainbow: { name: "Rainbow", c: "url(#rainbow)", unlock: { type: "tokens", cost: 40 } },
+    galaxy: { name: "Galaxy", c: "url(#galaxy)", unlock: { type: "tokens", cost: 60 } }
+  };
+  var EYES = { dot: { name: "Dots" }, big: { name: "Big sparkly" }, lash: { name: "Lashes" }, happy: { name: "Happy arcs" } };
+  var MOODS = ["happy", "yay", "sad", "whoa"];
+
+  /* ---------------- slots (layer order lives in buildSVG) ----------------
+     To add a slot: add it here, give items that slot, and draw its parts in buildSVG
+     at the right layer. Accessory slots only need an entry in ACC_SLOTS + a part key. */
+  var SLOTS = {
+    hair: { def: "hair.bob", none: false, color: "hairColor" },
+    top: { def: "top.tee", none: false, color: "topC" },
+    bottom: { def: "bottom.shorts", none: false, color: "bottomC" },
+    dress: { def: null, none: true, color: "dressC" },
+    shoes: { def: "shoes.sneakers", none: false, color: "shoesC" }
+  };
+  var ACC_SLOTS = ["head", "face", "neck", "hand"];
+
+  /* ---------------- art helpers (tokens {c1} {c1d} {c2} {c2d} {s} {sd} {h} {hd}) ---------------- */
+  function cap(x1, y1, x2, y2, w, fill, stroke) { // capsule with 3px outline
+    return '<path d="M' + x1 + " " + y1 + "L" + x2 + " " + y2 + '" stroke="' + stroke + '" stroke-width="' + (w + 6) + '" stroke-linecap="round" fill="none"/>' +
+      '<path d="M' + x1 + " " + y1 + "L" + x2 + " " + y2 + '" stroke="' + fill + '" stroke-width="' + w + '" stroke-linecap="round" fill="none"/>';
+  }
+  function P(d, fill, stroke, extra) {
+    return '<path d="' + d + '" fill="' + fill + '"' + (stroke ? ' stroke="' + stroke + '" stroke-width="3" stroke-linejoin="round"' : "") + (extra || "") + "/>";
+  }
+  function star(cx, cy, r) {
+    var d = "", i, a, rr;
+    for (i = 0; i < 10; i++) { a = -Math.PI / 2 + i * Math.PI / 5; rr = i % 2 ? r * 0.45 : r; d += (i ? "L" : "M") + (cx + rr * Math.cos(a)).toFixed(1) + " " + (cy + rr * Math.sin(a)).toFixed(1); }
+    return d + "Z";
+  }
+  var AX = { L: 78, R: 122 }, LX = { L: 89, R: 111 };
+  var TORSO = "M73 138C73 127 85 121 100 121C115 121 127 127 127 138L130 194C130 202 120 204 100 204C80 204 70 202 70 194Z";
+  var NECKLINE = P("M89 122Q100 138 111 122Z", "{s}");
+  var HIP = "M71 186L129 186L131 212C120 216 108 214 100 208C92 214 80 216 69 212Z";
+  function sleeves(kind, fill, stroke, cuff) { // -> {armL, armR, foreL, foreR}; v1.2: hem band, cuffs, shine, fold
+    var o = {}, hl = function (x, y1, y2) { return '<path d="M' + (x - 4) + " " + y1 + "L" + (x - 4) + " " + y2 + '" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".3"/>'; };
+    ["L", "R"].forEach(function (k) {
+      var x = AX[k];
+      if (kind === "short") o["arm" + k] = cap(x, 137, x, 150, 18, fill, stroke) + '<path d="M' + (x - 9) + " 150L" + (x + 9) + ' 150" stroke="' + (cuff || stroke) + '" stroke-width="3.5" stroke-linecap="round"/>' + hl(x, 139, 145);
+      if (kind === "long") {
+        o["arm" + k] = cap(x, 137, x, 166, 18, fill, stroke) + hl(x, 139, 158) + '<path d="M' + (x - 6) + " 160Q" + x + " 163 " + (x + 6) + ' 160" stroke="' + stroke + '" stroke-width="2" fill="none" opacity=".6"/>';
+        o["fore" + k] = cap(x, 163, x, 184, 17, fill, stroke) + cap(x, 181, x, 184, 18, cuff || stroke, stroke) + '<path d="M' + (x - 5) + " 182.5L" + (x + 5) + ' 182.5" stroke="#fff" stroke-width="1.5" opacity=".5"/>';
+      }
+    });
+    return o;
+  }
+  function legs(len, w, fill, stroke, cuff, roll) { // pant legs -> {thighL, shinL, thighR, shinR}; v1.2: shine, knee fold, cuffs
+    var o = {}, hl = function (x, y1, y2) { return '<path d="M' + (x - w / 4) + " " + y1 + "L" + (x - w / 4) + " " + y2 + '" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".2"/>'; };
+    ["L", "R"].forEach(function (k) {
+      var x = LX[k];
+      o["thigh" + k] = cap(x, 204, x, len === "short" ? 220 : 238, w, fill, stroke) + hl(x, 208, len === "short" ? 216 : 232) +
+        (len === "short" && cuff ? cap(x, 218, x, 220, w + 1, cuff, stroke) : "");
+      if (len !== "short") o["shin" + k] = cap(x, 236, x, len === "ankle" ? 268 : 264, w - 2, fill, stroke) + hl(x, 242, 258) +
+        '<path d="M' + (x - 5) + " 238Q" + x + " 241 " + (x + 5) + ' 238" stroke="' + stroke + '" stroke-width="2" fill="none" opacity=".55"/>' +
+        (roll ? cap(x, 261, x, 266, w + 1, fill, stroke) + '<path d="M' + (x - w / 2 + 1) + " 263.5L" + (x + w / 2 - 1) + ' 263.5" stroke="#fff" stroke-width="1.5" opacity=".45"/>' : cuff ? cap(x, 264, x, 266, w, cuff, stroke) : "");
+    });
+    return o;
+  }
+  function shoe(k, body) { return body(LX[k], k === "L" ? -1 : 1); }
+  function feet(body) { return { footL: shoe("L", body), footR: shoe("R", body) }; }
+  function lowShoe(x, s) {
+    var t = x + s * 2;
+    return P("M" + (t - 14) + " 284C" + (t - 14) + " 268 " + (t + 14) + " 268 " + (t + 14) + " 282L" + (t + 15) + " 286C" + (t + 15) + " 291 " + (t - 15) + " 291 " + (t - 15) + " 286Z", "{c1}", "{c1d}") +
+      '<ellipse cx="' + (t - 7) + '" cy="276" rx="4" ry="2.5" fill="#fff" opacity=".45"/>';
+  }
+  function merge() { var o = {}, i, k; for (i = 0; i < arguments.length; i++) for (k in arguments[i]) o[k] = (o[k] || "") + arguments[i][k]; return o; }
+  /* v1.2.0 art helpers: shine, strands, folds, shading, scallops (curls, puffs, ruffles) */
+  function SHINE(d, w) { return '<path d="' + d + '" stroke="{hs}" stroke-width="' + (w || 4) + '" stroke-linecap="round" fill="none" opacity=".8"/>'; }
+  function STRANDS(d) { return '<path d="' + d + '" stroke="{hd}" stroke-width="2" stroke-linecap="round" fill="none" opacity=".5"/>'; }
+  function FOLD(d, c) { return '<path d="' + d + '" stroke="' + (c || "{c1d}") + '" stroke-width="2" stroke-linecap="round" fill="none" opacity=".6"/>'; }
+  function STITCH(d, c) { return '<path d="' + d + '" stroke="' + (c || "#ffc83d") + '" stroke-width="1.6" stroke-dasharray="3 2.5" fill="none" opacity=".9"/>'; }
+  function HI(d, op) { return '<path d="' + d + '" fill="#fff" opacity="' + (op || ".22") + '"/>'; }
+  function SH(d, c, op) { return '<path d="' + d + '" fill="' + (c || "{c1d}") + '" opacity="' + (op || ".32") + '"/>'; }
+  function DOTS(list, r, c, op) { var s = '<g fill="' + (c || "#fff") + '" opacity="' + (op || ".85") + '">'; for (var i = 0; i < list.length; i += 2) s += '<circle cx="' + list[i] + '" cy="' + list[i + 1] + '" r="' + r + '"/>'; return s + "</g>"; }
+  function BTN(x, y, c) { return '<circle cx="' + x + '" cy="' + y + '" r="3" fill="' + (c || "{c1d}") + '"/><circle cx="' + (x - 0.9) + '" cy="' + (y - 0.9) + '" r="1" fill="#fff" opacity=".7"/>'; }
+  function bumpy(cx, cy, rx, ry, n, b, a0) { // scalloped ellipse
+    var d = "", i, a, am, T = Math.PI * 2; a0 = a0 || 0;
+    for (i = 0; i <= n; i++) {
+      a = a0 + i * T / n;
+      var x = (cx + rx * Math.cos(a)).toFixed(1), y = (cy + ry * Math.sin(a)).toFixed(1);
+      if (!i) { d = "M" + x + " " + y; continue; }
+      am = a - Math.PI / n;
+      d += "Q" + (cx + rx * (1 + b) * Math.cos(am)).toFixed(1) + " " + (cy + ry * (1 + b) * Math.sin(am)).toFixed(1) + " " + x + " " + y;
+    }
+    return d + "Z";
+  }
+  // flared skirt with a scalloped (ruffle) hem: waist tl..tr at ty, hem bl..br at by, n scallops of depth h
+  function skirt(tl, tr, ty, bl, br, by, n, h) {
+    var d = "M" + tl + " " + ty + "L" + tr + " " + ty + "L" + br + " " + by, i, w = (br - bl) / n, x;
+    for (i = 0; i < n; i++) { x = br - w * (i + 1); d += "Q" + (x + w / 2).toFixed(1) + " " + (by + h + 4 * Math.sin(Math.PI * (i + 0.5) / n)).toFixed(1) + " " + x.toFixed(1) + " " + (by + 4 * Math.sin(Math.PI * (i + 1) / n)).toFixed(1); }
+    return d + "Z";
+  }
+  function pleats(tl, tr, ty, bl, br, by, n) { var d = "", i; for (i = 1; i < n; i++) d += "M" + (tl + (tr - tl) * i / n).toFixed(1) + " " + (ty + 5) + "L" + (bl + (br - bl) * i / n).toFixed(1) + " " + (by - 2); return FOLD(d); }
+  // shared top shading: right shade, left highlight, waist folds, armpit creases, hem
+  var TOP_SHADE = SH("M114 124C122 128 126 134 126 140L129 194C129 199 123 201 114 202C119 180 119 150 114 124Z") +
+    HI("M82 130C77 137 75 152 75 170L74 192C77 194 79 194 81 193C80 170 80 148 84 130Z") +
+    FOLD("M84 189Q91 184 98 190M104 191Q111 185 118 190M76 146Q80 151 80 158M124 146Q120 151 120 158") + FOLD("M71 196Q100 203 129 196");
+  var RIB = '<path d="M88 122Q100 141 112 122" stroke="{c1d}" stroke-width="4" fill="none" stroke-linecap="round"/>';
+  var HAIR_CAP = "M50 82C46 40 70 20 100 20C130 20 154 40 150 82C148 70 144 62 138 56C120 58 82 58 62 56C56 62 52 70 50 82Z";
+  var HAIR_SIDE = "M50 84C46 40 70 20 100 20C132 20 154 40 150 84C147 68 140 58 130 52C118 48 110 42 106 34C98 48 80 56 62 58C56 64 52 72 50 84Z";
+  var HAIR_BACK_TOP = "M48 66C48 26 76 14 100 14C124 14 152 26 152 66";
+  function hairItem(id, name, back, front) {
+    return { id: id, slot: "hair", name: name, icon: "💇", colorways: null, unlock: { type: "free" }, svg: { back: back || "", front: front || "" } };
+  }
+  function F(id, slot, name, icon, colorways, svg, extra) {
+    var o = { id: id, slot: slot, name: name, icon: icon, colorways: colorways, unlock: { type: "free" }, svg: svg }, k;
+    for (k in extra || {}) o[k] = extra[k];
+    return o;
+  }
+  function reward(floor, more) { var o = { unlock: { type: "reward", event: "climb.floor", count: floor } }, k; for (k in more || {}) o[k] = more[k]; return o; }
+  var TOPC = ["red", "orange", "gold", "green", "sky", "blue", "purple", "pink", "white", "black", "gray", "lime"];
+
+  /* ---------------- ITEMS: 53 free starter items + 6 Climb rewards ----------------
+     svg part keys: back (hair behind body), front (hair over face), head (hat), face, neck, hand,
+     torso (top/dress body), over (bib/straps drawn over the top), hip (bottom's waist),
+     armL/armR (upper sleeve), foreL/foreR (lower sleeve), thighL/R, shinL/R (pant legs), footL/R (shoes). */
+  var ITEMS = [
+    // hair styles (12) - colored by look.hairColor ({h} gradient fill, {hd} outline, {hs} shine)
+    hairItem("hair.buzz", "Buzz", "", P("M54 62C53 34 76 24 100 24C124 24 147 34 146 62C134 50 118 45 100 45C82 45 66 50 54 62Z", "{h}", "{hd}") +
+      STRANDS("M68 42l2 4M80 35l1 4M92 31l.5 4M108 31l-.5 4M120 35l-1 4M132 42l-2 4M74 51l1 3M88 46l.5 3M112 46l-.5 3M126 51l-1 3") + SHINE("M74 36Q90 27 108 29", 3)),
+    hairItem("hair.crop", "Short crop", "", P("M50 72C46 36 72 18 100 18C128 18 154 36 150 72C146 58 138 50 128 46L122 54L114 44L104 52L96 42L88 52L80 44L74 50C64 52 56 60 50 72Z", "{h}", "{hd}") +
+      STRANDS("M80 44L84 30M96 42L97 26M113 44L112 27M124 50L128 36M66 52Q70 40 78 32") + SHINE("M68 38Q84 24 104 24")),
+    hairItem("hair.curly", "Curly top", "", P("M50 76C46 40 72 22 100 22C128 22 154 40 150 76C140 60 120 52 100 52C80 52 60 60 50 76Z", "{h}", "{hd}") + (function () {
+      var c = [58, 60, 10, 142, 60, 10, 66, 41, 13, 134, 41, 13, 82, 30, 14, 118, 30, 14, 100, 25, 15, 76, 52, 9, 92, 48, 9, 108, 48, 9, 124, 52, 9], s = "", i;
+      for (i = 0; i < c.length; i += 3) s += P(bumpy(c[i], c[i + 1], c[i + 2], c[i + 2], 6, 0.22, i), "{h}", "{hd}") + STRANDS("M" + (c[i] - 3) + " " + c[i + 1] + "a3.5 3.5 0 1 1 3.5 3.5");
+      return s + SHINE("M90 18Q100 13 110 18", 3) + SHINE("M60 34Q66 29 72 30", 3) + SHINE("M128 30Q134 29 140 34", 3);
+    })()),
+    hairItem("hair.bob", "Bob", P(HAIR_BACK_TOP + "C160 84 160 104 156 114C152 125 138 127 130 118L70 118C62 127 48 125 44 114C40 104 40 84 48 66Z", "{h}", "{hd}") + STRANDS("M52 88Q49 104 56 116M148 88Q151 104 144 116"),
+      P("M50 86C44 38 72 18 102 18C132 18 156 40 150 86C146 68 140 58 130 54C114 62 86 60 64 50C58 58 52 70 50 86Z", "{h}", "{hd}") +
+      STRANDS("M102 22Q94 37 78 46M120 24Q116 42 104 54M138 36Q140 48 142 62") + SHINE("M68 36Q86 23 110 25")),
+    hairItem("hair.shoulder", "Shoulder straight", P(HAIR_BACK_TOP + "C160 90 158 120 158 136C152 147 136 147 128 138L72 138C64 147 48 147 42 136C42 120 40 90 48 66Z", "{h}", "{hd}") +
+      STRANDS("M50 92Q47 116 52 136M150 92Q153 116 148 136M58 118Q57 128 60 138M142 118Q143 128 140 138"),
+      P(HAIR_SIDE, "{h}", "{hd}") + STRANDS("M106 36Q118 46 132 52M100 30Q86 48 64 56M140 58Q146 66 148 78") + SHINE("M66 40Q84 24 108 24")),
+    hairItem("hair.long", "Long straight", P(HAIR_BACK_TOP + "C162 100 160 140 160 170C154 181 140 183 132 174L68 174C60 183 46 181 40 170C40 140 38 100 48 66Z", "{h}", "{hd}") +
+      STRANDS("M50 100Q46 140 52 170M150 100Q154 140 148 170M58 124Q56 152 60 172M142 124Q144 152 140 172"),
+      P("M50 86C44 40 70 18 100 18C130 18 156 40 150 86C146 64 132 48 106 40L100 34L94 40C68 48 54 64 50 86Z", "{h}", "{hd}") +
+      STRANDS("M94 40Q72 52 60 70M106 40Q128 52 140 70") + SHINE("M64 44Q76 28 94 24") + SHINE("M108 24Q126 28 136 44")),
+    hairItem("hair.waves", "Long waves", P(HAIR_BACK_TOP + "C162 90 150 104 160 124C170 146 150 156 158 172C146 182 130 178 124 168L76 168C70 178 54 182 42 172C50 156 30 146 40 124C50 104 38 90 48 66Z", "{h}", "{hd}") +
+      STRANDS("M50 92C42 110 56 122 46 140C40 152 52 160 48 170M150 92C158 110 144 122 154 140C160 152 148 160 152 170M60 130C56 142 64 150 60 162M140 130C144 142 136 150 140 162"),
+      P("M50 84C46 40 70 20 100 20C130 20 154 40 150 84C148 66 140 56 128 54C116 60 104 50 96 42C88 56 72 60 60 60C54 66 51 74 50 84Z", "{h}", "{hd}") +
+      STRANDS("M96 42Q84 54 64 58M110 30Q118 46 130 52M140 58C146 64 144 72 148 80") + SHINE("M66 40Q84 25 106 24")),
+    hairItem("hair.ponytail", "Ponytail", P("M136 40C176 34 192 80 180 120C174 140 160 150 150 146C162 132 164 112 156 96C150 76 146 56 136 40Z", "{h}", "{hd}") +
+      STRANDS("M150 50Q174 74 170 112M146 62Q162 86 160 124M172 96Q178 116 166 134") + SHINE("M156 52Q172 64 176 84", 3) +
+      P(bumpy(144, 45, 8, 8, 7, 0.25), "#ff7aa2", "#d65f86") + '<circle cx="142" cy="43" r="2" fill="#fff" opacity=".7"/>',
+      P(HAIR_CAP, "{h}", "{hd}") + STRANDS("M58 60Q78 36 122 32M74 56Q96 42 134 42M92 54Q110 46 138 50") + SHINE("M66 40Q84 25 106 24")),
+    hairItem("hair.puffs", "Two puffs", P(bumpy(55, 34, 24, 24, 9, 0.16), "{h}", "{hd}") + P(bumpy(145, 34, 24, 24, 9, 0.16, 0.3), "{h}", "{hd}") +
+      STRANDS("M46 30a5 5 0 1 1 5 5M60 42a4 4 0 1 1 4 -4M136 30a5 5 0 1 1 5 5M150 42a4 4 0 1 1 4 -4M52 20a4 4 0 1 0 6 2M142 20a4 4 0 1 0 6 2") +
+      SHINE("M40 26Q46 16 56 15", 3.5) + SHINE("M130 26Q136 16 146 15", 3.5) +
+      '<g fill="#ff7aa2" stroke="#d65f86" stroke-width="2.5"><ellipse cx="66" cy="53" rx="9" ry="5" transform="rotate(-35 66 53)"/><ellipse cx="134" cy="53" rx="9" ry="5" transform="rotate(35 134 53)"/></g>',
+      P("M52 74C50 40 74 24 100 24C126 24 150 40 148 74C140 56 122 46 100 46C78 46 60 56 52 74Z", "{h}", "{hd}") + STRANDS("M100 28L100 44M88 30Q76 36 68 50M112 30Q124 36 132 50") + SHINE("M70 40Q82 30 94 29", 3)),
+    hairItem("hair.braids", "Braids", (function () {
+      var s = "", x, y, k;
+      for (k = 0; k < 2; k++) {
+        x = k ? 148 : 52;
+        s += P("M" + (x - 8) + " 66L" + (x + 8) + " 66L" + (x + 6) + " 100L" + (x - 6) + " 100Z", "{h}", "{hd}");
+        for (y = 102; y <= 158; y += 14) {
+          s += '<ellipse cx="' + (x - 3) + '" cy="' + y + '" rx="7.5" ry="9" transform="rotate(-28 ' + (x - 3) + " " + y + ')" fill="{h}" stroke="{hd}" stroke-width="2.5"/>';
+          s += '<ellipse cx="' + (x + 3) + '" cy="' + (y + 7) + '" rx="7.5" ry="9" transform="rotate(28 ' + (x + 3) + " " + (y + 7) + ')" fill="{h}" stroke="{hd}" stroke-width="2.5"/>';
+        }
+        s += P("M" + (x - 5) + " 174Q" + (x - 9) + " 190 " + (x - 2) + " 192Q" + x + " 186 " + (x + 2) + " 192Q" + (x + 9) + " 190 " + (x + 5) + " 174Z", "{h}", "{hd}");
+        s += P("M" + x + " 174L" + (x - 10) + " 168L" + (x - 10) + " 180Z M" + x + " 174L" + (x + 10) + " 168L" + (x + 10) + " 180Z", "#ff7aa2", "#d65f86") + '<circle cx="' + x + '" cy="174" r="3.5" fill="#d65f86"/>';
+        s += SHINE("M" + (x - 4) + " 72L" + (x - 3) + " 94", 2.5);
+      }
+      return s;
+    })(), P("M50 82C46 40 70 20 100 20C130 20 154 40 150 82C146 64 136 54 124 50C112 46 104 40 100 30C96 40 88 46 76 50C64 54 54 64 50 82Z", "{h}", "{hd}") +
+      STRANDS("M100 22L100 30M96 34Q84 44 66 52M104 34Q116 44 134 52") + SHINE("M66 40Q80 26 96 24") + SHINE("M106 24Q120 26 134 38")),
+    hairItem("hair.bun", "Bun", P("M100 0C112 0 120 9 120 20C120 31 112 39 100 39C88 39 80 31 80 20C80 9 88 0 100 0Z", "{h}", "{hd}") +
+      STRANDS("M86 16Q98 4 112 14Q116 26 102 30Q90 28 92 20Q96 12 106 16") + SHINE("M88 9Q94 4 102 4", 3) +
+      '<path d="M86 36Q100 42 114 36" stroke="#ff7aa2" stroke-width="5" fill="none" stroke-linecap="round"/>',
+      P("M52 72C50 38 74 22 100 22C126 22 150 38 148 72C138 52 120 44 100 44C80 44 62 52 52 72Z", "{h}", "{hd}") +
+      STRANDS("M62 62Q78 40 96 28M138 62Q122 40 104 28M80 50Q90 36 99 28M120 50Q110 36 101 28") + SHINE("M70 42Q84 28 98 26")),
+    hairItem("hair.afro", "Afro", P(bumpy(100, 64, 64, 56, 16, 0.09), "{h}", "{hd}") +
+      STRANDS("M54 70a4 4 0 1 1 4 4M146 70a4 4 0 1 0 -4 4M62 36a4 4 0 1 1 4 4M138 36a4 4 0 1 0 -4 4M84 16a4 4 0 1 1 4 4M116 16a4 4 0 1 0 -4 4M48 98a4 4 0 1 1 4 4M152 98a4 4 0 1 0 -4 4M100 12a3 3 0 1 1 3 3") +
+      SHINE("M60 26Q76 12 96 10", 5) + SHINE("M42 62Q42 50 48 42", 4),
+      P("M52 74C50 42 72 28 100 28C128 28 150 42 148 74C140 56 122 48 100 48C78 48 60 56 52 74Z", "{h}", "{hd}") + STRANDS("M70 40a3 3 0 1 1 3 3M100 34a3 3 0 1 1 3 3M128 40a3 3 0 1 0 -3 3")),
+
+    // tops (8)
+    F("top.tee", "top", "T-shirt", "👕", TOPC, merge({ torso: P(TORSO, "{c1}", "{c1d}") + TOP_SHADE + NECKLINE + RIB }, sleeves("short", "{c1}", "{c1d}"))),
+    F("top.striped", "top", "Striped tee", "👕", ["red", "blue", "green", "purple", "orange", "pink", "gold", "black"], merge({
+      torso: P(TORSO, "{c1}", "{c1d}") + '<g fill="#fff" opacity=".8"><path d="M73.6 146L126.4 146L126.8 153L73.2 153Z"/><path d="M72.8 162L127.2 162L127.7 169L72.3 169Z"/><path d="M72 178L128 178L128.6 185L71.4 185Z"/></g>' + TOP_SHADE + NECKLINE + RIB
+    }, sleeves("short", "{c1}", "{c1d}"), { armL: '<path d="M70 144L86 144" stroke="#fff" stroke-width="4" opacity=".8"/>', armR: '<path d="M114 144L130 144" stroke="#fff" stroke-width="4" opacity=".8"/>' })),
+    F("top.hoodie", "top", "Hoodie", "🧥", ["gray", "black", "purple", "sky", "lime", "pink", "red", "teal"], merge({
+      torso: P(TORSO, "{c1}", "{c1d}") + TOP_SHADE + P("M76 128C74 112 126 112 124 128C118 138 82 138 76 128Z", "{c1d}") + NECKLINE + P("M82 122C86 140 114 140 118 122C114 133 86 133 82 122Z", "{c1}", "{c1d}") +
+        P("M83 170L117 170L121 193L79 193Z", "{c1}", "{c1d}") + SH("M83 170L117 170L118 176L82 176Z", null, ".4") + STITCH("M85 173L115 173", "#fff") +
+        '<path d="M92 132L90 154M108 132L110 154" stroke="#fff" stroke-width="3" stroke-linecap="round"/><g fill="#fff"><rect x="87.5" y="153" width="5" height="6" rx="2"/><rect x="107.5" y="153" width="5" height="6" rx="2"/></g>' +
+        '<rect x="72" y="194" width="56" height="8" rx="4" fill="{c1d}" opacity=".7"/>'
+    }, sleeves("long", "{c1}", "{c1d}"))),
+    F("top.polo", "top", "Polo", "👕", ["sky", "green", "red", "white", "gold", "purple"], merge({
+      torso: P(TORSO, "{c1}", "{c1d}") + TOP_SHADE + NECKLINE + '<path d="M100 134L100 160" stroke="{c1d}" stroke-width="2.5"/>' +
+        P("M87 121L100 134L88 144L82 128Z M113 121L100 134L112 144L118 128Z", "#fff", "#d8d2e8") + SH("M88 136L100 134L88 144Z M112 136L100 134L112 144Z", "#d8d2e8", ".8") + BTN(104, 142) + BTN(104, 153) +
+        P("M110 150L121 150L121 160Q115.5 163 110 160Z", "{c1}", "{c1d}")
+    }, sleeves("short", "{c1}", "{c1d}", "#fff"))),
+    F("top.tank", "top", "Tank top", "🎽", ["pink", "sky", "lime", "gold", "white", "purple", "orange"], {
+      torso: P("M82 124L92 124C94 136 106 136 108 124L118 124C122 132 128 136 128 146L130 194C130 202 120 204 100 204C80 204 70 202 70 194L72 146C72 136 78 132 82 124Z", "{c1}", "{c1d}") + TOP_SHADE +
+        '<path d="M92 125C94 137 106 137 108 125M83 125C79 133 74 137 73 146M117 125C121 133 126 137 127 146" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".85"/>' +
+        P("M100 150C96 144 88 148 92 154L100 161L108 154C112 148 104 144 100 150Z", "#fff", null, ' opacity=".85"')
+    }),
+    F("top.longsleeve", "top", "Long-sleeve", "👚", ["purple", "teal", "red", "sky", "gray", "pink", "green", "black"], merge({
+      torso: P(TORSO, "{c1}", "{c1d}") + TOP_SHADE + NECKLINE + RIB + FOLD("M90 124L80 140M110 124L120 140") + DOTS([86, 150, 114, 150, 100, 160, 84, 172, 116, 172, 100, 184], 2.2, "#fff", ".7")
+    }, sleeves("long", "{c1}", "{c1d}"))),
+    F("top.star", "top", "Star tee", "⭐", ["purple", "blue", "black", "pink", "teal", "red"], merge({
+      torso: P(TORSO, "{c1}", "{c1d}") + TOP_SHADE + NECKLINE + RIB + P(star(100, 164, 18), "#ffc83d", "#e0a400") + HI(star(97, 160, 7), ".55") +
+        P(star(80, 144, 4.5), "#fff", null, ' opacity=".9"') + P(star(121, 182, 4), "#fff", null, ' opacity=".9"') + P(star(119, 142, 3), "#ffc83d")
+    }, sleeves("short", "{c1}", "{c1d}"))),
+    F("top.button", "top", "Button shirt", "👔", ["sky", "white", "mint", "lilac", "peach", "red"], merge({
+      torso: P(TORSO, "{c1}", "{c1d}") + TOP_SHADE + NECKLINE + '<path d="M100 137L100 202M104 137L104 202" stroke="{c1d}" stroke-width="1.6" opacity=".8"/>' +
+        BTN(102, 148) + BTN(102, 162) + BTN(102, 176) + BTN(102, 190) + P("M80 146L92 146L92 158Q86 161 80 158Z", "{c1}", "{c1d}") + FOLD("M80 150L92 150") +
+        P("M86 121L100 136L89 145L81 129Z M114 121L100 136L111 145L119 129Z", "{c1}", "{c1d}") + SH("M89 139L100 136L89 145Z M111 139L100 136L111 145Z")
+    }, sleeves("long", "{c1}", "{c1d}"))),
+
+    // bottoms (6)
+    F("bottom.shorts", "bottom", "Shorts", "🩳", ["denim", "black", "lime", "red", "purple", "gray"], merge({
+      hip: P(HIP, "{c1}", "{c1d}") + '<path d="M71 192L129 192" stroke="{c1d}" stroke-width="2.5"/>' + FOLD("M100 192L100 207M78 194Q84 200 90 196M122 194Q116 200 110 196") + HI("M74 194L84 194L82 208L72 210Z", ".18")
+    }, legs("short", 24, "{c1}", "{c1d}", "{c1d}"))),
+    F("bottom.jeans", "bottom", "Jeans", "👖", ["denim", "black", "blue", "gray"], merge({
+      hip: P(HIP, "{c1}", "{c1d}") + '<path d="M71 192L129 192" stroke="{c1d}" stroke-width="2.5"/>' + STITCH("M100 193L100 208M77 195Q83 202 90 197M123 195Q117 202 110 197M72 190L128 190") + BTN(100, 189, "#ffc83d")
+    }, legs("long", 24, "{c1}", "{c1d}", "{c1d}", true))),
+    F("bottom.leggings", "bottom", "Leggings", "🦵", ["purple", "black", "pink", "teal", "sky"], merge({
+      hip: P(HIP, "{c1}", "{c1d}") + '<rect x="71" y="186" width="58" height="7" fill="{c1d}" opacity=".6"/>' + FOLD("M100 196L100 207")
+    }, legs("ankle", 21, "{c1}", "{c1d}"))),
+    F("bottom.skirt", "bottom", "Skirt", "🩰", ["pink", "purple", "red", "sky", "denim", "gold"], {
+      hip: P(skirt(72, 128, 186, 60, 140, 226, 7, 6), "{c1}", "{c1d}") + pleats(72, 128, 186, 60, 140, 226, 7) + SH("M118 190L128 186L140 226L128 230Z") +
+        '<rect x="71" y="185" width="58" height="8" rx="3" fill="{c1d}"/>' + DOTS([80, 206, 98, 214, 116, 204, 70, 220, 130, 218, 108, 226, 88, 226], 2.2, "#fff", ".75")
+    }),
+    F("bottom.joggers", "bottom", "Joggers", "👖", ["gray", "black", "purple", "green", "red"], merge({
+      hip: P(HIP, "{c1}", "{c1d}") + '<rect x="71" y="186" width="58" height="7" fill="{c1d}" opacity=".7"/>' +
+        '<path d="M97 192Q93 200 90 203M103 192Q107 200 110 203" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>' + FOLD("M100 196L100 208")
+    }, legs("long", 24, "{c1}", "{c1d}", "{c1d}"), { thighL: '<path d="M78 206L78 236" stroke="#fff" stroke-width="3" opacity=".75"/>', thighR: '<path d="M122 206L122 236" stroke="#fff" stroke-width="3" opacity=".75"/>',
+      shinL: '<path d="M79 238L79 260" stroke="#fff" stroke-width="3" opacity=".75"/>', shinR: '<path d="M121 238L121 260" stroke="#fff" stroke-width="3" opacity=".75"/>' })),
+    F("bottom.overalls", "bottom", "Overalls", "👖", ["denim", "red", "lime", "purple"], merge({
+      hip: P(HIP, "{c1}", "{c1d}") + STITCH("M100 193L100 208"),
+      over: P("M84 158L116 158L118 196L82 196Z", "{c1}", "{c1d}") + STITCH("M87 161L113 161L114.5 193L85.5 193Z") + P("M92 168L108 168L108 180Q100 184 92 180Z", "{c1}", "{c1d}") + STITCH("M94 171L106 171") +
+        '<path d="M86 160L82 125M114 160L118 125" stroke="{c1d}" stroke-width="5" stroke-linecap="round"/>' +
+        '<g fill="#ffc83d" stroke="#e0a400" stroke-width="1.5"><rect x="83" y="158" width="8" height="7" rx="2"/><rect x="109" y="158" width="8" height="7" rx="2"/></g>'
+    }, legs("long", 24, "{c1}", "{c1d}", "{c1d}", true))),
+
+    // dresses (4) - replace top + bottom
+    F("dress.sun", "dress", "Sun dress", "👗", ["gold", "pink", "sky", "lime", "coral", "lilac"], {
+      torso: P("M80 128L120 128L127 192L73 192Z", "{c1}", "{c1d}") + SH("M114 128L120 128L127 192L118 192Z") + '<path d="M84 129L82 120M116 129L118 120" stroke="{c1d}" stroke-width="4" stroke-linecap="round"/>' +
+        FOLD("M84 140L116 140M83 146L117 146M82 152L118 152") +
+        P(skirt(73, 127, 186, 46, 154, 236, 10, 7), "{c1d}", "{c1d}") + P(skirt(73, 127, 186, 52, 148, 230, 9, 6), "{c1}", "{c1d}") + pleats(73, 127, 186, 52, 148, 230, 6) +
+        SH("M112 190L127 186L148 230L130 234Z", null, ".25") +
+        DOTS([84, 206, 102, 216, 120, 204, 70, 222, 132, 222, 92, 228, 112, 228, 100, 198], 2.6, "#fff", ".85") +
+        '<rect x="72" y="184" width="56" height="8" rx="4" fill="#fff" opacity=".9"/>' + P("M100 188L90 182L90 194Z M100 188L110 182L110 194Z", "#fff", "{c1d}") + '<circle cx="100" cy="188" r="3" fill="{c1d}"/>'
+    }),
+    F("dress.tee", "dress", "T-shirt dress", "👗", ["purple", "red", "teal", "pink", "sky", "gray"], merge({
+      torso: P(skirt(70, 130, 186, 58, 142, 232, 1, 4), "{c1}", "{c1d}") + pleats(70, 130, 186, 58, 142, 232, 4) + P(TORSO, "{c1}", "{c1d}") + TOP_SHADE + NECKLINE + RIB +
+        '<path d="M60 226Q100 238 140 226" stroke="{c1d}" stroke-width="4" fill="none" opacity=".7"/>' + P("M108 200L122 200L121 212Q115 215 109 212Z", "{c1}", "{c1d}") + STITCH("M109 203L121 203", "#fff") +
+        P(star(88, 160, 7), "#fff", null, ' opacity=".85"')
+    }, sleeves("short", "{c1}", "{c1d}"))),
+    F("dress.jumper", "dress", "Jumper dress", "👗", ["red", "denim", "purple", "green", "gold"], merge({
+      torso: P(TORSO, "#ffffff", "#d8d2e8") + FOLD("M76 146Q80 151 80 158M124 146Q120 151 120 158", "#d8d2e8") + NECKLINE +
+        P("M100 124C96 134 84 136 82 126Z M100 124C104 134 116 136 118 126Z", "#ffffff", "#d8d2e8") +
+        P("M82 150L118 150L124 192L76 192Z", "{c1}", "{c1d}") + '<path d="M85 152L82 125M115 152L118 125" stroke="{c1}" stroke-width="5" stroke-linecap="round"/>' + BTN(87, 155, "#fff") + BTN(113, 155, "#fff") +
+        P(skirt(74, 126, 186, 56, 144, 234, 1, 3), "{c1}", "{c1d}") + pleats(74, 126, 186, 56, 144, 234, 6) + SH("M114 188L126 186L144 234L128 236Z", null, ".25") +
+        '<rect x="74" y="184" width="52" height="7" rx="3" fill="{c1d}"/>'
+    }, sleeves("short", "#ffffff", "#d8d2e8"), { armL: '<path d="M69 149L87 149" stroke="#d8d2e8" stroke-width="3" stroke-linecap="round"/>', armR: '<path d="M113 149L131 149" stroke="#d8d2e8" stroke-width="3" stroke-linecap="round"/>' })),
+    F("dress.overall", "dress", "Play overall-dress", "👗", ["denim", "pink", "lime", "lilac"], merge({
+      torso: P(TORSO, "{c2}", "{c2d}") + TOP_SHADE.replace(/\{c1d\}/g, "{c2d}") + NECKLINE + P("M84 154L116 154L120 192L80 192Z", "{c1}", "{c1d}") + STITCH("M87 157L113 157L116 189L84 189Z") +
+        '<path d="M86 156L82 125M114 156L118 125" stroke="{c1d}" stroke-width="5" stroke-linecap="round"/><circle cx="87" cy="160" r="3.5" fill="#ffc83d" stroke="#e0a400" stroke-width="1.5"/><circle cx="113" cy="160" r="3.5" fill="#ffc83d" stroke="#e0a400" stroke-width="1.5"/>' +
+        P(skirt(74, 126, 186, 60, 140, 228, 8, 5), "{c1}", "{c1d}") + SH("M114 188L126 186L140 228L126 231Z", null, ".25") +
+        P("M86 204L98 204L98 216Q92 219 86 216Z M102 204L114 204L114 216Q108 219 102 216Z", "{c1}", "{c1d}") + STITCH("M87 207L97 207M103 207L113 207") + STITCH("M62 224Q100 236 138 224")
+    }, sleeves("short", "{c2}", "{c2d}")), { c2: "gold" }),
+
+    // shoes (6): soles, laces, toe caps, shine
+    F("shoes.sneakers", "shoes", "Sneakers", "👟", ["white", "red", "sky", "black", "pink", "lime"], feet(function (x, s) {
+      var t = x + s * 2; return lowShoe(x, s) + SH("M" + (t - 6) + " 271Q" + t + " 268 " + (t + 6) + " 271L" + (t + 5) + " 282L" + (t - 5) + " 282Z", null, ".35") +
+        '<rect x="' + (t - 16) + '" y="283" width="32" height="8" rx="4" fill="#fff" stroke="#c9c3dc" stroke-width="2"/><path d="M' + (t - 12) + " 288L" + (t + 12) + ' 288" stroke="#c9c3dc" stroke-width="1.5" stroke-dasharray="2 2"/>' +
+        '<path d="M' + (t - 5) + " 273L" + (t + 5) + " 277M" + (t + 5) + " 273L" + (t - 5) + " 277M" + (t - 5) + " 278L" + (t + 5) + " 281M" + (t + 5) + " 278L" + (t - 5) + ' 281" stroke="#fff" stroke-width="2" stroke-linecap="round"/>' +
+        '<path d="M' + (t + s * 8) + " 276Q" + (t + s * 12) + " 280 " + (t + s * 13) + ' 284" stroke="{c1d}" stroke-width="2.5" fill="none" stroke-linecap="round"/>';
+    })),
+    F("shoes.sandals", "shoes", "Sandals", "🩴", ["brown", "pink", "sky", "gold"], feet(function (x, s) {
+      var t = x + s * 2; return '<rect x="' + (t - 15) + '" y="285" width="30" height="7" rx="3.5" fill="{c1}" stroke="{c1d}" stroke-width="2"/><path d="M' + (t - 12) + " 289L" + (t + 12) + ' 289" stroke="#fff" stroke-width="1.5" opacity=".6"/>' +
+        '<path d="M' + (t - 11) + " 279L" + (t + 11) + " 279M" + (t - 9) + " 273L" + (t + 9) + ' 273" stroke="{c1}" stroke-width="4.5" stroke-linecap="round"/>' +
+        '<circle cx="' + (t + s * 9) + '" cy="279" r="3" fill="#ffc83d" stroke="#e0a400" stroke-width="1.2"/><circle cx="' + (t - s * 2) + '" cy="273" r="2.4" fill="#fff" opacity=".9"/>';
+    })),
+    F("shoes.rainboots", "shoes", "Rain boots", "🥾", ["gold", "red", "green", "pink", "sky"], feet(function (x, s) {
+      var t = x + s * 2; return P("M" + (x - 12) + " 248L" + (x + 12) + " 248L" + (x + 13) + " 274C" + (t + 16) + " 276 " + (t + 16) + " 290 " + (t + 10) + " 290L" + (t - 12) + " 290C" + (t - 16) + " 290 " + (t - 16) + " 276 " + (x - 13) + " 274Z", "{c1}", "{c1d}") +
+        '<rect x="' + (x - 13) + '" y="247" width="26" height="7" rx="3.5" fill="{c1d}"/><path d="M' + (x - 6) + " 258L" + (x - 6) + ' 276" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".55"/>' +
+        '<rect x="' + (t - 16) + '" y="286" width="32" height="5" rx="2.5" fill="' + INK + '" opacity=".75"/><circle cx="' + (x + 5) + '" cy="262" r="2.2" fill="#fff" opacity=".7"/>';
+    })),
+    F("shoes.slipons", "shoes", "Slip-ons", "👞", ["black", "denim", "red", "purple", "gray"], feet(function (x, s) {
+      var t = x + s * 2; return lowShoe(x, s) + '<rect x="' + (t - 16) + '" y="284" width="32" height="7" rx="3.5" fill="#fff8e7" stroke="#e7e2f5" stroke-width="1.5"/>' +
+        '<path d="M' + (t - 7) + " 274Q" + t + " 279 " + (t + 7) + ' 274" stroke="#fff" stroke-width="2" fill="none" opacity=".8"/>' + STITCH("M" + (t - 12) + " 281L" + (t + 12) + " 281", "#fff");
+    })),
+    F("shoes.hightops", "shoes", "High-tops", "👟", ["red", "black", "purple", "sky", "white"], feet(function (x, s) {
+      var t = x + s * 2; return '<rect x="' + (x - 12) + '" y="256" width="24" height="24" rx="8" fill="{c1}" stroke="{c1d}" stroke-width="3"/>' + lowShoe(x, s) +
+        '<rect x="' + (t - 16) + '" y="283" width="32" height="8" rx="4" fill="#fff" stroke="#c9c3dc" stroke-width="2"/><path d="M' + (t - 12) + " 287L" + (t + 12) + ' 287" stroke="#c9c3dc" stroke-width="1.5"/>' +
+        '<path d="M' + (x - 5) + " 260L" + (x + 5) + " 264M" + (x + 5) + " 260L" + (x - 5) + " 264M" + (x - 5) + " 267L" + (x + 5) + " 271M" + (x + 5) + " 267L" + (x - 5) + ' 271" stroke="#fff" stroke-width="2" stroke-linecap="round"/>' +
+        '<circle cx="' + (x - s * 7) + '" cy="266" r="4.5" fill="#fff" stroke="{c1d}" stroke-width="1.5"/>' + P(star(x - s * 7, 266, 3), "{c1}");
+    })),
+    F("shoes.barefoot", "shoes", "Barefoot", "🦶", null, {}),
+
+    // accessories (7)
+    F("acc.head.cap", "acc.head", "Baseball cap", "🧢", ["red", "blue", "green", "orange", "purple", "black"], {
+      head: P("M52 58C52 24 76 12 100 12C124 12 148 24 148 58Z", "{c1}", "{c1d}") + '<path d="M100 14L100 56" stroke="{c1d}" stroke-width="2.5"/><circle cx="100" cy="14" r="4" fill="{c1d}"/>' + P("M44 58C60 48 140 48 156 58C150 69 50 69 44 58Z", "{c1d}", "{c1d}")
+    }, { hairMode: "tuck", brimY: 62 }),
+    F("acc.head.bow", "acc.head", "Hair bow", "🎀", ["pink", "red", "purple", "sky", "white", "gold"], {
+      head: P("M138 34L118 20C111 28 111 40 118 48Z M138 34L158 20C165 28 165 40 158 48Z", "{c1}", "{c1d}") + '<circle cx="138" cy="34" r="6.5" fill="{c1d}"/>'
+    }, { hairMode: "full" }),
+    F("acc.head.fox_ears", "acc.head", "Fox-ears headband", "🦊", ["orange", "white", "gray"], {
+      head: P("M60 46L56 6L88 30Z M140 46L144 6L112 30Z", "{c1}", "{c1d}") + P("M64 36L62 18L77 30Z M136 36L138 18L123 30Z", "#fff3dc") + '<path d="M54 58C60 26 140 26 146 58" stroke="{c1d}" stroke-width="6" fill="none" stroke-linecap="round"/>'
+    }, { hairMode: "full" }),
+    F("acc.head.frog_hat", "acc.head", "Frog hat", "🐸", ["green", "lime", "teal"], {
+      head: P("M48 64C48 26 72 16 100 16C128 16 152 26 152 64C130 71 70 71 48 64Z", "{c1}", "{c1d}") +
+        '<g stroke="{c1d}" stroke-width="3"><circle cx="72" cy="20" r="14" fill="{c1}"/><circle cx="128" cy="20" r="14" fill="{c1}"/></g><circle cx="72" cy="19" r="8.5" fill="#fff"/><circle cx="128" cy="19" r="8.5" fill="#fff"/><circle cx="73" cy="20" r="4.5" fill="' + INK + '"/><circle cx="127" cy="20" r="4.5" fill="' + INK + '"/>' +
+        '<path d="M84 44Q100 52 116 44" stroke="{c1d}" stroke-width="3" fill="none" stroke-linecap="round"/>'
+    }, { hairMode: "tuck", brimY: 66 }),
+    F("acc.face.round_glasses", "acc.face", "Round glasses", "👓", ["purple", "black", "red", "sky", "gold"], {
+      face: '<g fill="#fff" fill-opacity=".22" stroke="{c1}" stroke-width="4"><circle cx="82" cy="80" r="13"/><circle cx="118" cy="80" r="13"/></g><path d="M95 79Q100 74 105 79M69 78L55 75M131 78L145 75" stroke="{c1}" stroke-width="4" fill="none" stroke-linecap="round"/>'
+    }),
+    F("acc.neck.bandana", "acc.neck", "Bandana", "🧣", ["red", "blue", "purple", "green", "gold"], {
+      neck: P("M80 121C90 128 110 128 120 121L112 132L100 150L88 132Z", "{c1}", "{c1d}") + '<g fill="#fff" opacity=".85"><circle cx="92" cy="130" r="2"/><circle cx="108" cy="130" r="2"/><circle cx="100" cy="140" r="2"/></g>'
+    }),
+    F("acc.hand.balloon", "acc.hand", "Balloon", "🎈", ["red", "pink", "sky", "gold", "purple", "lime"], {
+      hand: '<path d="M0 -6C14 -40 24 -70 40 -104" stroke="#7a7699" stroke-width="2" fill="none"/>' + P("M40 -104L35 -98L45 -98Z", "{c1d}") +
+        '<ellipse cx="42" cy="-126" rx="18" ry="22" fill="{c1}" stroke="{c1d}" stroke-width="3"/><ellipse cx="35" cy="-134" rx="4" ry="7" fill="#fff" opacity=".6"/>'
+    }),
+
+    // Climb the Quiz floor rewards (6) - reward-only, never for sale
+    F("shoes.climbers", "shoes", "Grippy climbing shoes", "🧗", ["orange", "teal", "purple"], feet(function (x, s) {
+      var t = x + s * 2; return lowShoe(x, s) + P("M" + (t + s * 4 - 10) + " 288C" + (t + s * 4 - 10) + " 276 " + (t + s * 4 + 11) + " 276 " + (t + s * 4 + 11) + " 288Z", "{c2}", "{c2d}") +
+        '<rect x="' + (t - 16) + '" y="285" width="32" height="6" rx="3" fill="' + INK + '"/><rect x="' + (t - 9) + '" y="272" width="18" height="5" rx="2.5" fill="{c2}"/>';
+    }), reward(5, { c2: "gold" })),
+    F("acc.head.helmet", "acc.head", "Climbing helmet", "🪖", ["red", "sky", "gold"], {
+      head: P("M46 62C46 22 74 10 100 10C126 10 154 22 154 62C130 68 70 68 46 62Z", "{c1}", "{c1d}") +
+        '<g fill="{c1d}"><rect x="78" y="20" width="9" height="20" rx="4.5"/><rect x="95.5" y="16" width="9" height="22" rx="4.5"/><rect x="113" y="20" width="9" height="20" rx="4.5"/></g>' +
+        '<path d="M52 64L76 116M148 64L124 116" stroke="#3a3650" stroke-width="3"/><rect x="72" y="112" width="8" height="8" rx="2" fill="#3a3650"/>'
+    }, reward(10, { hairMode: "tuck", brimY: 66 })),
+    F("acc.hand.flag", "acc.hand", "Summit flag", "🚩", ["red", "purple", "teal"], {
+      hand: '<path d="M-5 16L22 -84" stroke="#9a98b0" stroke-width="5" stroke-linecap="round"/><circle cx="23" cy="-87" r="4" fill="#ffc83d"/>' + P("M24 -82L64 -66L18 -58Z", "{c1}", "{c1d}") + P(star(36, -68, 6), "#ffc83d")
+    }, reward(15)),
+    F("top.climb_jacket", "top", "Climber's jacket", "🧥", ["orange", "teal", "red", "purple"], merge({
+      torso: P(TORSO, "{c1}", "{c1d}") + P("M86 121L100 128L114 121L114 130L100 136L86 130Z", "{c1d}") + '<rect x="72" y="150" width="56" height="9" fill="{c2}"/><path d="M100 136L100 202" stroke="' + INK + '" stroke-width="2.5"/><circle cx="100" cy="142" r="3" fill="#c7c3d6"/>' +
+        P("M108 166L122 166L122 180L108 180Z", "{c1d}", null, ' opacity=".6"')
+    }, sleeves("long", "{c1}", "{c1d}"), { armL: '<rect x="68" y="150" width="20" height="7" fill="{c2}"/>', armR: '<rect x="112" y="150" width="20" height="7" fill="{c2}"/>' }), reward(20, { c2: "gold" })),
+    F("acc.face.star_goggles", "acc.face", "Star goggles", "🥽", ["gold", "pink", "sky"], {
+      face: P("M50 74C70 69 130 69 150 74L150 84C130 80 70 80 50 84Z", "#7c4dff", "#5a2fd6") + P(star(82, 80, 17), "{c1}", "{c1d}", ' fill-opacity=".85"') + P(star(118, 80, 17), "{c1}", "{c1d}", ' fill-opacity=".85"') +
+        '<circle cx="78" cy="75" r="3" fill="#fff"/><circle cx="114" cy="75" r="3" fill="#fff"/>'
+    }, reward(25)),
+    F("acc.head.summit_crown", "acc.head", "Summit crown", "👑", ["gold_foil", "rainbow", "sparkle"], {
+      head: P("M64 40L62 6L82 24L100 0L118 24L138 6L136 40Z", "{c1}", "{c1d}") + '<rect x="62" y="34" width="76" height="10" rx="5" fill="{c1d}"/><circle cx="100" cy="28" r="5" fill="#ff7aa2"/><circle cx="80" cy="32" r="4" fill="#7fd0ff"/><circle cx="120" cy="32" r="4" fill="#3ccf4e"/>'
+    }, reward(30, { hairMode: "full" }))
+  ];
+
+  /* v1.2.0 prices (Aaron, Oct 3): small free starter set, everything else costs tokens (10 plain .. 60 fancy;
+     dresses + accessories at the high end). Free: all skins + eyes, hair crop/bob/ponytail/afro, hair colors
+     black/dark brown/brown/blonde/ginger, T-shirt, hoodie, shorts, jeans, sun dress, sneakers, sandals, barefoot. */
+  var PRICES = {
+    "hair.buzz": 10, "hair.curly": 15, "hair.shoulder": 15, "hair.bun": 15, "hair.long": 20, "hair.waves": 20, "hair.braids": 25, "hair.puffs": 25,
+    "top.striped": 10, "top.tank": 10, "top.polo": 15, "top.longsleeve": 15, "top.star": 20, "top.button": 20,
+    "bottom.joggers": 10, "bottom.leggings": 15, "bottom.skirt": 20, "bottom.overalls": 25,
+    "shoes.slipons": 10, "shoes.hightops": 20, "shoes.rainboots": 25,
+    "dress.tee": 35, "dress.jumper": 40, "dress.overall": 45,
+    "acc.head.cap": 35, "acc.head.bow": 35, "acc.face.round_glasses": 40, "acc.neck.bandana": 40, "acc.head.fox_ears": 45, "acc.head.frog_hat": 50, "acc.hand.balloon": 50
+  };
+  var HAIR_PRICES = { auburn: 10, gray: 10, platinum: 15, pink: 20, sky_blue: 20, rainbow: 40, galaxy: 60 };
+  ITEMS.forEach(function (it) { if (PRICES[it.id]) it.unlock = { type: "tokens", cost: PRICES[it.id] }; });
+  Object.keys(HAIR_PRICES).forEach(function (k) { HAIR_COLORS[k].unlock = { type: "tokens", cost: HAIR_PRICES[k] }; });
+
+  // Starter look per profile emoji (only FREE items; skin is never guessed: always s3). v1.2: no paid pieces.
+  var STARTER = {
+    "🦊": ["top.tee", "orange", "ginger", null, null], "🐼": ["top.hoodie", "black", "black", null, null],
+    "🦄": ["top.tee", "purple", "blonde", null, null], "🐯": ["top.tee", "orange", "ginger", null, null],
+    "🐸": ["top.tee", "green", "brown", null, null], "🐙": ["top.hoodie", "purple", "dark_brown", null, null],
+    "🦖": ["top.hoodie", "lime", "dark_brown", null, null], "🐰": ["top.tee", "pink", "blonde", null, null],
+    "🐨": ["top.hoodie", "gray", "dark_brown", null, null], "🦁": ["top.tee", "gold", "ginger", null, null],
+    "🐧": ["top.tee", "white", "black", null, null], "🐝": ["top.tee", "gold", "black", null, null],
+    "🐬": ["top.tee", "sky", "brown", null, null], "🦋": ["top.tee", "purple", "brown", null, null],
+    "🐱": ["top.hoodie", "black", "dark_brown", null, null], "🐶": ["top.tee", "red", "brown", null, null]
+  };
+
+  /* ---------------- spoken words (v1.1.0, for read-aloud + screen readers) ----------------
+     Templates: {a} = a/an (picked after the color is filled in), {c} = color word. Keep them short,
+     concrete and kid-friendly: they are spoken to 6-year-old non-readers. */
+  var SAY = {
+    "hair.buzz": "{a} {c} buzz cut", "hair.crop": "short {c} hair", "hair.curly": "curly {c} hair", "hair.bob": "{a} {c} bob",
+    "hair.shoulder": "{c} hair down to your shoulders", "hair.long": "long {c} hair", "hair.waves": "long wavy {c} hair",
+    "hair.ponytail": "{a} {c} ponytail", "hair.puffs": "two {c} puffs", "hair.braids": "{c} braids", "hair.bun": "{a} {c} bun", "hair.afro": "{a} {c} afro",
+    "top.tee": "{a} {c} T-shirt", "top.striped": "{a} {c} striped T-shirt", "top.hoodie": "{a} {c} hoodie", "top.polo": "{a} {c} polo shirt",
+    "top.tank": "{a} {c} tank top", "top.longsleeve": "{a} {c} long-sleeve shirt", "top.star": "{a} {c} star T-shirt", "top.button": "{a} {c} button shirt",
+    "bottom.shorts": "{c} shorts", "bottom.jeans": "{c} jeans", "bottom.leggings": "{c} leggings", "bottom.skirt": "{a} {c} skirt",
+    "bottom.joggers": "{c} jogging pants", "bottom.overalls": "{c} overalls",
+    "dress.sun": "{a} {c} sun dress", "dress.tee": "{a} {c} T-shirt dress", "dress.jumper": "{a} {c} jumper dress", "dress.overall": "{a} {c} overall dress",
+    "shoes.sneakers": "{c} sneakers", "shoes.sandals": "{c} sandals", "shoes.rainboots": "{c} rain boots", "shoes.slipons": "{c} slip-on shoes",
+    "shoes.hightops": "{c} high-top sneakers", "shoes.barefoot": "bare feet",
+    "acc.head.cap": "{a} {c} baseball cap", "acc.head.bow": "{a} {c} hair bow", "acc.head.fox_ears": "{c} fox ears", "acc.head.frog_hat": "{a} {c} frog hat",
+    "acc.face.round_glasses": "{c} round glasses", "acc.neck.bandana": "{a} {c} bandana", "acc.hand.balloon": "{a} {c} balloon",
+    "shoes.climbers": "{c} climbing shoes", "acc.head.helmet": "{a} {c} climbing helmet", "acc.hand.flag": "{a} {c} summit flag",
+    "top.climb_jacket": "{a} {c} climbing jacket", "acc.face.star_goggles": "{c} star goggles", "acc.head.summit_crown": "{a} {c} summit crown"
+  };
+  var COLOR_WORDS = {
+    pink: "pink", red: "red", orange: "orange", gold: "yellow", lime: "lime green", green: "green", teal: "teal", sky: "sky blue",
+    blue: "blue", purple: "purple", lilac: "light purple", white: "white", cream: "cream", gray: "gray", black: "black", brown: "brown",
+    denim: "denim blue", mint: "mint green", peach: "peach", coral: "coral", rainbow: "rainbow", sparkle: "sparkly", galaxy: "galaxy", gold_foil: "shiny gold"
+  };
+  var HAIR_WORDS = { black: "black", dark_brown: "dark brown", brown: "brown", auburn: "red-brown", ginger: "ginger", blonde: "blonde",
+    platinum: "white-blonde", gray: "gray", pink: "pink", sky_blue: "blue", rainbow: "rainbow", galaxy: "galaxy" };
+  var EYE_WORDS = { dot: "dot eyes", big: "big sparkly eyes", lash: "eyes with lashes", happy: "happy smiley eyes" };
+  // Closet tabs: picture + spoken name (no reading needed). none = what "None" says for that slot.
+  var SLOT_LABELS = {
+    skin: { icon: "✋", say: "Skin color" }, hair: { icon: "💇", say: "Hair style" }, hairColor: { icon: "🎨", say: "Hair color" },
+    eyes: { icon: "👀", say: "Eyes" }, top: { icon: "👕", say: "Shirts" }, dress: { icon: "👗", say: "Dresses", none: "no dress" },
+    bottom: { icon: "👖", say: "Pants and skirts" }, shoes: { icon: "👟", say: "Shoes" }, acc: { icon: "🎀", say: "Extras" },
+    "acc.head": { icon: "🧢", say: "Hats", none: "no hat" }, "acc.face": { icon: "👓", say: "Glasses", none: "no glasses" },
+    "acc.neck": { icon: "🧣", say: "Neck", none: "nothing on your neck" }, "acc.hand": { icon: "🎈", say: "Things to hold", none: "nothing in your hand" }
+  };
+  function article(rest) { return /^[aeiou]/i.test(rest) ? "an" : "a"; }
+  function fill(tpl, cw) {
+    var t = tpl.replace("{c}", cw || "").replace(/\s+/g, " ").trim(), i = t.indexOf("{a}");
+    if (i < 0) return t;
+    var rest = t.slice(i + 3).trim();
+    return (t.slice(0, i) + article(rest) + " " + rest).trim();
+  }
+
+  var BY_ID = {};
+  function deepFreeze(o) { if (o && typeof o === "object" && !Object.isFrozen(o)) { Object.freeze(o); Object.keys(o).forEach(function (k) { deepFreeze(o[k]); }); } return o; }
+  ITEMS.forEach(function (it) { BY_ID[it.id] = it; it.say = SAY[it.id] || "{a} {c} " + it.name.toLowerCase(); });
+
+  /* ---------------- look: default, normalize, readLook ---------------- */
+  var DEFAULT_LOOK = {
+    skin: "s3", hair: "hair.bob", hairColor: "brown", eyes: "dot",
+    top: "top.tee", topC: "sky", bottom: "bottom.shorts", bottomC: "denim",
+    dress: null, dressC: null, shoes: "shoes.sneakers", shoesC: "white",
+    acc: { head: null, face: null, neck: null, hand: null },
+    accC: { head: null, face: null, neck: null, hand: null }
+  };
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function has(o, k) { return !!o && Object.prototype.hasOwnProperty.call(o, k); }
+  function isFree(u) { return !u || u.type === "free"; }
+  function ownedSet(list) {
+    var s = {}; if (Array.isArray(list)) list.forEach(function (id) { if (typeof id === "string") s[id] = 1; }); return s;
+  }
+  function pickColor(item, c, fallback) { // valid colorway, else the slot default's color, else the first colorway
+    if (!item || !item.colorways) return null;
+    if (typeof c === "string" && item.colorways.indexOf(c) >= 0) return c;
+    return (typeof fallback === "string" && item.colorways.indexOf(fallback) >= 0) ? fallback : item.colorways[0];
+  }
+  // Pure, never throws. opts.owned: ids owned beyond the free set; opts.allowLocked: skip ownership (render/try-on).
+  function normalizeLook(look, opts) {
+    try {
+      opts = opts || {};
+      var src = (look && typeof look === "object" && !Array.isArray(look)) ? look : {};
+      var own = ownedSet(opts.owned), all = !!opts.allowLocked;
+      var ok = function (item) { return !!item && (all || isFree(item.unlock) || own[item.id] === 1); };
+      var out = clone(DEFAULT_LOOK);
+      out.skin = (typeof src.skin === "string" && has(SKINS, src.skin)) ? src.skin : DEFAULT_LOOK.skin;
+      out.eyes = (typeof src.eyes === "string" && has(EYES, src.eyes)) ? src.eyes : DEFAULT_LOOK.eyes;
+      var hc = typeof src.hairColor === "string" && has(HAIR_COLORS, src.hairColor) ? src.hairColor : null;
+      out.hairColor = hc && (all || isFree(HAIR_COLORS[hc].unlock) || own["hairColor." + hc] === 1 || own[hc] === 1) ? hc : DEFAULT_LOOK.hairColor;
+      Object.keys(SLOTS).forEach(function (slot) {
+        var def = SLOTS[slot], id = src[slot], item = typeof id === "string" && has(BY_ID, id) ? BY_ID[id] : null;
+        if (!item || item.slot !== slot || !ok(item)) item = def.def ? BY_ID[def.def] : null;
+        out[slot] = item ? item.id : null;
+        if (def.color !== "hairColor") out[def.color] = item ? pickColor(item, src[def.color], item.id === def.def ? DEFAULT_LOOK[def.color] : null) : null;
+      });
+      var acc = src.acc && typeof src.acc === "object" ? src.acc : {}, accC = src.accC && typeof src.accC === "object" ? src.accC : {};
+      ACC_SLOTS.forEach(function (k) {
+        var id = acc[k], item = typeof id === "string" && has(BY_ID, id) ? BY_ID[id] : null;
+        if (!item || item.slot !== "acc." + k || !ok(item)) item = null;
+        out.acc[k] = item ? item.id : null;
+        out.accC[k] = item ? pickColor(item, accC[k]) : null;
+      });
+      return out;
+    } catch (e) { return clone(DEFAULT_LOOK); }
+  }
+  function starterLook(emoji) {
+    var e = typeof emoji === "string" ? emoji.replace(/\uFE0F/g, "").trim() : "";
+    var s = has(STARTER, e) ? STARTER[e] : null, l = clone(DEFAULT_LOOK);
+    if (s) { l.top = s[0]; l.topC = s[1]; l.hairColor = s[2]; l.acc.head = s[3]; l.accC.head = s[4]; }
+    return normalizeLook(l);
+  }
+  // readLook(profile, {owned?: [...extra ids, e.g. the game's own kids[id].unlocks]})
+  var LOOK_KEYS = ["skin", "hair", "hairColor", "eyes", "top", "bottom", "dress", "shoes", "acc"];
+  // Works for ANY profile: a brand-new or younger player (e.g. a Little Thinkers kid) with no look or closet,
+  // a minimal {id, avatar} record, junk, or null. Returns a fresh object every call (no shared state between kids).
+  function readLook(profile, opts) {
+    try {
+      var p = profile && typeof profile === "object" && !Array.isArray(profile) ? profile : {};
+      var lk = p.look;
+      if (!lk || typeof lk !== "object" || Array.isArray(lk) || !LOOK_KEYS.some(function (k) { return has(lk, k); })) return starterLook(p.avatar);
+      var owned = [].concat(p.closet && Array.isArray(p.closet.owned) ? p.closet.owned : [], opts && Array.isArray(opts.owned) ? opts.owned : []);
+      return normalizeLook(p.look, { owned: owned });
+    } catch (e) { return clone(DEFAULT_LOOK); }
+  }
+  // readLookFor(save, profileId?, opts) - save = parsed logicquest.v1 (or its JSON string). profileId defaults to
+  // save.activeId. Unknown id / broken save -> starter look for that emoji (or the default look). Never throws.
+  function readLookFor(save, profileId, opts) {
+    try {
+      var d = typeof save === "string" ? JSON.parse(save) : save;
+      var list = d && Array.isArray(d.profiles) ? d.profiles : [];
+      var id = profileId == null ? d && d.activeId : profileId, i;
+      for (i = 0; i < list.length; i++) if (list[i] && list[i].id === id) return readLook(list[i], opts);
+      return readLook(null, opts);
+    } catch (e) { return clone(DEFAULT_LOOK); }
+  }
+
+  /* ---------------- describe: short spoken phrases (v1.1.0) ---------------- */
+  function colorWord(key) { return has(COLOR_WORDS, key) ? COLOR_WORDS[key] : ""; }
+  // describeItem("top.tee", "sky") -> "a sky blue T-shirt". Unknown id -> "". opts.article:false drops a/an.
+  function describeItem(id, color, opts) {
+    try {
+      var it = typeof id === "string" && has(BY_ID, id) ? BY_ID[id] : null;
+      if (!it) return "";
+      var cw = it.slot === "hair" ? (has(HAIR_WORDS, color) ? HAIR_WORDS[color] : "") : colorWord(pickColor(it, color));
+      var t = fill(it.say, cw);
+      if (opts && opts.article === false) t = t.replace(/^(a|an) /, "");
+      return t;
+    } catch (e) { return ""; }
+  }
+  // describeUnlock(id) -> "" (free) | "costs 25 coins" | "win it on floor 10 of the tower" | "a special prize"
+  function describeUnlock(id) {
+    var u = typeof id === "string" && has(BY_ID, id) ? BY_ID[id].unlock : (typeof id === "string" && id.indexOf("hairColor.") === 0 && has(HAIR_COLORS, id.slice(10)) ? HAIR_COLORS[id.slice(10)].unlock : null);
+    if (!u || u.type === "free") return "";
+    if (u.type === "tokens") return "costs " + u.cost + " coins";
+    if (u.type === "reward" && u.event === "climb.floor") return "win it on floor " + u.count + " of the tower";
+    return "a special prize";
+  }
+  // describe(look)                 -> "Brown bob, a sky blue T-shirt, denim shorts and white sneakers."
+  // describe(look, {slot:"top"})   -> "a sky blue T-shirt"   (slots: skin hair hairColor eyes top bottom dress shoes acc.head acc.face acc.neck acc.hand, or head/face/neck/hand)
+  // describe(look, {full:true})    -> also says skin tone and eyes. {name:"Fin"} -> "Fin has ..." Never throws.
+  function describe(look, opts) {
+    try {
+      opts = opts && typeof opts === "object" ? opts : {};
+      var L = normalizeLook(look, { allowLocked: true }), slot = opts.slot;
+      if (slot) {
+        if (ACC_SLOTS.indexOf(slot) >= 0) slot = "acc." + slot;
+        if (slot === "skin") return "skin tone " + L.skin.slice(1);
+        if (slot === "eyes") return EYE_WORDS[L.eyes];
+        if (slot === "hairColor") return HAIR_WORDS[L.hairColor] + " hair";
+        if (slot.indexOf("acc.") === 0) { var k = slot.slice(4); return L.acc[k] ? describeItem(L.acc[k], L.accC[k]) : (SLOT_LABELS[slot] ? SLOT_LABELS[slot].none : ""); }
+        if (slot === "dress") return L.dress ? describeItem(L.dress, L.dressC) : SLOT_LABELS.dress.none;
+        if (has(SLOTS, slot)) return describeItem(L[slot], slot === "hair" ? L.hairColor : L[SLOTS[slot].color]);
+        return "";
+      }
+      var parts = [describeItem(L.hair, L.hairColor)];
+      if (L.dress) parts.push(describeItem(L.dress, L.dressC)); else parts.push(describeItem(L.top, L.topC), describeItem(L.bottom, L.bottomC));
+      parts.push(describeItem(L.shoes, L.shoesC));
+      if (opts.full) parts.unshift("skin tone " + L.skin.slice(1), EYE_WORDS[L.eyes]);
+      var extras = ACC_SLOTS.filter(function (k) { return L.acc[k]; }).map(function (k) { return describeItem(L.acc[k], L.accC[k]); });
+      var list = function (a) { return a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1]; };
+      var txt = list(parts) + (extras.length ? ", with " + list(extras) : "");
+      if (typeof opts.name === "string" && opts.name.trim()) txt = opts.name.trim().slice(0, 40) + " has " + txt;
+      else txt = txt.charAt(0).toUpperCase() + txt.slice(1);
+      return txt + ".";
+    } catch (e) { return "Your avatar."; }
+  }
+  // label option -> text: string as-is; true -> describe(look); function -> fn(look). With opts.describe, "label: description".
+  function labelText(label, L, withDesc) {
+    var t = "";
+    try { t = label === true ? describe(L) : typeof label === "function" ? String(label(L) || "") : typeof label === "string" ? label : ""; } catch (e) { t = ""; }
+    if (withDesc && label !== true) t = (t ? t.replace(/[.:]\s*$/, "") + ": " : "") + describe(L);
+    return t.slice(0, 300);
+  }
+
+  /* ---------------- colors ---------------- */
+  function shade(hex, f) {
+    var n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+    var h = function (v) { return ("0" + Math.max(0, Math.round(v * (1 - f))).toString(16)).slice(-2); };
+    return "#" + h(r) + h(g) + h(b);
+  }
+  function tint(hex, f) { // mix toward white
+    var n = parseInt(hex.slice(1), 16), r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+    var h = function (v) { return ("0" + Math.min(255, Math.round(v + (255 - v) * f)).toString(16)).slice(-2); };
+    return "#" + h(r) + h(g) + h(b);
+  }
+  // v1.2 hair: every hair color is a gradient (highlight -> base -> shadow) + a shine tone; rainbow is a diagonal
+  // rainbow; galaxy is a deep-space gradient with fixed (non-random) sparkles that move with the hair.
+  var GALAXY_SPARKS = [62, 30, 4, 84, 18, 3, 118, 22, 4, 140, 38, 3, 52, 58, 3, 148, 62, 4, 70, 44, 2, 128, 48, 2, 100, 14, 3, 44, 92, 3, 156, 96, 3, 50, 128, 4, 150, 130, 4,
+    58, 160, 3, 142, 160, 3, 46, 150, 2, 154, 112, 2, 168, 80, 3, 176, 118, 3, 36, 72, 2, 92, 30, 2, 110, 36, 2];
+  function hairPaint(key, p) { // -> [fill, outline, shine, defs]
+    var raw = HAIR_COLORS[key].c, id = p + "-hair";
+    if (key === "rainbow") return ["url(#" + id + ")", "#7c4dff", "#ffffff", '<linearGradient id="' + id + '" gradientUnits="userSpaceOnUse" x1="40" y1="20" x2="160" y2="140"><stop offset="0" stop-color="#ff7aa2"/><stop offset=".2" stop-color="#ff9f43"/><stop offset=".38" stop-color="#ffd84d"/><stop offset=".55" stop-color="#9be15d"/><stop offset=".72" stop-color="#7fd0ff"/><stop offset=".9" stop-color="#b59cff"/></linearGradient>'];
+    if (key === "galaxy") {
+      var sp = "", i, x, y, r;
+      for (i = 0; i < GALAXY_SPARKS.length; i += 3) {
+        x = GALAXY_SPARKS[i]; y = GALAXY_SPARKS[i + 1]; r = GALAXY_SPARKS[i + 2];
+        sp += r > 2 ? '<path d="M' + x + " " + (y - r) + "L" + (x + r * 0.3) + " " + (y - r * 0.3) + "L" + (x + r) + " " + y + "L" + (x + r * 0.3) + " " + (y + r * 0.3) + "L" + x + " " + (y + r) + "L" + (x - r * 0.3) + " " + (y + r * 0.3) + "L" + (x - r) + " " + y + "L" + (x - r * 0.3) + " " + (y - r * 0.3) + 'Z" fill="#fff"/>'
+          : '<circle cx="' + x + '" cy="' + y + '" r="1.3" fill="' + (i % 2 ? "#ffd6f0" : "#bfe9ff") + '"/>';
+      }
+      return ["url(#" + id + ")", "#1f1846", "#c9b8ff", '<radialGradient id="' + id + '-bg" gradientUnits="userSpaceOnUse" cx="90" cy="50" r="170"><stop offset="0" stop-color="#a77dff"/><stop offset=".4" stop-color="#6544d4"/><stop offset=".75" stop-color="#33289a"/><stop offset="1" stop-color="#17123a"/></radialGradient>' +
+        '<pattern id="' + id + '" patternUnits="userSpaceOnUse" x="0" y="0" width="200" height="300"><rect width="200" height="300" fill="url(#' + id + '-bg)"/>' + sp + "</pattern>"];
+    }
+    var light = parseInt(raw.slice(1, 3), 16) + parseInt(raw.slice(3, 5), 16) + parseInt(raw.slice(5, 7), 16) > 600;
+    return ["url(#" + id + ")", shade(raw, light ? 0.28 : 0.35), light ? "#ffffff" : tint(raw, 0.5),
+      '<linearGradient id="' + id + '" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="' + tint(raw, light ? 0.45 : 0.28) + '"/><stop offset=".5" stop-color="' + raw + '"/><stop offset="1" stop-color="' + shade(raw, 0.2) + '"/></linearGradient>'];
+  }
+  function resolve(val, key, p) { // -> [fill, outline]
+    if (typeof val !== "string") val = "#cccccc";
+    if (val.indexOf("url(#") === 0) { var g = val.slice(5, -1); return ["url(#" + p + "-" + g + ")", GRAD_SHADE[key] || GRAD_SHADE[g === "goldfoil" ? "gold_foil" : g] || "#5a2fd6"]; }
+    return [val, shade(val, 0.18)];
+  }
+  function defsFor(p, used) {
+    var d = "";
+    if (used.rainbow) d += '<linearGradient id="' + p + '-rainbow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7aa2"/><stop offset=".25" stop-color="#ffc83d"/><stop offset=".5" stop-color="#9be15d"/><stop offset=".75" stop-color="#7fd0ff"/><stop offset="1" stop-color="#c7b3ff"/></linearGradient>';
+    if (used.sparkle) d += '<radialGradient id="' + p + '-sparkle"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#e3d6ff"/><stop offset="1" stop-color="#c7b3ff"/></radialGradient>';
+    if (used.galaxy) d += '<radialGradient id="' + p + '-galaxy" cx=".35" cy=".3"><stop offset="0" stop-color="#7c4dff"/><stop offset=".6" stop-color="#2f2a7a"/><stop offset="1" stop-color="#1b1640"/></radialGradient>';
+    if (used.goldfoil) d += '<linearGradient id="' + p + '-goldfoil" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0a8"/><stop offset=".5" stop-color="#ffc83d"/><stop offset="1" stop-color="#e0a400"/></linearGradient>';
+    return d;
+  }
+
+  /* ---------------- poses & animations ----------------
+     Joints (degrees, SVG clockwise-positive; L/R = screen side in front view):
+     rootX, rootY (SVG units, -y = up), rootRot (about body center), scaleX/scaleY (about the feet),
+     bodyY, lean (upper body about hips), head (about neck), armL/armR (shoulder), forearmL/forearmR (elbow),
+     legL/legR (hip), shinL/shinR (knee), blink (0..1). armL>0 / armR<0 swings arms outward/up. */
+  var JOINTS = ["rootX", "rootY", "rootRot", "scaleX", "scaleY", "bodyY", "lean", "head", "armL", "forearmL", "armR", "forearmR", "legL", "shinL", "legR", "shinR", "blink"];
+  var REST = { rootX: 0, rootY: 0, rootRot: 0, scaleX: 1, scaleY: 1, bodyY: 0, lean: 0, head: 0, armL: 10, forearmL: -6, armR: -10, forearmR: 6, legL: 2, shinL: 0, legR: -2, shinR: 0, blink: 0 };
+  var TAU = Math.PI * 2;
+  function rest() { var o = {}, k; for (k in REST) o[k] = REST[k]; return o; }
+  function clamp01(x) { return x < 0 ? 0 : x > 1 ? 1 : x; }
+  function ease(x) { x = clamp01(x); return x * x * (3 - 2 * x); }
+  function mix(a, b, e) { return a + (b - a) * e; }
+  function seg(u, a, b) { return clamp01((u - a) / (b - a)); }
+  // fn(t, c) -> partial pose; c = {dir:-1|0|1, A: amplitude (1, or .3 reduced), reduced, height}
+  var ANIMS = {
+    idle: { loop: true, dur: 2.4, mood: "happy", fn: function (t, c) {
+      var p = TAU * t / 2.4, s = Math.sin(p);
+      return { bodyY: 1.6 * s * c.A, scaleY: 1 + 0.012 * s * c.A, armL: 10 + 3 * s * c.A, armR: -10 - 3 * s * c.A, head: 2 * Math.sin(p / 2) * c.A };
+    } },
+    walk: { loop: true, dur: 0.8, mood: "happy", fn: function (t, c) {
+      var p = TAU * t / 0.8, s = Math.sin(p), A = c.A, d = c.dir || 0;
+      return { bodyY: -3 * Math.abs(Math.cos(p)) * A + 1.5 * A, lean: 5 * d * A, head: -2 * d * A,
+        legL: (2 + 16 * s) * A, shinL: -14 * Math.max(0, Math.cos(p)) * A, legR: (-2 + 16 * s) * A, shinR: 14 * Math.max(0, -Math.cos(p)) * A,
+        armL: 12 - 18 * s * A, forearmL: -10, armR: -12 - 18 * s * A, forearmR: 10, rootRot: 1.5 * s * A };
+    } },
+    climb: { loop: true, dur: 1.0, mood: "happy", fn: function (t, c) {
+      var p = TAU * t, s = Math.sin(p), A = c.A, up = Math.max(0, s), dn = Math.max(0, -s);
+      return { armL: 115 + 14 * s * A, forearmL: 28 - 6 * dn * A, armR: -115 + 14 * s * A, forearmR: -28 + 6 * up * A,
+        legL: 6 + 30 * up * A, shinL: -46 * up * A, legR: -6 - 30 * dn * A, shinR: 46 * dn * A,
+        bodyY: -3 * Math.abs(s) * A, head: 4 * s * A, lean: 2 * s * A };
+    } },
+    crouch: { loop: true, dur: 1, mood: "happy", fn: function (t, c) { // held squat with a small "ready..." wiggle
+      var o = crouchPose(1, c.A), s = Math.sin(TAU * t * 2); o.bodyY += 1.2 * s * c.A + (c.reduced ? 0.4 * s : 0); o.armL += 4 * s; o.armR -= 4 * s; return o; } },
+    air: { loop: true, dur: 0.6, mood: "yay", fn: function (t, c) {
+      var s = Math.sin(TAU * t / 0.6) * c.A;
+      return { armL: 120 + 8 * s, forearmL: 25, armR: -120 - 8 * s, forearmR: -25, legL: 14, shinL: -28 + 6 * s, legR: -14, shinR: 28 - 6 * s, scaleY: 1 + 0.04 * c.A };
+    } },
+    land: { loop: false, dur: 0.35, then: "idle", mood: "happy", fn: function (t, c) {
+      var u = t / 0.35, e = u < 0.35 ? ease(u / 0.35) : 1 - ease((u - 0.35) / 0.65);
+      return squash(e, c.A);
+    } },
+    jump: { loop: false, dur: 0.9, then: "idle", mood: "yay", fn: function (t, c) {
+      var u = clamp01(t / (c.dur || 0.9)), A = c.A, H = (c.height == null ? 50 : c.height) * (c.reduced ? 0.35 : 1), o;
+      if (u < 0.22) o = crouchPose(ease(u / 0.22), A);
+      else if (u < 0.36) { var e = ease(seg(u, 0.22, 0.36)), a = crouchPose(1, A); o = {
+        scaleY: mix(a.scaleY, 1 + 0.12 * A, e), scaleX: mix(a.scaleX, 1 - 0.06 * A, e), bodyY: mix(a.bodyY, -2, e),
+        armL: mix(a.armL, 125, e), forearmL: mix(a.forearmL, 20, e), armR: mix(a.armR, -125, e), forearmR: mix(a.forearmR, -20, e),
+        legL: mix(a.legL, 4, e), shinL: mix(a.shinL, 0, e), legR: mix(a.legR, -4, e), shinR: mix(a.shinR, 0, e) }; }
+      else if (u < 0.78) { var f = ease(seg(u, 0.36, 0.78)); o = {
+        scaleY: mix(1 + 0.12 * A, 1, f), scaleX: mix(1 - 0.06 * A, 1, f), armL: mix(125, 110, f), forearmL: 20, armR: mix(-125, -110, f), forearmR: -20,
+        legL: mix(4, 14, Math.sin(Math.PI * f)), shinL: -26 * Math.sin(Math.PI * f) * A, legR: mix(-4, -14, Math.sin(Math.PI * f)), shinR: 26 * Math.sin(Math.PI * f) * A }; }
+      else if (u < 0.88) o = squash(ease(seg(u, 0.78, 0.88)), A);
+      else o = squash(1 - ease(seg(u, 0.88, 1)), A);
+      o.rootY = u > 0.3 && u < 0.8 ? -H * Math.sin(Math.PI * (u - 0.3) / 0.5) : 0;
+      return o;
+    } },
+    fall: { loop: true, dur: 0.9, mood: "whoa", fn: function (t, c) {
+      var p = TAU * t / 0.9, s = Math.sin(p * 2), A = c.A;
+      return { rootRot: c.reduced ? 10 * Math.sin(p) : 360 * (t / 0.9 % 1), armL: 120 + 30 * s * A, forearmL: 30 * Math.sin(p * 3) * A, armR: -120 + 30 * s * A, forearmR: -30 * Math.sin(p * 3 + 1) * A,
+        legL: 20 + 18 * Math.sin(p * 2 + 1) * A, shinL: -20 * A, legR: -20 - 18 * Math.sin(p * 2) * A, shinR: 20 * A, head: 6 * s * A };
+    } },
+    cheer: { loop: true, dur: 0.9, mood: "yay", fn: function (t, c) {
+      var p = TAU * t / 0.9, s = Math.sin(p), A = c.A, hop = Math.abs(Math.sin(p));
+      return { rootY: -14 * hop * A, scaleY: 1 + 0.04 * (hop - 0.5) * A, armL: 122 + 12 * s * A, forearmL: 22 + 10 * s * A, armR: -122 + 12 * s * A, forearmR: -22 + 10 * s * A,
+        legL: 6 + 6 * hop * A, legR: -6 - 6 * hop * A, head: 5 * s * A };
+    } },
+    dance: { loop: true, dur: 1.2, mood: "yay", fn: function (t, c) {
+      var p = TAU * t / 1.2, s = Math.sin(p), s2 = Math.sin(p * 2), A = c.A;
+      return { rootX: 7 * s * A, rootRot: 4 * s * A, lean: 7 * s * A, head: -8 * s * A, bodyY: 3 * Math.abs(s2) * A,
+        armL: 70 + 45 * Math.max(0, s) * A, forearmL: 10 + 30 * s * A, armR: -70 - 45 * Math.max(0, -s) * A, forearmR: -10 + 30 * s * A,
+        legL: 8 + 8 * s * A, shinL: -14 * Math.max(0, -s2) * A, legR: -8 + 8 * s * A, shinR: 14 * Math.max(0, s2) * A, scaleY: 1 - 0.03 * Math.abs(s2) * A };
+    } },
+    wave: { loop: true, dur: 1.0, mood: "happy", fn: function (t, c) {
+      var s = Math.sin(TAU * t * 2), A = c.A;
+      return { armR: -105, forearmR: -45 + 20 * s * A, head: 4 + 2 * s * A, armL: 12, lean: -2 * A, bodyY: 0.8 * Math.sin(TAU * t) * A };
+    } },
+    oops: { loop: false, dur: 0.8, then: "idle", mood: "sad", fn: function (t, c) {
+      var u = clamp01(t / 0.8), k = 1 - u, A = c.A;
+      return { head: 12 * Math.sin(TAU * u * 3) * k * A, rootX: 4 * Math.sin(TAU * u * 3) * k * A, armL: 30 + 20 * Math.sin(Math.PI * u), forearmL: 50 * Math.sin(Math.PI * u), armR: -30 - 20 * Math.sin(Math.PI * u), forearmR: -50 * Math.sin(Math.PI * u), bodyY: 3 * Math.sin(Math.PI * u) };
+    } }
+  };
+  function crouchPose(e, A) {
+    return { scaleY: 1 - 0.16 * e * A, scaleX: 1 + 0.1 * e * A, bodyY: 6 * e * A, armL: mix(10, 32, e), forearmL: mix(-6, -20, e), armR: mix(-10, -32, e), forearmR: mix(6, 20, e),
+      legL: mix(2, 18, e * A), shinL: -34 * e * A, legR: mix(-2, -18, e * A), shinR: 34 * e * A };
+  }
+  function squash(e, A) {
+    return { scaleY: 1 - 0.18 * e * A, scaleX: 1 + 0.12 * e * A, bodyY: 5 * e * A, armL: mix(10, 50, e), forearmL: mix(-6, 14, e), armR: mix(-10, -50, e), forearmR: mix(6, -14, e),
+      legL: mix(2, 16, e * A), shinL: -28 * e * A, legR: mix(-2, -16, e * A), shinR: 28 * e * A };
+  }
+  // Static pose names accepted by render() (spec §4) -> [animation, time]
+  var STATIC = { idle: ["idle", 0], yay: ["cheer", 0.225], jump: ["air", 0], land: ["land", 0.12], climb: ["climb", 0.25], wave: ["wave", 0.125], crouch: ["crouch", 0], fall: ["fall", 0.1], dance: ["dance", 0.3], walk: ["walk", 0.2], cheer: ["cheer", 0.225], oops: ["oops", 0.3] };
+  function poseAt(name, t, opts) {
+    opts = opts || {};
+    var a = ANIMS[name] || ANIMS.idle, reduced = !!opts.reduced, o = rest(), k, part, dur = opts.duration || a.dur;
+    var tt = Number(t) || 0; if (tt < 0) tt = 0;
+    if (a.loop) tt = tt % (name === "jump" ? dur : a.dur); else tt = Math.min(tt, dur);
+    part = a.fn(name === "jump" ? tt : (a.loop ? tt : Math.min(tt, a.dur)), { dir: opts.dir || 0, A: reduced ? 0.3 : 1, reduced: reduced, height: opts.height, dur: dur });
+    for (k in part) if (typeof part[k] === "number" && isFinite(part[k])) o[k] = part[k];
+    return o;
+  }
+
+  /* ---------------- SVG build ---------------- */
+  function n2(v) { return (Math.round(v * 100) / 100).toString(); }
+  function transforms(p, dir) {
+    var bodyT = "translate(0 " + n2(p.bodyY) + ") rotate(" + n2(p.lean) + " 100 205)", headT = "rotate(" + n2(p.head) + " 100 120)";
+    var sh = Math.max(0.45, Math.min(1, 1 + p.rootY / 160));
+    return {
+      shadow: "translate(" + n2(p.rootX) + " 0) translate(100 292) scale(" + n2(sh) + ") translate(-100 -292)",
+      root: "translate(" + n2(p.rootX) + " " + n2(p.rootY) + ") rotate(" + n2(p.rootRot) + " 100 200) translate(100 292) scale(" + n2(p.scaleX) + " " + n2(p.scaleY) + ") translate(-100 -292)",
+      hb: bodyT + " " + headT, body: bodyT, head: headT,
+      armL: "rotate(" + n2(p.armL) + " 78 138)", foreL: "rotate(" + n2(p.forearmL) + " 78 163)",
+      armR: "rotate(" + n2(p.armR) + " 122 138)", foreR: "rotate(" + n2(p.forearmR) + " 122 163)",
+      item: "rotate(" + n2(-(p.armR + p.forearmR + p.lean)) + " 122 194)",
+      legL: "rotate(" + n2(p.legL) + " 89 202)", shinL: "rotate(" + n2(p.shinL) + " 89 236)",
+      legR: "rotate(" + n2(p.legR) + " 111 202)", shinR: "rotate(" + n2(p.shinR) + " 111 236)",
+      face: "translate(" + n2(7 * (dir || 0)) + " 0)",
+      eyes: "translate(0 80) scale(1 " + n2(1 - 0.92 * clamp01(p.blink)) + ") translate(0 -80)"
+    };
+  }
+  function eyesSVG(style, mood) { // v1.2: bigger, rounder eyes with two shine dots
+    var s = "", xs = [82, 118];
+    if (style === "happy") return '<path d="M73 82q9 -10 18 0M109 82q9 -10 18 0" stroke="' + INK + '" stroke-width="4" fill="none" stroke-linecap="round"/>';
+    xs.forEach(function (x, i) {
+      if (style === "big") s += '<ellipse cx="' + x + '" cy="80" rx="8" ry="9.5" fill="' + INK + '"/><ellipse cx="' + x + '" cy="84" rx="5" ry="3.6" fill="#7a6ae0" opacity=".55"/><circle cx="' + (x + 2.8) + '" cy="75.8" r="3.2" fill="#fff"/><circle cx="' + (x - 2.6) + '" cy="84.5" r="1.6" fill="#fff"/>';
+      else s += '<ellipse cx="' + x + '" cy="80" rx="6.2" ry="7" fill="' + INK + '"/><circle cx="' + (x + 2.2) + '" cy="77.2" r="2.4" fill="#fff"/><circle cx="' + (x - 2) + '" cy="83" r="1.1" fill="#fff" opacity=".9"/>';
+      if (style === "lash") { var o = i ? 1 : -1; s += '<path d="M' + (x + o * 4) + " 74l" + o * 5 + " -4M" + (x + o * 6) + " 78l" + o * 6 + ' -1" stroke="' + INK + '" stroke-width="2.5" stroke-linecap="round"/>'; }
+    });
+    return s;
+  }
+  function faceSVG(look, mood) { // v1.2: soft brows (hair color), tiny nose, open smile, bigger blush with shine
+    var m = "", brows = '<path d="M75 66q7 -4 14 -1M111 65q7 -3 14 1" stroke="{hd}" stroke-width="3" fill="none" stroke-linecap="round" opacity=".85"/>';
+    if (mood === "yay") m = '<path d="M88 94q12 17 24 0z" fill="#e35d7a" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/><path d="M94 101.5q6 -4 12 0q-6 5 -12 0z" fill="#ff9fb5"/>';
+    else if (mood === "sad") { brows = ""; m = '<path d="M93 102q7 -6 14 0" stroke="' + INK + '" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M72 68l9 3M128 68l-9 3" stroke="' + INK + '" stroke-width="2.5" stroke-linecap="round"/>'; }
+    else if (mood === "whoa") { brows = ""; m = '<ellipse cx="100" cy="100" rx="5" ry="6.5" fill="#e35d7a" stroke="' + INK + '" stroke-width="2.5"/><path d="M73 66l10 -2M127 66l-10 -2" stroke="' + INK + '" stroke-width="2.5" stroke-linecap="round"/>'; }
+    else m = '<path d="M91 95Q100 105 109 95Q100 98.5 91 95Z" fill="#e35d7a" stroke="' + INK + '" stroke-width="2.5" stroke-linejoin="round"/>';
+    return '<g data-p="eyes">' + eyesSVG(look.eyes, mood) + "</g>" + brows + m + '<path d="M97.5 88.5q2.5 2 5 0" stroke="{sd}" stroke-width="2.2" fill="none" stroke-linecap="round"/>' +
+      '<ellipse cx="67" cy="93" rx="8.5" ry="5" fill="#ff8fab" opacity=".5"/><ellipse cx="133" cy="93" rx="8.5" ry="5" fill="#ff8fab" opacity=".5"/>' +
+      '<circle cx="64" cy="91.5" r="1.5" fill="#fff" opacity=".7"/><circle cx="130" cy="91.5" r="1.5" fill="#fff" opacity=".7"/>';
+  }
+  var cache = {}, cacheN = 0;
+  // opts: crop, size, mood, pose (static name or animation name), t, facing, idPrefix, label, reducedMotion
+  function render(look, opts) {
+    opts = opts && typeof opts === "object" ? opts : {};
+    var L = normalizeLook(look, { allowLocked: true });
+    var lbl = labelText(opts.label, L, opts.describe);
+    var key = JSON.stringify([L, opts.crop, opts.size, opts.mood, opts.pose, opts.t, opts.facing, opts.idPrefix, lbl]);
+    if (has(cache, key)) return cache[key];
+    var st = STATIC[opts.pose] || [ANIMS[opts.pose] ? opts.pose : "idle", 0];
+    var pose = poseAt(st[0], opts.t == null ? st[1] : opts.t, { dir: dirOf(opts.facing), reduced: !!opts.reducedMotion });
+    pose.rootX = 0; pose.rootY = 0;
+    var mood = MOODS.indexOf(opts.mood) >= 0 ? opts.mood : (ANIMS[st[0]].mood || "happy");
+    var svg = buildSVG(L, { crop: opts.crop, size: opts.size, mood: mood, pose: pose, dir: dirOf(opts.facing), idPrefix: safeId(opts.idPrefix || "av1"), label: lbl });
+    if (++cacheN > 300) { cache = {}; cacheN = 1; }
+    cache[key] = svg;
+    return svg;
+  }
+  function dirOf(f) { return f === "left" ? -1 : f === "right" ? 1 : 0; }
+  function safeId(s) { s = String(s).replace(/[^A-Za-z0-9_-]/g, ""); return /^[A-Za-z]/.test(s) ? s : "av" + s; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function buildSVG(L, o) {
+    var p = o.idPrefix, used = {};
+    var col = function (key) { var v = PALETTE[key]; if (typeof v === "string" && v.indexOf("url(#") === 0) used[v.slice(5, -1)] = 1; return resolve(v, key, p); };
+    var skin = SKINS[L.skin].c, sk = [skin, shade(skin, 0.16)];
+    var hcRaw = HAIR_COLORS[L.hairColor].c; if (hcRaw.indexOf("url(#") === 0) used[hcRaw.slice(5, -1)] = 1;
+    var hc = hairPaint(L.hairColor, p);
+    var parts = {}, add = function (item, c1key, c2key) {
+      if (!item) return;
+      var c1 = c1key ? col(c1key) : ["#cccccc", "#aaaaaa"], c2 = col(c2key || item.c2 || "white"), k;
+      for (k in item.svg) {
+        parts[k] = (parts[k] || "") + item.svg[k].replace(/\{c1d\}/g, c1[1]).replace(/\{c1\}/g, c1[0]).replace(/\{c2d\}/g, c2[1]).replace(/\{c2\}/g, c2[0]);
+      }
+    };
+    // Layer order (closet spec 3.1): hair back, body, bottom, shoes, top, dress, neck, face, face acc, hair front, head acc, hand
+    var hair = BY_ID[L.hair], hat = L.acc.head ? BY_ID[L.acc.head] : null, mode = hat && hat.hairMode || "full";
+    if (!L.dress) add(BY_ID[L.bottom], L.bottomC);
+    add(BY_ID[L.shoes], L.shoesC);
+    if (!L.dress) add(BY_ID[L.top], L.topC); else add(BY_ID[L.dress], L.dressC);
+    ACC_SLOTS.forEach(function (k) { if (L.acc[k]) add(BY_ID[L.acc[k]], L.accC[k]); });
+    var g = function (k) { return parts[k] || ""; };
+    var tr = transforms(o.pose, o.dir);
+    var G = function (name, cls, inner) { return '<g data-p="' + name + '"' + (cls ? ' class="' + cls + '"' : "") + ' transform="' + tr[name] + '">' + inner + "</g>"; };
+    var limbArm = function (k) {
+      var x = AX[k], fore = cap(x, 163, x, 186, 12, sk[0], sk[1]) + g("fore" + k) + '<circle cx="' + x + '" cy="194" r="9" fill="' + sk[0] + '" stroke="' + sk[1] + '" stroke-width="3"/>' + (k === "R" ? G("item", "av-hand", g("hand") ? '<g transform="translate(122 194)">' + g("hand") + "</g>" : "") : "");
+      return G("arm" + k, "av-arm" + k, cap(x, 138, x, 163, 12, sk[0], sk[1]) + g("arm" + k) + G("fore" + k, "av-fore" + k, fore));
+    };
+    var limbLeg = function (k) {
+      var x = LX[k], s = k === "L" ? -2 : 2;
+      var shin = cap(x, 236, x, 268, 13, sk[0], sk[1]) + '<ellipse cx="' + (x + s) + '" cy="281" rx="12" ry="8" fill="' + sk[0] + '" stroke="' + sk[1] + '" stroke-width="3"/>' + g("shin" + k) + g("foot" + k);
+      return G("leg" + k, "av-leg" + k, cap(x, 204, x, 236, 13, sk[0], sk[1]) + g("thigh" + k) + G("shin" + k, "av-shin" + k, shin));
+    };
+    var sub = function (s) { return s.replace(/\{sd\}/g, sk[1]).replace(/\{s\}/g, sk[0]).replace(/\{hd\}/g, hc[1]).replace(/\{hs\}/g, hc[2]).replace(/\{h\}/g, hc[0]); };
+    var front = mode === "hide" ? "" : (hair ? hair.svg.front : "");
+    if (front && mode === "tuck") front = '<g clip-path="url(#' + p + '-tuck)">' + front + "</g>";
+    var head = '<circle cx="51" cy="80" r="9" fill="' + sk[0] + '" stroke="' + sk[1] + '" stroke-width="3"/><circle cx="149" cy="80" r="9" fill="' + sk[0] + '" stroke="' + sk[1] + '" stroke-width="3"/>' +
+      '<ellipse cx="100" cy="74" rx="50" ry="46" fill="' + sk[0] + '" stroke="' + sk[1] + '" stroke-width="3"/>' +
+      G("face", "av-face", faceSVG(L, o.mood) + g("face")) + front + g("head");
+    var torso = '<rect x="91" y="108" width="18" height="24" rx="6" fill="' + sk[0] + '"/>' + P(TORSO, sk[0], sk[1]) + g("hip") + g("torso") + g("over") + g("neck");
+    var body = sub(
+      G("shadow", "", '<ellipse cx="100" cy="292" rx="42" ry="7" fill="' + INK + '" opacity=".14"/>') +
+      G("root", "av-root",
+        G("hb", "av-hairBack", hair ? hair.svg.back : "") + limbLeg("L") + limbLeg("R") +
+        G("body", "av-body", torso + G("head", "av-head", head) + limbArm("L") + limbArm("R"))));
+    var defs = defsFor(p, used) + hc[3] + (mode === "tuck" ? '<clipPath id="' + p + '-tuck"><rect x="0" y="' + (hat.brimY || 60) + '" width="200" height="260"/></clipPath>' : "");
+    var vb = o.crop === "head" ? "40 10 120 120" : "0 0 200 300";
+    var size = Number(o.size) > 0 ? Number(o.size) : 0;
+    var wh = size ? ' width="' + n2(o.crop === "head" ? size : size * 2 / 3) + '" height="' + n2(size) + '"' : ' width="100%" height="100%"';
+    // Labeled: role=img + aria-label + <title> (VoiceOver/TalkBack/NVDA all read it). Unlabeled: hidden from screen readers.
+    var a11y = o.label ? ' role="img" aria-label="' + esc(o.label) + '" focusable="false"' : ' aria-hidden="true" focusable="false"';
+    var title = o.label ? "<title>" + esc(o.label) + "</title>" : "";
+    return '<svg xmlns="http://www.w3.org/2000/svg" class="elzee-avatar" viewBox="' + vb + '"' + wh + a11y + ' style="overflow:' + (o.crop === "head" ? "hidden" : "visible") + ';display:block">' + title + (defs ? "<defs>" + defs + "</defs>" : "") + body + "</svg>";
+  }
+
+  /* ---------------- live instances (DOM) ---------------- */
+  var live = [], rafId = 0, lastTs = 0, uid = 0;
+  function loop(ts) {
+    var dt = lastTs ? (ts - lastTs) / 1000 : 0; lastTs = ts;
+    live.slice().forEach(function (inst) { if (inst._auto) inst._advance(dt); });
+    rafId = live.some(function (i) { return i._auto; }) ? root.requestAnimationFrame(loop) : 0;
+    if (!rafId) lastTs = 0;
+  }
+  function ensureLoop() { if (!rafId && typeof root.requestAnimationFrame === "function") { lastTs = 0; rafId = root.requestAnimationFrame(loop); } }
+  function lerpPose(a, b, e) { var o = {}, i, k; for (i = 0; i < JOINTS.length; i++) { k = JOINTS[i]; o[k] = mix(a[k], b[k], e); } return o; }
+  function hashStr(s) { var h = 7, i; for (i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 9973; return h; }
+
+  // create(container, look, opts) -> instance. opts: { animation, facing, mood, size, crop, manual, reducedMotion: "auto"|true|false, idPrefix, label, speed }
+  function create(container, look, opts) {
+    if (!container || typeof container.appendChild !== "function") throw new TypeError("ElzeeAvatar.create: container must be a DOM element");
+    opts = opts && typeof opts === "object" ? opts : {};
+    var mq = null, onMq = null;
+    if (opts.reducedMotion === "auto" || opts.reducedMotion == null) {
+      try { mq = root.matchMedia ? root.matchMedia("(prefers-reduced-motion: reduce)") : null; } catch (e) { mq = null; }
+    }
+    var inst = {
+      version: VERSION, el: null, look: normalizeLook(look, { allowLocked: true }),
+      _auto: !opts.manual, _anim: "idle", _t: 0, _clock: 0, _speed: 1, _aopts: {}, _done: false,
+      _dir: dirOf(opts.facing), _mood: MOODS.indexOf(opts.mood) >= 0 ? opts.mood : null, _over: null,
+      _from: null, _blend: 1, _pose: rest(), _parts: {}, _last: {}, _id: safeId(opts.idPrefix || ("eza" + (++uid))),
+      _reduced: opts.reducedMotion === true || (mq ? !!mq.matches : false), _destroyed: false,
+      _blinkOff: 0, _label: opts.label
+    };
+    inst._blinkOff = (hashStr(inst._id) % 100) / 100 * 3.7;
+    inst._render = function () {
+      var mood = inst._mood || (ANIMS[inst._anim].mood || "happy");
+      inst._shownMood = mood;
+      container.innerHTML = buildSVG(inst.look, { crop: opts.crop, size: opts.size, mood: mood, pose: inst._pose, dir: inst._dir, idPrefix: inst._id, label: labelText(inst._label, inst.look, opts.describe) });
+      inst.el = container.lastElementChild;
+      inst._parts = {}; inst._last = {};
+      var nodes = inst.el.querySelectorAll("[data-p]"), i;
+      for (i = 0; i < nodes.length; i++) inst._parts[nodes[i].getAttribute("data-p")] = nodes[i];
+      inst._apply(true);
+    };
+    inst._sample = function () {
+      var a = ANIMS[inst._anim], p = poseAt(inst._anim, inst._t, { dir: inst._dir, reduced: inst._reduced, height: inst._aopts.height, duration: inst._aopts.duration }), k;
+      if (inst._from && inst._blend < 1) p = lerpPose(inst._from, p, ease(inst._blend));
+      var bt = (inst._clock + inst._blinkOff) % 3.7;
+      p.blink = (inst._anim === "fall") ? 0 : (bt < 0.14 ? Math.sin(Math.PI * bt / 0.14) : 0);
+      if (inst._over) for (k in inst._over) p[k] = inst._over[k];
+      return p;
+    };
+    inst._apply = function (force) {
+      var tr = transforms(inst._pose, inst._dir), k;
+      for (k in inst._parts) if (tr[k] && (force || inst._last[k] !== tr[k])) { inst._parts[k].setAttribute("transform", tr[k]); inst._last[k] = tr[k]; }
+    };
+    inst._advance = function (dt) {
+      if (inst._destroyed) return inst;
+      dt = Number(dt); if (!isFinite(dt) || dt < 0) dt = 0; if (dt > 0.1) dt = 0.1;
+      inst._clock += dt;
+      inst._t += dt * inst._speed;
+      if (inst._blend < 1) inst._blend = Math.min(1, inst._blend + dt / 0.15);
+      var a = ANIMS[inst._anim], dur = inst._aopts.duration || a.dur;
+      if (!a.loop && inst._t >= dur && !inst._done) {
+        inst._done = true;
+        var cb = inst._aopts.onDone, nxt = has(inst._aopts, "then") ? inst._aopts.then : a.then;
+        if (nxt && ANIMS[nxt]) inst.setAnimation(nxt);
+        if (typeof cb === "function") { try { cb(inst); } catch (e) { if (root.console) root.console.error(e); } }
+      }
+      inst._pose = inst._sample();
+      var mood = inst._mood || (ANIMS[inst._anim].mood || "happy");
+      if (mood !== inst._shownMood) inst._render(); else inst._apply(false);
+      return inst;
+    };
+    // setAnimation(name, {speed, loop?, height, duration, then, onDone, restart})
+    inst.setAnimation = function (name, o) {
+      if (!has(ANIMS, name)) name = "idle";
+      o = o && typeof o === "object" ? o : {};
+      if (name === inst._anim && !o.restart && ANIMS[name].loop) { inst._speed = Number(o.speed) > 0 ? Number(o.speed) : inst._speed; return inst; }
+      inst._from = inst._reduced ? null : inst._pose; inst._blend = inst._reduced ? 1 : 0;
+      inst._anim = name; inst._t = 0; inst._done = false; inst._aopts = o;
+      inst._speed = Number(o.speed) > 0 ? Number(o.speed) : 1;
+      return inst;
+    };
+    inst.getAnimation = function () { return inst._anim; };
+    inst.setFacing = function (f) { var d = dirOf(f); if (d !== inst._dir) { inst._dir = d; inst._apply(true); } return inst; };
+    inst.setMood = function (m) { inst._mood = MOODS.indexOf(m) >= 0 ? m : null; inst._render(); return inst; };
+    // setPose("climb") = setAnimation (spec §4); setPose({armL: 90, ...}) = hold joint overrides; setPose(null) clears.
+    inst.setPose = function (p) {
+      if (typeof p === "string") return inst.setAnimation(p);
+      if (!p || typeof p !== "object") { inst._over = null; return inst; }
+      var o = inst._over || {}, k; for (k in p) if (JOINTS.indexOf(k) >= 0 && typeof p[k] === "number" && isFinite(p[k])) o[k] = p[k];
+      inst._over = o; inst._pose = inst._sample(); inst._apply(false); return inst;
+    };
+    // setLabel("Fin") / setLabel(true) (= describe(look), kept in sync on setLook) / setLabel(null) (decorative)
+    inst.setLabel = function (l) { inst._label = l; inst._render(); return inst; };
+    inst.getLabel = function () { return labelText(inst._label, inst.look, opts.describe); };
+    inst.clearPose = function () { inst._over = null; return inst; };
+    inst.setLook = function (l) { inst.look = normalizeLook(l, { allowLocked: true }); inst._render(); return inst; };
+    // update(dtSeconds) advances time (manual mode); update(lookObject) = setLook (spec §4 mount handle).
+    inst.update = function (x) { return (x && typeof x === "object") ? inst.setLook(x) : inst._advance(x); };
+    inst.tick = inst._advance;
+    inst.setTime = function (t) { inst._t = Math.max(0, Number(t) || 0); inst._blend = 1; inst._done = false; inst._pose = inst._sample(); inst._apply(false); return inst; };
+    inst.setManual = function (m) { inst._auto = !m; if (inst._auto) ensureLoop(); return inst; };
+    inst.setReducedMotion = function (r) { inst._reduced = !!r; return inst; };
+    inst.getState = function () { return { animation: inst._anim, t: inst._t, done: inst._done, facing: ["left", "front", "right"][inst._dir + 1], mood: inst._shownMood, reduced: inst._reduced, pose: JSON.parse(JSON.stringify(inst._pose)) }; };
+    inst.destroy = function () {
+      if (inst._destroyed) return;
+      inst._destroyed = true; inst._auto = false;
+      live = live.filter(function (x) { return x !== inst; });
+      if (mq && onMq) { try { mq.removeEventListener ? mq.removeEventListener("change", onMq) : mq.removeListener(onMq); } catch (e) { /* old Safari */ } }
+      if (inst.el && inst.el.parentNode === container) container.removeChild(inst.el);
+      inst.el = null; inst._parts = {};
+    };
+    if (mq) { onMq = function () { inst._reduced = !!mq.matches; }; try { mq.addEventListener ? mq.addEventListener("change", onMq) : mq.addListener(onMq); } catch (e) { /* ignore */ } }
+    inst.setAnimation(opts.animation || opts.pose || "idle", { speed: opts.speed });
+    inst._blend = 1; inst._pose = inst._sample();
+    inst._render();
+    live.push(inst);
+    if (inst._auto) ensureLoop();
+    return inst;
+  }
+  // Spec §4 alias: mount(el, look, {pose, mood, ...}) -> handle with setPose/setMood/update/destroy
+  function mount(el, look, opts) { opts = opts && typeof opts === "object" ? opts : {}; var o = {}, k; for (k in opts) o[k] = opts[k]; if (!o.animation) o.animation = STATIC[o.pose] ? STATIC[o.pose][0] : o.pose; return create(el, look, o); }
+
+  var api = {
+    version: VERSION,
+    ITEMS: deepFreeze(ITEMS), SKINS: deepFreeze(SKINS), PALETTE: deepFreeze(PALETTE), HAIR_COLORS: deepFreeze(HAIR_COLORS),
+    EYES: deepFreeze(EYES), SLOTS: deepFreeze(SLOTS), ACC_SLOTS: deepFreeze(ACC_SLOTS), MOODS: deepFreeze(MOODS), STARTER: deepFreeze(STARTER),
+    JOINTS: deepFreeze(JOINTS.slice()),
+    ANIMATIONS: deepFreeze(Object.keys(ANIMS).map(function (k) { return { name: k, loop: ANIMS[k].loop, duration: ANIMS[k].dur, mood: ANIMS[k].mood, then: ANIMS[k].then || null }; })),
+    POSES: deepFreeze(Object.keys(STATIC)),
+    defaultLook: function () { return clone(DEFAULT_LOOK); },
+    SLOT_LABELS: deepFreeze(SLOT_LABELS), COLOR_WORDS: deepFreeze(COLOR_WORDS), HAIR_WORDS: deepFreeze(HAIR_WORDS), EYE_WORDS: deepFreeze(EYE_WORDS),
+    describe: describe, describeItem: describeItem, describeUnlock: describeUnlock, readLookFor: readLookFor,
+    describeColor: function (key) { return has(HAIR_WORDS, key) && !has(COLOR_WORDS, key) ? HAIR_WORDS[key] : colorWord(key); },
+    item: function (id) { return has(BY_ID, id) ? BY_ID[id] : null; },
+    normalizeLook: normalizeLook, validate: normalizeLook, starterLook: starterLook, readLook: readLook,
+    render: render, poseAt: poseAt, create: create, mount: mount
+  };
+  deepFreeze(api);
+  if (root && typeof root.document !== "undefined") root.ElzeeAvatar = api; // browser: the one global
+  else if (typeof module === "object" && module && module.exports) module.exports = api; // Node tests
+})(typeof window !== "undefined" ? window : this);
+/*AVATAR-END*/
+</script>
 <script>
 "use strict";
 /* ==========================================================================
@@ -383,6 +1474,136 @@ const PATHS = [
         c: ["One carrot can't tell you about ALL vegetables", "Carrots are orange, but most other vegetables are green", "She ate too many carrots"], why: "One carrot is just one veggie. There are tons more to try!" }
     ]}
   ]}
+  ,
+  // ---- 1.3.7: new Little Thinkers worlds (picture-first; every choice has an emoji + a word so read-aloud works) ----
+  { id: "patterns", title: "What Comes Next?", emoji: "🌈", color: "#e84393", dark: "#b8256f", light: "#ffe6f2",
+    blurb: "Find the pattern and keep it going!",
+    levels: [
+    { name: "Color Beads", qs: [
+      { pic: "🔴 🔵 🔴 🔵 ❔", q: "Red, blue, red, blue…", ask: "What comes next?",
+        c: ["🔴 Red", "🔵 Blue", "🟢 Green"], why: "The beads go red, blue, red, blue. After blue comes red again!" },
+      { pic: "🐶 🐱 🐶 🐱 ❔", q: "Dog, cat, dog, cat…", ask: "Who comes next?",
+        c: ["🐶 Dog", "🐱 Cat", "🐭 Mouse"], why: "Dog, cat, dog, cat. After cat comes dog!" },
+      { pic: "⭐ ⭐ 🌙 ⭐ ⭐ 🌙 ❔", q: "Star, star, moon. Star, star, moon…", ask: "What comes next?",
+        c: ["⭐ Star", "🌙 Moon", "☀️ Sun"], why: "Two stars, then a moon. A new group starts with a star!" },
+      { pic: "🍎 🍌 🍎 ❔ 🍎 🍌", q: "Apple, banana, apple, a missing spot, apple, banana.", ask: "What is missing?",
+        c: ["🍌 Banana", "🍎 Apple", "🍇 Grapes"], why: "Apple and banana take turns. The missing spot comes right after an apple, so it's banana!" },
+      { pic: "🟢 🟡 🟢 🟡 🟢 ❔", q: "Green, yellow, green, yellow, green…", ask: "What comes next?",
+        c: ["🟡 Yellow", "🟢 Green", "🔴 Red"], why: "Green and yellow take turns. After green comes yellow!" }
+    ]},
+    { name: "Pattern Train", qs: [
+      { pic: "🐸 🐰 🐻 🐸 🐰 ❔", q: "Frog, bunny, bear. Frog, bunny…", ask: "Who comes next?",
+        c: ["🐻 Bear", "🐸 Frog", "🐰 Bunny"], why: "The train goes frog, bunny, bear, over and over. After bunny comes bear!" },
+      { pic: "👏 👏 🦶 👏 👏 🦶 ❔", q: "Clap, clap, stomp. Clap, clap, stomp…", ask: "What comes next?",
+        c: ["👏 Clap", "🦶 Stomp", "👋 Wave"], why: "Clap, clap, stomp is done, so it starts over. The new group begins with a clap!" },
+      { pic: "🔺 🟦 🟦 🔺 🟦 🟦 ❔", q: "Triangle, square, square. Triangle, square, square…", ask: "What comes next?",
+        c: ["🔺 Triangle", "🟦 Square", "⚪ Circle"], why: "One triangle, two squares, then it starts again with a triangle!" },
+      { pic: "☀️ 🌧️ ☀️ 🌧️ ❔ 🌧️", q: "Sun, rain, sun, rain, a missing spot, rain.", ask: "What is missing?",
+        c: ["☀️ Sun", "🌧️ Rain", "❄️ Snow"], why: "Sun and rain take turns. The spot right before rain is sun!" },
+      { pic: "🍓 🍓 🍋 🍓 🍓 🍋 🍓 ❔", q: "Strawberry, strawberry, lemon. Strawberry, strawberry, lemon. Strawberry…", ask: "What comes next?",
+        c: ["🍓 Strawberry", "🍋 Lemon", "🍊 Orange"], why: "Two strawberries come before each lemon. We only have one so far, so next is another strawberry!" }
+    ]},
+    { name: "Growing Patterns", qs: [
+      { pic: "🟣 · 🟣🟣 · 🟣🟣🟣 · ❔", q: "One dot, then two dots, then three dots…", ask: "How many dots come next?",
+        c: ["4️⃣ Four dots", "3️⃣ Three dots", "1️⃣ One dot"], why: "Each group gets one more dot: one, two, three… then four!" },
+      { pic: "🌱 ❔ 🌳", q: "A tiny sprout grows bigger and bigger until it is a tall tree.", ask: "What goes in the middle?",
+        c: ["🌿 A small plant", "🌰 A seed", "🍂 A dry leaf"], why: "Sprout, then a small plant, then a tree. It grows a little at a time! The seed comes before the sprout." },
+      { pic: "🐣 ❔ 🐔", q: "A baby chick hatches. Later it is a big hen.", ask: "What goes in the middle?",
+        c: ["🐥 A bigger chick", "🥚 An egg", "🍳 A fried egg"], why: "The egg comes BEFORE the chick hatches. In the middle, the chick is growing bigger!" },
+      { pic: "1️⃣ 2️⃣ 3️⃣ ❔ 5️⃣", q: "One, two, three, a missing spot, five.", ask: "What number is missing?",
+        c: ["4️⃣ Four", "6️⃣ Six", "2️⃣ Two"], why: "Counting goes one, two, three, four, five. Four is missing!" },
+      { pic: "2️⃣ 4️⃣ 6️⃣ ❔", q: "Two, four, six… jumping by twos!", ask: "What comes next?",
+        c: ["8️⃣ Eight", "7️⃣ Seven", "9️⃣ Nine"], why: "Jump by twos: two, four, six, eight! Seven is only one more, not two." }
+    ]},
+    { name: "Fix the Pattern", qs: [
+      { pic: "🐶 🐱 🐶 🐱 🐱", q: "The pattern is dog, cat, dog, cat. But the last one is wrong!", ask: "What should the last one be?",
+        c: ["🐶 Dog", "🐱 Cat", "🐰 Bunny"], why: "After cat comes dog. The last one should be a dog!" },
+      { pic: "⬆️ ⬇️ ⬆️ ⬇️ ❔", q: "Up, down, up, down…", ask: "Which way is next?",
+        c: ["⬆️ Up", "⬇️ Down", "➡️ Sideways"], why: "Up and down take turns. After down comes up!" },
+      { pic: "🍪 🥛 🍪 🥛 🍪 🥛", q: "Cookie, milk, cookie, milk, cookie, milk.", ask: "How many cookies are there?",
+        c: ["3️⃣ Three", "2️⃣ Two", "6️⃣ Six"], why: "Count only the cookies: one, two, three! The other three are milk." },
+      { pic: "🔵 🟡 🟡 🔵 🟡 🟡 🔵 ❔ ❔", q: "Blue, yellow, yellow. Blue, yellow, yellow. Blue…", ask: "What are the next TWO?",
+        c: ["🟡🟡 Yellow, yellow", "🔵🔵 Blue, blue", "🔵🟡 Blue, yellow"], why: "After every blue come two yellows!" },
+      { pic: "🎵 🎵 🥁 🎵 🎵 🥁", q: "La, la, BOOM! La, la, BOOM!", ask: "What is the rule?",
+        c: ["🎵🎵🥁 Two la's, then a boom", "🎵🥁 One la, then a boom", "🥁🥁🎵 Two booms, then a la"], why: "Listen: la, la, BOOM. It's two la's and then one boom!" }
+    ]},
+    { name: "Pattern Pro", qs: [
+      { pic: "🌞 🌜 🌞 🌜 ❔", q: "Morning, night, morning, night…", ask: "After the night, what comes next?",
+        c: ["🌞 Morning", "🌜 Night again", "🌧️ Rain"], why: "Day and night take turns, every single day! After night comes morning." },
+      { pic: "🐥🐥🐥 · 🐥🐥 · 🐥 · ❔", q: "Three chicks, then two chicks, then one chick…", ask: "How many chicks come next?",
+        c: ["0️⃣ None", "4️⃣ Four", "1️⃣ One"], why: "Each group has one less: three, two, one… then zero. All gone!" },
+      { pic: "🟥 🟧 🟨 🟩 ❔", q: "Red, orange, yellow, green… just like a rainbow!", ask: "What comes next?",
+        c: ["🟦 Blue", "🟥 Red", "🟫 Brown"], why: "Rainbow colors go red, orange, yellow, green, BLUE, and then purple!" },
+      { pic: "👟 👟 🧦 👟 👟 🧦 ❔ ❔ ❔", q: "Shoe, shoe, sock. Shoe, shoe, sock…", ask: "What are the next THREE?",
+        c: ["👟👟🧦 Shoe, shoe, sock", "🧦👟👟 Sock, shoe, shoe", "👟🧦🧦 Shoe, sock, sock"], why: "The whole group repeats: shoe, shoe, sock!" },
+      { pic: "🐞 · 🐞🐞 · 🐞 · 🐞🐞 · ❔", q: "One bug, two bugs, one bug, two bugs…", ask: "How many bugs come next?",
+        c: ["1️⃣ One bug", "2️⃣ Two bugs", "3️⃣ Three bugs"], why: "It goes one, two, one, two. After two comes one!" }
+    ]}
+  ]},
+  { id: "sort", title: "Odd One Out", emoji: "🧺", color: "#2f80ed", dark: "#1b5fbf", light: "#e6f0ff",
+    blurb: "Which one doesn't belong? Sort it out!",
+    levels: [
+    { name: "Not Like the Others", qs: [
+      { pic: "🍎 🍌 🍇 🚗", q: "Apple, banana, grapes, and a car.", ask: "Which one does NOT belong?",
+        c: ["🚗 Car", "🍎 Apple", "🍌 Banana"], why: "Apple, banana, and grapes are all fruits. A car is not a fruit!" },
+      { pic: "🐶 🐱 🐰 🌳", q: "Dog, cat, bunny, and a tree.", ask: "Which one does NOT belong?",
+        c: ["🌳 Tree", "🐶 Dog", "🐰 Bunny"], why: "Dog, cat, and bunny are animals. A tree is a plant!" },
+      { pic: "⚽ 🏀 🎾 🍕", q: "Soccer ball, basketball, tennis ball, and pizza.", ask: "Which one does NOT belong?",
+        c: ["🍕 Pizza", "⚽ Soccer ball", "🎾 Tennis ball"], why: "You play with balls. You EAT pizza!" },
+      { pic: "🚗 🚌 🚲 🐟", q: "Car, bus, bike, and a fish.", ask: "Which one does NOT belong?",
+        c: ["🐟 Fish", "🚌 Bus", "🚲 Bike"], why: "A car, a bus, and a bike take you places. A fish swims!" },
+      { pic: "☀️ 🌙 ⭐ 🧦", q: "Sun, moon, star, and a sock.", ask: "Which one does NOT belong?",
+        c: ["🧦 Sock", "🌙 Moon", "⭐ Star"], why: "The sun, moon, and stars are up in the sky. A sock goes on your foot!" }
+    ]},
+    { name: "Sorting Baskets", qs: [
+      { pic: "🧺 🍓 🍊", q: "This basket is only for fruit.", ask: "Which one can go in?",
+        c: ["🍐 Pear", "🥾 Boot", "🧸 Teddy bear"], why: "A pear is a fruit, so it goes in the fruit basket!" },
+      { pic: "❄️ ⛄ 🎒", q: "Mia packs her bag for a cold, snowy day.", ask: "What should she pack?",
+        c: ["🧥 A warm coat", "🩱 A swimsuit", "🩴 Flip-flops"], why: "Snow is cold! A warm coat keeps Mia toasty." },
+      { pic: "🌊 🐠 🐙", q: "Fish and octopuses live in the sea.", ask: "Who else lives in the sea?",
+        c: ["🦀 Crab", "🐄 Cow", "🐿️ Squirrel"], why: "Crabs live in the sea with the fish and octopuses. Cows and squirrels live on land!" },
+      { pic: "🍓 🚒", q: "Strawberries and fire trucks are both red.", ask: "Which one is red too?",
+        c: ["🍅 Tomato", "🍌 Banana", "🥦 Broccoli"], why: "Tomatoes are red, just like strawberries and fire trucks! Bananas are yellow and broccoli is green." },
+      { pic: "🦅 🦋 🐝", q: "An eagle, a butterfly, and a bee all have wings.", ask: "What can they all do?",
+        c: ["🕊️ Fly", "🏊 Swim underwater", "🗣️ Talk"], why: "Eagles, butterflies, and bees all have wings. They can fly!" }
+    ]},
+    { name: "Tricky Odd One", qs: [
+      { pic: "🐔 🦆 🦉 🐕", q: "Chicken, duck, owl, and dog.", ask: "Which one does NOT belong?",
+        c: ["🐕 Dog", "🦆 Duck", "🦉 Owl"], why: "The chicken, duck, and owl are birds with feathers. A dog has fur!" },
+      { pic: "🥕 🥦 🌽 🍩", q: "Carrot, broccoli, corn, and a donut.", ask: "Which one does NOT belong?",
+        c: ["🍩 Donut", "🥕 Carrot", "🌽 Corn"], why: "Carrots, broccoli, and corn are veggies. A donut is a sweet treat!" },
+      { pic: "🐘 🦒 🦁 🐜", q: "Elephant, giraffe, lion, and ant.", ask: "Which one is the odd one out?",
+        c: ["🐜 Ant", "🦒 Giraffe", "🦁 Lion"], why: "The elephant, giraffe, and lion are BIG animals. The ant is teeny tiny!" },
+      { pic: "✏️ 🖍️ 🖌️ 🥄", q: "Pencil, crayon, paintbrush, and spoon.", ask: "Which one does NOT belong?",
+        c: ["🥄 Spoon", "🖍️ Crayon", "✏️ Pencil"], why: "You draw with a pencil, a crayon, and a paintbrush. A spoon is for eating!" },
+      { pic: "🧊 ⛄ ❄️ 🔥", q: "Ice, snowman, snowflake, and fire.", ask: "Which one does NOT belong?",
+        c: ["🔥 Fire", "⛄ Snowman", "🧊 Ice"], why: "Ice, snowmen, and snowflakes are cold. Fire is HOT!" }
+    ]},
+    { name: "Look Closer", qs: [
+      { pic: "🐟 🐳 🐬 🐕", q: "Fish, whale, dolphin, and dog.", ask: "Which one does NOT live in the sea?",
+        c: ["🐕 Dog", "🐳 Whale", "🐬 Dolphin"], why: "Fish, whales, and dolphins live in the sea. A dog lives on land, even if it likes to splash!" },
+      { pic: "🍎 🍒 🍓 🍌", q: "Apple, cherries, strawberry, and banana. They are ALL fruit!", ask: "So which one is the odd one out?",
+        c: ["🍌 Banana", "🍒 Cherries", "🍓 Strawberry"], why: "They're all fruit, so look at the colors! The apple, cherries, and strawberry are red. The banana is yellow." },
+      { pic: "🚗 🚕 🚙 ✈️", q: "Car, taxi, jeep, and airplane. They ALL take you places!", ask: "So which one is the odd one out?",
+        c: ["✈️ Airplane", "🚕 Taxi", "🚙 Jeep"], why: "They all go places, but cars, taxis, and jeeps drive on the road. An airplane flies in the sky!" },
+      { pic: "🌷 🌻 🌹 🌲", q: "Tulip, sunflower, rose, and pine tree. They are ALL plants!", ask: "So which one is the odd one out?",
+        c: ["🌲 Pine tree", "🌻 Sunflower", "🌹 Rose"], why: "They're all plants, but tulips, sunflowers, and roses are flowers. A pine tree is a tree!" },
+      { pic: "😀 😃 😄 😢", q: "Three faces and one more face.", ask: "Which face is different?",
+        c: ["😢 The sad face", "😃 A happy face", "😄 A smiley face"], why: "Three faces are happy. One face is sad, so it's the odd one out!" }
+    ]},
+    { name: "Sorting Star", qs: [
+      { pic: "🐧 🌊", q: "Penny is a penguin. Penguins are birds, but they can't fly. They swim!", ask: "What can Penny do?",
+        c: ["🏊 Swim", "🕊️ Fly", "🐒 Climb trees"], why: "Penguins can't fly, but they are super swimmers!" },
+      { pic: "🍎🍌 · 🚗🚂 · 🚌", q: "One basket has fruit. One basket has things that go. Where does the bus go?", ask: "Which basket gets the bus?",
+        c: ["🚂 The things-that-go basket", "🍎 The fruit basket", "🗑️ The trash can"], why: "A bus is a thing that goes, like the car and the train!" },
+      { pic: "🍦 🧊 ☕", q: "Ice cream is cold. Ice is cold. Hot cocoa is hot.", ask: "Which one is NOT cold?",
+        c: ["☕ Hot cocoa", "🍦 Ice cream", "🧊 Ice"], why: "Ice cream and ice are cold. Hot cocoa is warm and toasty!" },
+      { pic: "🐄 🐑 🐖 🦁", q: "Cow, sheep, pig, and lion.", ask: "Which one does NOT live on a farm?",
+        c: ["🦁 Lion", "🐑 Sheep", "🐖 Pig"], why: "Cows, sheep, and pigs live on a farm. Lions live in the wild!" },
+      { pic: "👕 👖 🧦 🍌", q: "Shirt, pants, socks, and a banana.", ask: "Which one can you NOT wear?",
+        c: ["🍌 Banana", "👕 Shirt", "🧦 Socks"], why: "You wear shirts, pants, and socks. You eat a banana. Silly!" }
+    ]}
+  ]}
   ]
 },
 {
@@ -509,6 +1730,160 @@ const PATHS = [
         c: ["Nugget is the only cat that was in the house", "The cake had pink frosting", "The cake was chocolate", "Nugget likes to nap"], why: "If Nugget is the only cat around, those cat paw prints almost have to be Nugget's!" }
     ]}
   ]}
+  ,
+  // ---- 1.3.7: new Big Thinkers worlds ----
+  { id: "codes", title: "Code Cave", emoji: "🔐", color: "#e84393", dark: "#b8256f", light: "#ffe6f2",
+    blurb: "Crack patterns, rules, and secret codes.",
+    levels: [
+    { name: "Number Trails", qs: [
+      { q: "Pip hops along the number trail: 3, 6, 9, 12, …", ask: "What number comes next?",
+        c: ["15", "13", "14", "18"], why: "Each hop adds 3: 3, 6, 9, 12, 15!" },
+      { q: "A tower has 2 blocks, then 4, then 8, then 16.", ask: "How many blocks come next?",
+        c: ["32", "18", "20", "24"], why: "The tower doubles each time: 16 + 16 = 32. Adding 2 would only give 18." },
+      { q: "Count down the trail: 50, 45, 40, 35, …", ask: "What number comes next?",
+        c: ["30", "25", "34", "45"], why: "Each step takes away 5. 35 − 5 = 30." },
+      { q: "A trail goes 1, 2, 4, 7, 11, … The jumps keep growing: +1, +2, +3, +4.", ask: "What number comes next?",
+        c: ["16", "15", "14", "22"], why: "The next jump is +5. 11 + 5 = 16!" },
+      { q: "A trail goes 1, 3, 5, 7, ?, 11.", ask: "Which number is missing?",
+        c: ["9", "8", "10", "6"], why: "Each number is 2 more than the one before: 7 + 2 = 9, and 9 + 2 = 11." }
+    ]},
+    { name: "Shape Codes", qs: [
+      { pic: "🔺 ⚪ ⚪ 🔺 ⚪ ⚪ 🔺 ⚪ ⚪", q: "The shapes go triangle, circle, circle, over and over.", ask: "What is the 10th shape?",
+        c: ["🔺 Triangle", "⚪ Circle", "🟦 Square"], why: "The pattern repeats every 3 shapes. Shapes 1, 4, 7, and 10 all start a group, so the 10th is a triangle!" },
+      { pic: "🟥 🟦 🟨 🟥 🟦 🟨", q: "Mia lays tiles: red, blue, yellow, over and over. She keeps going until she has 14 tiles.", ask: "What color is tile 14?",
+        c: ["🟦 Blue", "🟥 Red", "🟨 Yellow"], why: "Every 3 tiles the pattern starts again. Tile 12 is yellow (the end of a group), so tile 13 is red and tile 14 is blue." },
+      { pic: "🌑 🌓 🌕 🌗 🌑 🌓 ❔", q: "The moon shapes go: dark moon, half moon, full moon, other half moon, then dark again…", ask: "What comes next?",
+        c: ["🌕 Full moon", "🌑 Dark moon", "🌗 The other half moon"], why: "The group is dark, half, full, other half. After the first half moon comes the full moon!" },
+      { q: "Leo writes a letter pattern: A, B, B, C, C, C, D, D, D, D, …", ask: "How many E's will there be?",
+        c: ["5", "4", "6", "1"], why: "A shows up once, B twice, C three times, D four times. So E shows up 5 times!" },
+      { pic: "⬆️ ➡️ ⬇️ ⬅️ ⬆️ ➡️ ❔", q: "An arrow makes a quarter turn every step, like a clock hand: up, right, down, left, up, right…", ask: "Which way does it point next?",
+        c: ["⬇️ Down", "⬅️ Left", "⬆️ Up"], why: "Up, right, down, left, turning like a clock. After right comes down!" }
+    ]},
+    { name: "Secret Codes", qs: [
+      { q: "In Owl Code, every letter moves 1 forward in the alphabet: A→B, B→C, C→D. So CAT becomes DBU.", ask: "What does DOG become?",
+        c: ["EPH", "CNF", "EPG", "DOH"], why: "Move each letter 1 forward: D→E, O→P, G→H. EPH!" },
+      { q: "In Owl Code (each letter moves 1 forward), Hoot sends a secret word: IBU.", ask: "What is the real word?",
+        c: ["HAT", "JCV", "HIT", "BAT"], why: "To decode, move each letter 1 BACK: I→H, B→A, U→T. HAT!" },
+      { q: "In Number Code, A = 1, B = 2, C = 3, D = 4, and so on.", ask: "What word is 2-1-4?",
+        c: ["BAD", "CAB", "DAB", "ADD"], why: "2 is B, 1 is A, 4 is D. BAD!" },
+      { q: "In Number Code (A = 1, B = 2, C = 3…), Zoe adds up the letters of a word. ACE is 1 + 3 + 5.", ask: "What does ACE add up to?",
+        c: ["9", "8", "135", "15"], why: "1 + 3 + 5 = 9. (135 is just the numbers squished together, not added!)" },
+      { q: "In Flip Code, words are written backward. Max sends: TAOB.", ask: "What is the word?",
+        c: ["BOAT", "TABO", "BATO", "OATB"], why: "Read it from right to left: B-O-A-T. BOAT!" }
+    ]},
+    { name: "Rule Finders", qs: [
+      { q: "A number machine does this: 2 → 5, 4 → 7, 10 → 13.", ask: "What does 6 turn into?",
+        c: ["9", "12", "8", "3"], why: "The machine adds 3 every time. 6 + 3 = 9." },
+      { q: "Another machine: 1 → 2, 3 → 6, 5 → 10.", ask: "What does 7 turn into?",
+        c: ["14", "9", "12", "8"], why: "This machine doubles! 7 + 7 = 14. (It isn't +1 or +2, because 5 → 10 adds 5.)" },
+      { q: "Tia builds squares: 1 block, then 2 rows of 2 blocks, then 3 rows of 3 blocks.", ask: "How many blocks in the 4th square?",
+        c: ["16", "12", "8", "10"], why: "The 4th square is 4 rows of 4 blocks: 4 + 4 + 4 + 4 = 16." },
+      { q: "Robot Rex has a secret rule. He says YES to 4, 10, and 22. He says NO to 5, 9, and 15.", ask: "Which number will Rex say YES to?",
+        c: ["8", "7", "13", "21"], why: "Every YES number is even. Every NO number is odd. 8 is the only even choice!" },
+      { q: "Gina's rule picks words. APPLE: yes. EGG: yes. IGLOO: yes. BALL: no. TREE: no.", ask: "Which word does Gina's rule pick?",
+        c: ["OWL", "DOG", "CAT", "SUN"], why: "Every YES word starts with a vowel (A, E, I, O, U). OWL starts with O!" }
+    ]},
+    { name: "Grid Puzzles", qs: [
+      { pic: "🐱 🐶 🐭 · 🐶 🐭 🐱 · 🐭 🐱 ❔", q: "A 3-by-3 grid. Row 1: cat, dog, mouse. Row 2: dog, mouse, cat. Row 3: mouse, cat, and an empty spot. Every row and every column has each animal once.", ask: "What goes in the empty spot?",
+        c: ["🐶 Dog", "🐱 Cat", "🐭 Mouse"], why: "Row 3 already has a mouse and a cat, so it needs the dog! (The last column has mouse and cat too.)" },
+      { q: "Mini Sudoku! Each row uses 1, 2, and 3 exactly once. One row reads: 3, ?, 1.", ask: "Which number is missing?",
+        c: ["2", "3", "1", "4"], why: "The row already has 3 and 1. The only number left is 2." },
+      { q: "Big Sudoku! Each row and each column uses 1, 2, 3, and 4 once. Row B already has a 2 and a 4. One of its empty spots is in Column 1, and Column 1 already has a 1 in it.", ask: "What number goes in Row B, Column 1?",
+        c: ["3", "1", "2", "4"], why: "Row B still needs a 1 and a 3. Column 1 already has a 1, so this spot must be 3!" },
+      { q: "Handshakes: 2 kids shake hands 1 time. 3 kids shake 3 times. 4 kids shake 6 times. Everyone shakes hands with everyone once.", ask: "How many handshakes for 5 kids?",
+        c: ["10", "8", "9", "12"], why: "The jumps go +2, +3, then +4. 6 + 4 = 10! The new kid shakes hands with the 4 already there." },
+      { q: "On Day 1 there is 1 magic tile. Every day, each tile splits into 2 tiles.", ask: "How many tiles are there on Day 5?",
+        c: ["16", "10", "32", "8"], why: "Day 1: 1, Day 2: 2, Day 3: 4, Day 4: 8, Day 5: 16. It doubles every day!" }
+    ]},
+    { name: "Code Master", qs: [
+      { q: "In Super Owl Code, letters move 2 forward: A→C, B→D, C→E. Hoot writes: FQI.", ask: "What is the real word?",
+        c: ["DOG", "HSK", "EPH", "DIG"], why: "Move each letter 2 BACK: F→D, Q→O, I→G. DOG!" },
+      { q: "Bea's trail is supposed to add 4 each time, but one number is wrong: 4, 8, 12, 15, 20, 24.", ask: "Which number is wrong?",
+        c: ["15", "12", "20", "24"], why: "Adding 4 gives 4, 8, 12, 16, 20, 24. The 15 should be 16!" },
+      { q: "A letter pattern: A, C, E, G, …", ask: "What letter comes next?",
+        c: ["I", "H", "J", "F"], why: "Skip one letter each time: A (skip B) C (skip D) E (skip F) G (skip H) I!" },
+      { q: "Sam stacks cups in a triangle. The bottom row has 4 cups, the next row has 3, then 2, then 1 on top.", ask: "How many cups in all?",
+        c: ["10", "8", "9", "12"], why: "4 + 3 + 2 + 1 = 10 cups!" },
+      { q: "A light flashes every 3 seconds. A bell beeps every 4 seconds. They both start together at 0.", ask: "When do they next happen together?",
+        c: ["At 12 seconds", "At 7 seconds", "At 6 seconds", "At 8 seconds"], why: "Flashes: 3, 6, 9, 12. Beeps: 4, 8, 12. The first number in both lists is 12!" }
+    ]}
+  ]},
+  { id: "truth", title: "Truth Island", emoji: "🏝️", color: "#2f80ed", dark: "#1b5fbf", light: "#e6f0ff",
+    blurb: "Truth-Tellers, Fibbers, and who-has-what mysteries.",
+    levels: [
+    { name: "Truth or Fib?", qs: [
+      { q: "On Truth Island, Truth-Tellers ALWAYS tell the truth. Tilly is a Truth-Teller. Tilly says: “I have a pet parrot.”", ask: "What must be true?",
+        c: ["Tilly has a pet parrot", "Tilly does not have a parrot", "Tilly is fibbing", "We can't tell"], why: "Truth-Tellers always tell the truth, so Tilly really has a parrot!" },
+      { q: "Fibbers ALWAYS fib, so everything they say is false. Fergus the Fibber says: “It is sunny today.”", ask: "What must be true?",
+        c: ["It is not sunny", "It is sunny", "It is snowing for sure", "We can't tell anything"], why: "Fergus's words are false, so it is NOT sunny. It could be cloudy or rainy. We can't be sure it's snowing!" },
+      { q: "Fergus the Fibber says: “I am NOT hungry.”", ask: "What must be true?",
+        c: ["Fergus is hungry", "Fergus is not hungry", "Fergus just ate lunch", "We can't tell"], why: "Fergus always fibs, so the opposite is true: he IS hungry!" },
+      { q: "Tess is a Truth-Teller. Tess says: “Fergus took the last cookie.”", ask: "What must be true?",
+        c: ["Fergus took the last cookie", "Tess took the last cookie", "Nobody took the cookie", "We can't tell"], why: "Tess always tells the truth, so Fergus really did take it!" },
+      { q: "Fiona is a Fibber. She says: “My hat is blue.” Her hat is either blue or red.", ask: "What color is Fiona's hat?",
+        c: ["Red", "Blue", "Green", "We can't tell"], why: "Fiona fibs, so her hat is NOT blue. The only other choice is red!" }
+    ]},
+    { name: "Who Said It?", qs: [
+      { q: "One of these two is a Truth-Teller and one is a Fibber. Ana says: “2 + 2 = 4.” Bo says: “2 + 2 = 5.”", ask: "Who is the Fibber?",
+        c: ["Bo", "Ana", "Both of them", "Neither of them"], why: "2 + 2 really is 4, so Ana told the truth. Bo said something false, so Bo is the Fibber." },
+      { q: "Cleo lives on Truth Island. Cleo says: “Fish live in trees.”", ask: "What is Cleo?",
+        c: ["A Fibber", "A Truth-Teller", "We can't tell"], why: "Fish live in water, not trees. That's false, so Cleo is a Fibber!" },
+      { q: "Dex lives on Truth Island. Dex says: “I am a Truth-Teller.”", ask: "What do we know about Dex?",
+        c: ["We can't tell yet", "Dex is a Truth-Teller", "Dex is a Fibber"], why: "A Truth-Teller would say “I'm a Truth-Teller”… and a Fibber would fib and say it too! So this doesn't tell us anything." },
+      { q: "Eli says: “The sky is green AND grass is green.”", ask: "What is Eli?",
+        c: ["A Fibber", "A Truth-Teller", "We can't tell"], why: "An AND sentence is only true if BOTH parts are true. The sky isn't green, so the whole sentence is false. Eli fibbed!" },
+      { q: "Hana lives on Truth Island. Hana says: “Kids have two legs.”", ask: "What is Hana?",
+        c: ["A Truth-Teller", "A Fibber", "We can't tell"], why: "That's true! Fibbers never say true things, so Hana must be a Truth-Teller." }
+    ]},
+    { name: "Who Has What?", qs: [
+      { q: "Amy, Ben, and Cora each have one pet: a dog, a cat, or a fish. Amy has the fish. Ben does not have the dog.", ask: "Who has the dog?",
+        c: ["Cora", "Ben", "Amy", "We can't tell"], why: "Amy has the fish. Ben can't have the dog, so Ben has the cat. That leaves the dog for Cora!" },
+      { q: "Dan, Eve, and Fay each pick one ice cream: chocolate, vanilla, or strawberry. Eve picks vanilla. Fay does not pick chocolate.", ask: "What does Dan pick?",
+        c: ["Chocolate", "Vanilla", "Strawberry", "We can't tell"], why: "Eve has vanilla. Fay can't have chocolate, so Fay has strawberry. Dan gets chocolate!" },
+      { q: "Gil, Hope, and Ivy each play one instrument: a drum, a flute, or a piano. Gil's instrument has black and white keys. Hope does not blow into hers.", ask: "What does Ivy play?",
+        c: ["The flute", "The drum", "The piano", "We can't tell"], why: "Black and white keys means Gil plays piano. Hope doesn't blow, so she plays the drum. Ivy plays the flute!" },
+      { q: "Jo, Kip, and Liv live in a red, a blue, and a green house. Jo's house is not red or blue. Kip's house is not red.", ask: "Who lives in the red house?",
+        c: ["Liv", "Kip", "Jo", "We can't tell"], why: "Jo's house must be green. Kip's can't be red, so it's blue. Liv lives in the red house!" },
+      { q: "Max, Nell, and Ozzy came 1st, 2nd, and 3rd in a race. Max beat Nell. Ozzy did not come 1st. Nell did not come last.", ask: "Who came 3rd?",
+        c: ["Ozzy", "Nell", "Max", "We can't tell"], why: "Nell isn't last, and she can't be 1st because Max beat her. So Nell is 2nd, Max is 1st, and Ozzy is 3rd." }
+    ]},
+    { name: "Island Mysteries", qs: [
+      { q: "Pia and Quin: one is a Truth-Teller and one is a Fibber. Pia says: “Quin is the Fibber.”", ask: "What must be true?",
+        c: ["We can't tell who is who", "Pia is the Truth-Teller", "Quin is the Truth-Teller", "They are both Fibbers"], why: "If Pia tells the truth, Quin is the Fibber. If Pia is fibbing, Quin is the Truth-Teller. Both stories work, so we can't tell!" },
+      { q: "Rae says: “Sid is a Truth-Teller.” Sid says: “The moon is made of cheese.”", ask: "What is Rae?",
+        c: ["A Fibber", "A Truth-Teller", "We can't tell"], why: "The moon isn't cheese, so Sid is a Fibber. Rae called Sid a Truth-Teller, which is false. Rae is a Fibber too!" },
+      { q: "Tom says: “Uma and I are both Truth-Tellers.” Uma says: “Tom is a Fibber.”", ask: "What must be true?",
+        c: ["Tom is a Fibber and Uma is a Truth-Teller", "Tom and Uma are both Truth-Tellers", "Tom and Uma are both Fibbers", "Tom is a Truth-Teller and Uma is a Fibber"], why: "If Tom told the truth, Uma would be a Truth-Teller… but then she calls Tom a Fibber! That can't work. So Tom fibs, and Uma told the truth about him." },
+      { q: "A shell is hidden under the red rock or the blue rock. Vic is a Fibber. Vic says: “It's under the red rock.”", ask: "Where is the shell?",
+        c: ["Under the blue rock", "Under the red rock", "Under both rocks", "We can't tell"], why: "Vic fibs, so it's NOT under the red rock. The only other place is the blue rock!" },
+      { q: "Yara is a Truth-Teller. Yara says: “Xan always fibs.” Xan says: “Today is Monday.”", ask: "What must be true?",
+        c: ["Today is not Monday", "Today is Monday", "Today is Tuesday", "Yara is fibbing"], why: "Yara tells the truth, so Xan is a Fibber. That makes “Today is Monday” false. It isn't Monday! (It might not be Tuesday either.)" }
+    ]},
+    { name: "Grid Masters", qs: [
+      { q: "Abe, Bree, Cal, and Dina each bring one snack: apples, chips, grapes, or popcorn. Abe brings grapes. Bree's snack is not a fruit. Cal's snack is a fruit. Dina doesn't bring chips.", ask: "Who brings the popcorn?",
+        c: ["Dina", "Bree", "Cal", "Abe"], why: "Abe has grapes, so Cal (fruit) has apples. Dina can't have chips, so Dina has popcorn and Bree has chips!" },
+      { q: "Gus says: “I am a Fibber.” Everyone on Truth Island is a Truth-Teller or a Fibber.", ask: "What does this tell us?",
+        c: ["Gus can't be from Truth Island", "Gus is a Truth-Teller", "Gus is a Fibber", "Gus only fibs on Mondays"], why: "A Truth-Teller can't say “I'm a Fibber” (that's false). A Fibber can't say it either (that would be true!). So Gus must be a visitor!" },
+      { q: "Ike says: “At least one of us is a Fibber.” He means himself and Jay.", ask: "What must be true?",
+        c: ["Ike is a Truth-Teller and Jay is a Fibber", "Both are Fibbers", "Both are Truth-Tellers", "Ike is a Fibber and Jay is a Truth-Teller"], why: "If Ike were a Fibber, his words would be TRUE, and Fibbers can't say true things! So Ike tells the truth, and one of them really is a Fibber: Jay." },
+      { q: "Three boxes are labeled APPLES, BANANAS, and MIXED. Every label is WRONG. Zed reaches into the box labeled MIXED and pulls out a banana.", ask: "What is really in the box labeled APPLES?",
+        c: ["Both fruits mixed", "Only apples", "Only bananas", "We can't tell"], why: "The MIXED box can't really be mixed, so it's all bananas. The APPLES box can't be apples, and the bananas are taken, so it's the mixed box!" },
+      { q: "Ella, Theo, and Gia sit in seats 1, 2, and 3 and wear red, blue, and green. Ella sits in seat 1. The kid in green sits in seat 3. Theo wears blue. Gia does not sit next to Ella.", ask: "What color is Ella wearing?",
+        c: ["Red", "Blue", "Green", "We can't tell"], why: "Gia can't be in seat 2 (next to Ella), so Gia is in seat 3 and wears green. Theo wears blue. Ella gets red!" }
+    ]},
+    { name: "Truth Champion", qs: [
+      { q: "Hal, Ida, and Jen: exactly ONE is a Truth-Teller. Hal says: “Ida is a Fibber.” Ida says: “Jen is a Fibber.” Jen says: “Hal and Ida are both Fibbers.”", ask: "Who is the Truth-Teller?",
+        c: ["Ida", "Hal", "Jen", "We can't tell"], why: "Try each one! If Hal were truthful, Ida fibs, so Jen would be truthful too: two Truth-Tellers. If Jen were, Hal's “Ida is a Fibber” would be true, but Hal must fib. Only Ida works!" },
+      { q: "Kai, Lee, Mo, and Nan each fly one kite: red, yellow, green, or purple. Kai's kite is yellow. Lee's kite is not red or green. Mo's kite is not red.", ask: "Whose kite is red?",
+        c: ["Nan", "Mo", "Lee", "Kai"], why: "Lee can't have red, green, or yellow, so Lee has purple. Mo can't have red, so Mo has green. Nan has the red kite!" },
+      { q: "Fergus the Fibber says: “EVERY kid at the party wore a hat.”", ask: "What must be true?",
+        c: ["At least one kid did not wear a hat", "No kid at the party wore a hat", "Every kid wore a hat", "Fergus wore a hat"], why: "The opposite of “EVERY kid wore a hat” isn't “NO kid did.” It just means at least one kid didn't!" },
+      { q: "Tess the Truth-Teller says: “If it rains, I bring my umbrella.” Today Tess did NOT bring her umbrella.", ask: "What must be true?",
+        c: ["It did not rain today", "It rained today", "Tess lost her umbrella", "Tess is a Fibber"], why: "If it had rained, Tess would have her umbrella. She doesn't, so it didn't rain!" },
+      { q: "Two guards stand by two doors: one hides treasure, one hides a mud pit. One guard is a Truth-Teller, one is a Fibber, but you don't know which. You ask Guard A: “Would Guard B say the LEFT door has the treasure?” Guard A says: “Yes.”", ask: "Which door has the treasure?",
+        c: ["The right door", "The left door", "We can't tell"], why: "Whoever you ask, exactly one fib sneaks into the answer: the Truth-Teller honestly reports the Fibber's fib, or the Fibber fibs about the Truth-Teller's answer. So “yes, left” means the treasure is on the RIGHT!" }
+    ]}
+  ]}
   ]
 }
 ];
@@ -522,7 +1897,7 @@ const APP = {
   mascot: "🦉",
   mascotName: "Professor Hoot",
   pinLength: 4,
-  version: "1.3.6-preview",
+  version: "1.4.0-preview",
 };
 const AVATARS = ["🦊","🐼","🦄","🐯","🐸","🐙","🦖","🐰","🐨","🦁","🐧","🐝","🐬","🦋","🐱","🐶"];
 const REWARDS = {
@@ -532,7 +1907,7 @@ const REWARDS = {
   comboBonus: 1,        // ...earns this extra
   lessonFirstClear: 10, // first time finishing a lesson
   lessonReplay: 2,      // replaying a finished lesson (no per-question tokens on replays)
-  replaysPaidPerDay: 3, // replay bonus is paid at most this many times per player per day
+  replaysPaidPerDay: Infinity, // no daily limit on replay bonus (Aaron, Oct 3)
   perfect: 5,           // first time a lesson reaches 3 stars
   streakPerDay: 3,      // daily bonus = streakPerDay * min(streak, streakCap)
   streakCap: 5,
@@ -621,7 +1996,7 @@ const Store = {
       profiles: [],
       activeId: null,
       prizes: DEFAULT_PRIZES.map(p => ({ id: uid(), ...p })),
-      prizeCatalog: PRIZE_CATALOG, // new devices already have the added prizes, so the migration must not run again
+      prizeDedupe: 1, prizeCatalog: PRIZE_CATALOG, // new devices already have the added prizes, so the migration must not run again
       log: [],            // redemptions: {ts, profileId, who, avatar, emoji, name, cost}
       pinHash: null, pinSalt: null,   // PIN is stored only as a salted hash
       pinFails: 0, pinLockUntil: 0,   // lockout after repeated wrong PINs
@@ -635,7 +2010,8 @@ const Store = {
     this.data = this.sanitize(raw);
     const catalogDirty = !!(this.data && this.data._saveSoon);
     if (this.data) delete this.data._saveSoon;
-    if (catalogDirty || (raw && typeof raw === "object" && "pin" in raw)) this.save(); // persist the one-time prize flag, or a migrated PIN
+    const closetMigrated = !!(raw && Array.isArray(raw.profiles) && raw.profiles.some(p => p && typeof p === "object" && !hasLookFields(p.look)));
+    if (catalogDirty || closetMigrated || (raw && typeof raw === "object" && "pin" in raw)) this.save(); // persist the one-time prize flag, or a migrated PIN
   },
   // Repairs missing / wrong-typed fields so old or damaged saves never crash the app.
   sanitize(raw) {
@@ -645,6 +2021,7 @@ const Store = {
     const str = (v, def, max) => (typeof v === "string" && v.trim() ? v.slice(0, max) : def);
     const obj = v => (v && typeof v === "object" && !Array.isArray(v) ? v : {});
     const pathIds = PATHS.map(x => x.id);
+    const closetBackup = readClosetBackup();
     d.profiles = (Array.isArray(raw.profiles) ? raw.profiles : []).filter(p => p && typeof p === "object").map(p => {
       const pathId = pathIds.includes(p.pathId) ? p.pathId : "big";
       const progress = {};
@@ -660,7 +2037,7 @@ const Store = {
         readAloud: typeof p.readAloud === "boolean" ? p.readAloud : getPath(pathId).readAloudDefault,
         created: num(p.created, Date.now()),
       };
-    });
+    }).map(p => Object.assign(p, sanitizeClosetFields(raw.profiles.find(r => r && r.id === p.id) || p, closetBackup)));
     const seen = new Set(); d.profiles = d.profiles.filter(p => !seen.has(p.id) && seen.add(p.id));
     d.activeId = d.profiles.some(p => p.id === raw.activeId) ? raw.activeId : null;
     if (Array.isArray(raw.prizes)) {
@@ -678,6 +2055,20 @@ const Store = {
       d._saveSoon = true;
     }
     d.prizeCatalog = PRIZE_CATALOG;
+    // One-time cleanup (1.3.5): drop an auto-added prize when the grown-up already made a near-identical one by hand
+    // (same cost and a shared word of 3+ letters, e.g. "Feastables bar" vs "Feastables chocolate bar after dinner").
+    if (raw.prizeDedupe !== 1) {
+      const words = n => new Set(n.toLowerCase().match(/[a-z0-9]{3,}/g) || []);
+      const auto = new Set(ADDED_PRIZES.map(p => p.name.trim().toLowerCase()));
+      const stop = new Set(["the", "and", "for", "get", "gets", "goes", "more", "min", "minutes", "after", "pick", "day"]);
+      d.prizes = d.prizes.filter(p => {
+        if (!auto.has(p.name.trim().toLowerCase())) return true;
+        const w = [...words(p.name)].filter(x => !stop.has(x));
+        return !d.prizes.some(q => q !== p && !auto.has(q.name.trim().toLowerCase()) && q.cost === p.cost &&
+          w.some(x => words(q.name).has(x)));
+      });
+      d.prizeDedupe = 1; d._saveSoon = true;
+    }
     d.log = (Array.isArray(raw.log) ? raw.log : []).filter(l => l && typeof l === "object").slice(0, 500).map(l => ({
       ts: num(l.ts, Date.now()), profileId: String(l.profileId ?? ""), who: str(l.who, "?", 40), avatar: str(l.avatar, "🙂", 16),
       emoji: str(l.emoji, "🎁", 16), name: str(l.name, "Prize", 60), cost: num(l.cost) }));
@@ -692,7 +2083,11 @@ const Store = {
     d.sound = typeof raw.sound === "boolean" ? raw.sound : true;
     return d;
   },
-  save() { try { localStorage.setItem(APP.storageKey, JSON.stringify(this.data)); } catch (e) { /* storage full / private mode */ } },
+  save() {
+    try { localStorage.setItem(APP.storageKey, JSON.stringify(this.data)); } catch (e) { /* storage full / private mode */ }
+    // Downgrade protection: an old cached build drops look/closet; load() restores them from here.
+    try { const b = {}; for (const p of this.data.profiles) if (p.look) b[p.id] = { look: p.look, closet: p.closet }; localStorage.setItem(CLOSET_BACKUP_KEY, JSON.stringify(b)); } catch (e) {}
+  },
 };
 const state = () => Store.data;
 const player = () => state().profiles.find(p => p.id === state().activeId) || null;
@@ -700,7 +2095,8 @@ const getPath = id => PATHS.find(p => p.id === id) || PATHS[0];
 
 function newProfile(name, avatar, pathId) {
   return { id: uid(), name, avatar, pathId, tokens: 0, totalEarned: 0, streak: 0, lastPlay: null,
-           progress: {}, lessonsDone: 0, replayDay: null, replayCount: 0, readAloud: getPath(pathId).readAloudDefault, created: Date.now() };
+           progress: {}, lessonsDone: 0, replayDay: null, replayCount: 0, readAloud: getPath(pathId).readAloudDefault, created: Date.now(),
+           ...closetDefaults(avatar) };
 }
 const progKey = (pathId, ti, li) => `${getPath(pathId).id}/${getPath(pathId).tracks[ti].id}/${li}`;
 const progOf = (pl, pathId, ti, li) => pl.progress[progKey(pathId, ti, li)] || {};
@@ -709,7 +2105,97 @@ const liveStreak = pl => (pl.lastPlay === todayStr() || pl.lastPlay === yesterda
 function addTokens(pl, n) { pl.tokens += n; pl.totalEarned += n; Store.save(); }
 
 /* ==========================================================================
-   MINI-GAMES (preview): games keep their own storage and never write the main save.
+   AVATAR CLOSET (1.4.0). Renderer = Steve's ElzeeAvatar (inlined above, unmodified).
+   Prices come from ElzeeAvatar item data (v1.2.0; Aaron Oct 3: small free starter,
+   everything else costs tokens). One wallet: spendTokens() never touches totalEarned.
+   ========================================================================== */
+const AV = (typeof window !== "undefined" && window.ElzeeAvatar && typeof window.ElzeeAvatar.render === "function") ? window.ElzeeAvatar : null;
+const CLOSET_BACKUP_KEY = "logicquest.v1.closet";
+// Prices and the free starter set live in ElzeeAvatar v1.2.0 item data (ITEMS[].unlock / HAIR_COLORS[].unlock),
+// so the closet, saves and Climb the Quiz all agree on what a kid owns.
+const CLOSET_DEFAULT_PRICE = 30; // safety net: a token item with no cost
+const HAIR_FALLBACK = { platinum: "blonde", auburn: "ginger", gray: "black", pink: "brown", sky_blue: "brown", rainbow: "brown", galaxy: "brown" };
+const SLOT_FREE_DEFAULT = { hair: "hair.bob", top: "top.tee", bottom: "bottom.shorts", dress: null, shoes: "shoes.sneakers" };
+
+// unlock status of an ownership key ("top.star", "hairColor.pink", "skin.s3", "eyes.big", "none"), read from ElzeeAvatar data
+function closetStatus(key) {
+  if (!AV || !key || key === "none" || key.startsWith("skin.") || key.startsWith("eyes.")) return { type: "free" };
+  let u;
+  if (key.startsWith("hairColor.")) { const hc = AV.HAIR_COLORS[key.slice(10)]; if (!hc) return { type: "unknown" }; u = hc.unlock; }
+  else { const it = AV.item(key); if (!it) return { type: "unknown" }; u = it.unlock; }
+  if (!u || u.type === "free") return { type: "free" };
+  if (u.type === "reward") return { type: "reward", event: u.event, count: u.count };
+  return { type: "tokens", cost: Number(u.cost) > 0 ? u.cost : CLOSET_DEFAULT_PRICE };
+}
+const closetKnownLocked = k => typeof k === "string" && k.length < 80 && ["tokens", "reward"].includes(closetStatus(k).type);
+function closetOwns(owned, key) { return closetStatus(key).type === "free" || (Array.isArray(owned) && owned.includes(key)); }
+const hasLookFields = l => !!l && typeof l === "object" && !Array.isArray(l) && ["skin", "hair", "hairColor", "top", "bottom", "dress", "shoes", "acc"].some(k => k in l);
+
+// Validate a look and strip anything the kid doesn't own (pure). Unowned piece -> free slot default (keeps its color if it fits).
+function closetLook(look, owned) {
+  if (!AV) return hasLookFields(look) ? JSON.parse(JSON.stringify(look)) : null;
+  const L = AV.normalizeLook(look, { allowLocked: true });
+  if (!closetOwns(owned, "hairColor." + L.hairColor)) L.hairColor = HAIR_FALLBACK[L.hairColor] || "brown";
+  for (const slot of Object.keys(SLOT_FREE_DEFAULT)) if (L[slot] && !closetOwns(owned, L[slot])) L[slot] = SLOT_FREE_DEFAULT[slot];
+  for (const k of AV.ACC_SLOTS) if (L.acc[k] && !closetOwns(owned, L.acc[k])) { L.acc[k] = null; L.accC[k] = null; }
+  return AV.normalizeLook(L, { owned: Array.isArray(owned) ? owned : [] });
+}
+function closetStarterLook(emoji) { return AV ? closetLook(AV.starterLook(emoji), []) : null; }
+function closetDefaults(emoji) { return { look: closetStarterLook(emoji), closet: { owned: [], spent: 0, seen: [], firstVisit: true, climbSeen: [] } }; }
+function readClosetBackup() { try { const b = JSON.parse(localStorage.getItem(CLOSET_BACKUP_KEY)); return b && typeof b === "object" && !Array.isArray(b) ? b : {}; } catch (e) { return {}; } }
+// Used by Store.sanitize(): rebuild look/closet field by field; restore from the backup key if an old build stripped them.
+function sanitizeClosetFields(p, backup) {
+  const bk = backup && backup[p.id];
+  const src = hasLookFields(p.look) ? p : (bk && hasLookFields(bk.look) ? bk : p);
+  const c = src.closet && typeof src.closet === "object" && !Array.isArray(src.closet) ? src.closet : {};
+  const list = v => [...new Set((Array.isArray(v) ? v : []).filter(closetKnownLocked))].slice(0, 500);
+  const closet = { owned: list(c.owned), spent: typeof c.spent === "number" && isFinite(c.spent) ? Math.max(0, Math.round(c.spent)) : 0,
+    seen: list(c.seen), firstVisit: typeof c.firstVisit === "boolean" ? c.firstVisit : true, climbSeen: list(c.climbSeen) };
+  const look = hasLookFields(src.look) ? closetLook(src.look, closet.owned) : closetStarterLook(p.avatar);
+  return { look, closet };
+}
+// One wallet. Checks, subtracts, records closet spend, one save. Never changes totalEarned.
+function spendTokens(pl, n, reason) {
+  n = Math.round(Number(n));
+  if (!pl || !(n > 0) || pl.tokens < n) return false;
+  pl.tokens -= n; pl.closet.spent += n; Store.save();
+  return true;
+}
+// Reward unlocks (R1a ledger, Climb floors): idempotent.
+function grantItem(pl, id, opts = {}) {
+  if (!pl || !pl.closet || !closetKnownLocked(id) || pl.closet.owned.includes(id)) return false;
+  pl.closet.owned.push(id); if (opts.save !== false) Store.save(); return true;
+}
+// 1.4.0: Climb the Quiz floor rewards ("New in your closet!") become real closet items.
+// Climb keeps its own list (logicquest.minigame.climb.v1 kids[id].unlocks, read only here). closet.climbSeen is the
+// ledger of rewards already handed over, so a reset closet is not refilled; a reward Climb dropped is forgotten
+// (and can be granted again if it is won again).
+const CLIMB_SAVE_KEY = "logicquest.minigame.climb.v1";
+function climbUnlocksFor(id) {
+  let raw = null; try { raw = JSON.parse(localStorage.getItem(CLIMB_SAVE_KEY)); } catch (e) { raw = null; }
+  const k = raw && typeof raw === "object" && raw.kids && typeof raw.kids === "object" ? raw.kids[id] : null;
+  if (!k || typeof k !== "object" || !Array.isArray(k.unlocks)) return [];
+  return [...new Set(k.unlocks.filter(x => typeof x === "string" && closetStatus(x).type === "reward"))];
+}
+function syncClimbRewards(pl) {
+  if (!AV || !pl || !pl.closet) return [];
+  const unl = climbUnlocksFor(pl.id), seen = Array.isArray(pl.closet.climbSeen) ? pl.closet.climbSeen : [];
+  const fresh = unl.filter(id => !seen.includes(id));
+  const nextSeen = seen.filter(id => unl.includes(id)).concat(fresh);
+  const got = fresh.filter(id => grantItem(pl, id, { save: false }));
+  if (fresh.length || nextSeen.length !== seen.length) { pl.closet.climbSeen = nextSeen; Store.save(); }
+  return got;
+}
+let avSeq = 0;
+function avatarHTML(pl, opts = {}) {
+  try {
+    if (!AV || !pl || !hasLookFields(pl.look)) throw 0;
+    return AV.render(pl.look, { crop: "head", mood: "happy", ...opts, idPrefix: (opts.idPrefix || "av") + (opts.uniq ? ++avSeq : "") });
+  } catch (e) { return `<span class="av avemoji">${esc(pl ? pl.avatar : "🙂")}</span>`; }
+}
+
+/* ==========================================================================
+   MINI-GAMES: games keep their own storage and never write the main save.
    Tokens are claimed here with a ledger in a separate key, so a claim can never pay twice
    (even if a stale game tab writes an old "pending" value back) and never exceeds the cap.
    ========================================================================== */
@@ -724,23 +2210,29 @@ const MINIGAMES = [
     key: "logicquest.minigame.sillystories.v1",
     interlude: true, role: "interlude", roundLabel: "1 story", minutes: 3, enabled: true },
   // Climb the Quiz (1.3.6): free play from the home tile. Tokens use Climb's own rates (no daily cap).
-  // hideForYounger: Steve's younger (non-reader) mode for Little Thinkers hasn't shipped yet, so the tile is hidden for them.
-  // It stays in this list so any tokens a kid already earned are still claimed.
+  // 1.3.8: Steve's younger (non-reader, picture-only) mode shipped, so Little Thinkers see the tile too (hideForYounger removed).
   { id: "climb", name: "Climb the Quiz", emoji: "🧗", blurb: "Climb the puzzle tower!",
     href: "games/climb-the-quiz.html?elzee=1&mode=free&ret=..%2Findex.html%23home",
-    key: "logicquest.minigame.climb.v1", act: "launchClimb", hideForYounger: true,
+    key: "logicquest.minigame.climb.v1", act: "launchClimb",
     interlude: true, role: "challenge", flagship: true, roundLabel: "3 floors", minutes: 4, enabled: true },
 ];
 const isYoungerProfile = pl => !!pl && pl.pathId === "little";
 const homeGames = pl => MINIGAMES.filter(g => !(g.hideForYounger && isYoungerProfile(pl)));
 /* Climb question pack (spec §6.1): review items only from levels this kid has finished. Returns null if there
-   aren't enough yet, and the game then uses its built-in sample pack. */
+   aren't enough yet, and the game then uses its built-in sample pack.
+   Younger profiles (1.3.8): band "younger" with no items; the game fills the climb from its own picture-only set
+   (our lesson items are text-based, so the game would drop them anyway). */
 const CLIMB_PACK_KEY = "logicquest.climb.pack.v1";
 function buildClimbPack(pl, n = 7) {
   if (!pl) return null;
   const path = getPath(pl.pathId), today = todayStr();
   const prev = readJSON(CLIMB_PACK_KEY);
   const recent = new Set(isObj(prev) && Array.isArray(prev.recentRefs) ? prev.recentRefs.filter(r => typeof r === "string") : []);
+  if (isYoungerProfile(pl)) {
+    const packId = "p-" + today.replace(/-/g, "") + "-" + Math.random().toString(36).slice(2, 6);
+    const pack = { v: 1, packId, profileId: pl.id, createdAt: Date.now(), pathId: path.id, band: "younger", items: [], recentRefs: [...recent].slice(0, 30) };
+    return writeJSON(CLIMB_PACK_KEY, pack) ? pack : null;
+  }
   const levels = [];
   path.tracks.forEach((t, ti) => t.levels.forEach((lv, li) => {
     const p = progOf(pl, path.id, ti, li);
@@ -769,7 +2261,7 @@ function buildClimbPack(pl, n = 7) {
   if (pick.length < 3) return null;
   const packId = "p-" + today.replace(/-/g, "") + "-" + Math.random().toString(36).slice(2, 6);
   const recentRefs = [...pick.map(x => x.ref), ...recent].slice(0, 30);
-  const pack = { v: 1, packId, profileId: pl.id, createdAt: Date.now(), pathId: path.id, items: pick, recentRefs };
+  const pack = { v: 1, packId, profileId: pl.id, createdAt: Date.now(), pathId: path.id, band: "older", items: pick, recentRefs };
   return writeJSON(CLIMB_PACK_KEY, pack) ? pack : null;
 }
 const CLAIM_KEY = "logicquest.minigame.claims.v1"; // { [gameId]: { [profileId]: { claimed, day, today } } }
@@ -880,7 +2372,7 @@ const Speech = {
       || local.find(v => /^en[-_]US/i.test(v.lang)) || local.find(v => /^en/i.test(v.lang)) || null;
   },
   clean(text) {
-    return String(text).replace(/\p{Extended_Pictographic}|\uFE0F|\u200D|[❔☆]/gu, " ").replace(/[“”]/g, "").replace(/\s+/g, " ").trim();
+    return String(text).replace(/[0-9#*]\uFE0F?\u20E3/gu, " ").replace(/\p{Extended_Pictographic}|\uFE0F|\u200D|[❔☆]/gu, " ").replace(/[“”]/g, "").replace(/\s+/g, " ").trim();
   },
   say(text) {
     if (!this.supported) return;
@@ -1037,19 +2529,22 @@ function forgotPin() {
 let view = { name: "picker" };   // current screen + its local state
 let lesson = null;               // active lesson state
 
-const NEEDS_PLAYER = ["home", "lesson", "results", "shop"];
+const NEEDS_PLAYER = ["home", "lesson", "results", "shop", "closet"];
 function render() {
   Speech.stop();
   if (NEEDS_PLAYER.includes(view.name) && !player()) view = { name: "picker" };
   if (view.name === "lesson" && !lesson) view = { name: player() ? "home" : "picker" };
   if (view.name === "results" && !view.result) view = { name: "home" };
+  if (view.name !== "closet" && closetSess) { closetSess = null; closetUndoStore.clear(); } // undo/refund only within one visit
   if (view.name === "home") {
     const paid = claimMiniGameTokens(player());
-    if (paid.length) setTimeout(() => { toast(paid.map(p => `+${p.n} 🪙 from ${p.game.name}!`).join(" ")); Sound.good(); }, 250);
+    const got = syncClimbRewards(player());
+    const msg = paid.map(p => `+${p.n} 🪙 from ${p.game.name}!`).concat(got.length ? [`👚 New in your closet! ${got.map(id => (AV.item(id) || {}).icon || "🎁").join(" ")}`] : []);
+    if (msg.length) setTimeout(() => { toast(msg.join(" "), got.length ? 3200 : 1800); Sound.good(); if (got.length) closetSay("New in your closet!"); }, 250);
   }
   $app.classList.toggle("wide", view.name === "lesson");
   ({ picker: renderPicker, addPlayer: renderAddPlayer, home: renderHome, lesson: renderQuestion,
-     results: renderResults, shop: renderShop, parent: renderParent })[view.name]();
+     results: renderResults, shop: renderShop, parent: renderParent, closet: renderCloset })[view.name]();
 }
 let lastNavAt = 0; // used to swallow stray double-taps that land on the next screen
 let histBooted = false;
@@ -1058,6 +2553,7 @@ function historySnapshot() {
   if (view.result) snap.result = view.result;
   if (view.pathId) snap.pathId = view.pathId;
   if (view.form) snap.form = { name: view.form.name, avatar: view.form.avatar, pathId: view.form.pathId };
+  if (view.name === "closet") { snap.tab = view.tab; snap.from = view.from; }
   return snap;
 }
 function recordHistory(replace) {
@@ -1099,6 +2595,7 @@ function onPopState() {
   if (s.result) extra.result = s.result;
   if (s.pathId) extra.pathId = s.pathId;
   if (s.form) extra.form = s.form;
+  if (s.name === "closet") { extra.tab = s.tab; extra.from = s.from; }
   go(s.name || "picker", extra, { fromPop: true });
   if (view.name !== s.name) recordHistory(true);
 }
@@ -1107,11 +2604,12 @@ function topBar(pl, { back = false } = {}) {
   const s = liveStreak(pl);
   return `<div class="top">
     ${back ? `<button class="iconbtn" data-act="home" aria-label="Back">⬅️</button>` :
-      `<button class="who" data-act="picker" aria-label="Switch player"><span class="av">${pl.avatar}</span><span>${esc(pl.name)}</span></button>`}
+      `<button class="who" data-act="picker" aria-label="Switch player">${avatarHTML(pl, { crop: "head", size: 44, idPrefix: "tb" })}<span>${esc(pl.name)}</span></button>`}
     <div class="pill fire ${s ? "" : "off"}" title="Daily streak">🔥 <b>${s}</b></div>
     <div class="pill tok" title="Tokens">🪙 <b data-tokens>${pl.tokens}</b></div>
     <div class="spacer"></div>
     <button class="iconbtn" data-act="shop" aria-label="Prize shop">🎁</button>
+    ${AV ? `<button class="iconbtn" data-act="openCloset" aria-label="My closet">👚</button>` : ""}
     <button class="iconbtn" data-act="parent" aria-label="Grown-ups">⚙️</button>
   </div>`;
 }
@@ -1124,7 +2622,7 @@ function renderPicker() {
     <p class="subtitle">${ps.length ? "Who's playing today?" : `Hi! I'm ${APP.mascotName}. Let's make your player!`}</p>
     <div class="players">
       ${ps.map(p => `<button class="playercard" data-act="choosePlayer" data-id="${p.id}">
-        <span class="av">${p.avatar}</span><span class="nm">${esc(p.name)}</span>
+        ${avatarHTML(p, { crop: "head", size: 88, idPrefix: "pc", uniq: true })}<span class="nm">${esc(p.name)}</span>
         <span class="meta">🪙 ${p.tokens} · 🔥 ${liveStreak(p)}</span></button>`).join("")}
       <button class="playercard add" data-act="addPlayer"><span class="av">➕</span><span class="nm">Add player</span></button>
     </div>`;
@@ -1152,6 +2650,11 @@ function renderAddPlayer() {
 function greeting(pl) {
   const s = liveStreak(pl);
   if (pl.lessonsDone === 0) return `Hi ${esc(pl.name)}! Tap the glowing circle to start your first puzzle!`;
+  // 1.3.7: a kid who has finished a whole world but not started a newer one gets pointed at it (new worlds sit at the bottom of the map)
+  const path = getPath(pl.pathId);
+  const fresh = path.tracks.filter((t, ti) => !progOf(pl, path.id, ti, 0).done);
+  const finishedOne = path.tracks.some((t, ti) => t.levels.every((_, li) => progOf(pl, path.id, ti, li).done));
+  if (fresh.length && finishedOne) return `New worlds to explore, ${esc(pl.name)}! Scroll down to ${fresh.map(t => `${t.emoji} ${esc(t.title)}`).join(" and ")}! 🗺️`;
   if (pl.lastPlay === todayStr()) return `Nice work today, ${esc(pl.name)}! 🔥 ${s}-day streak!`;
   if (s > 0) return `Welcome back, ${esc(pl.name)}! Play a lesson to keep your 🔥 ${s}-day streak!`;
   return `Welcome back, ${esc(pl.name)}! Ready to think?`;
@@ -1162,7 +2665,7 @@ function renderHome() {
   const path = getPath(pathId);
   const offsets = [0, 80, -80, 40, -40];
   $app.innerHTML = topBar(pl) + `
-    <div class="hello"><div class="mascot">${APP.mascot}</div><div class="bubble">${greeting(pl)}</div></div>
+    <div class="hello">${AV ? `<button class="heroav" data-act="openCloset" aria-label="My closet">${avatarHTML(pl, { crop: "full", size: 150, idPrefix: "hero" })}</button>` : ""}<div class="mascot">${APP.mascot}</div><div class="bubble">${greeting(pl)}</div></div>
     ${homeGames(pl).map(g => `<a class="gamecard" href="${g.href}" data-game="${g.id}"${g.act ? ` data-act="${g.act}"` : ""}><span class="ge">${g.emoji}</span>
       <span><b>${esc(g.name)}</b><small>${esc(g.blurb)}</small></span><span class="go">▶</span></a>`).join("")}
     <div class="tabs">${PATHS.map(p => `<button class="tab ${p.id === pathId ? "on" : ""}" data-act="viewPath" data-v="${p.id}">${p.emoji} ${esc(p.title)}</button>`).join("")}</div>
@@ -1448,9 +2951,7 @@ function renderParent() {
         <div class="line">${avatarSelect(p)}<input class="text" style="flex:1;min-width:160px;font-size:20px;padding:10px 12px" maxlength="16" value="${esc(p.name)}" data-field="name" data-kind="player" data-id="${p.id}"></div>
         <div class="line">${pathSelect(p)}<label class="toggle"><input type="checkbox" ${p.readAloud ? "checked" : ""} data-field="readAloud" data-kind="player" data-id="${p.id}"> Read questions aloud</label></div>
         <div class="line"><b>🪙 ${p.tokens}</b>
-          <button class="btn small ghost" data-act="adjTokens" data-id="${p.id}" data-v="-5">−5</button>
-          <button class="btn small ghost" data-act="adjTokens" data-id="${p.id}" data-v="5">+5</button>
-          <span class="muted">· 🔥 ${liveStreak(p)} · ${done(p)}/${totalLessons} lessons · ${p.totalEarned} earned all-time</span></div>
+          <span class="muted">· 🔥 ${liveStreak(p)} · ${done(p)}/${totalLessons} lessons · ${p.totalEarned} earned all-time · 👚 ${p.closet ? p.closet.spent : 0} closet spent</span></div>
         <div class="line"><button class="btn small ghost" data-act="resetPlayer" data-id="${p.id}">Reset progress</button>
           <button class="btn small danger" data-act="deletePlayer" data-id="${p.id}">Delete player</button></div>
       </div>`).join("") || `<p class="muted">No players yet.</p>`}
@@ -1518,6 +3019,7 @@ const actions = {
     if (!name) { toast("Type a nickname first! ✏️"); document.getElementById("pname").focus(); return; }
     const p = newProfile(name.slice(0, 16), f.avatar, f.pathId);
     state().profiles.push(p); state().activeId = p.id; Store.save(); Sound.win(); go("home");
+    if (AV) actions.openCloset(); // spec §7: the closet opens right after "Let's go!" (Done ✓ = skip)
   },
   choosePlayer(el) { LessonSave.clear(); lesson = null; if (!state().profiles.some(p => p.id === el.dataset.id)) return go("picker"); state().activeId = el.dataset.id; Store.save(); Sound.tap(); go("home"); },
   home() { go("home"); },
@@ -1538,17 +3040,18 @@ const actions = {
   redeem(el) { redeem(el.dataset.id); },
   parent() { requireGrownUp("This area is for grown-ups.", () => go("parent")); },
   leaveParent() { go(player() ? "home" : "picker"); },
-  adjTokens(el) { const p = state().profiles.find(x => x.id === el.dataset.id); if (!p) return; p.tokens = Math.max(0, p.tokens + Number(el.dataset.v)); Store.save(); render(); },
   resetPlayer(el) {
     const p = state().profiles.find(x => x.id === el.dataset.id);
     confirmBox(`Reset ${p.name}?`, "This clears their lessons, stars, streak, and tokens.", "Reset", () => {
-      Object.assign(p, { tokens: 0, totalEarned: 0, streak: 0, lastPlay: null, progress: {}, lessonsDone: 0, replayDay: null, replayCount: 0 }); LessonSave.clear(); Store.save(); render();
+      Object.assign(p, { tokens: 0, totalEarned: 0, streak: 0, lastPlay: null, progress: {}, lessonsDone: 0, replayDay: null, replayCount: 0 }, closetDefaults(p.avatar));
+      p.closet.climbSeen = climbUnlocksFor(p.id); // Climb rewards won before the reset are not handed back
+      closetForget(p.id, { keepProfile: true }); LessonSave.clear(); Store.save(); render();
     }, true);
   },
   deletePlayer(el) {
     const st = state(), p = st.profiles.find(x => x.id === el.dataset.id);
     confirmBox(`Delete ${p.name}?`, "This removes the player and all their progress.", "Delete", () => {
-      st.profiles = st.profiles.filter(x => x.id !== p.id); if (st.activeId === p.id) st.activeId = null; LessonSave.clear(); forgetMiniGameData(p.id); Store.save(); render();
+      st.profiles = st.profiles.filter(x => x.id !== p.id); if (st.activeId === p.id) st.activeId = null; LessonSave.clear(); forgetMiniGameData(p.id); closetForget(p.id); Store.save(); render();
     }, true);
   },
   addPrize() { state().prizes.push({ id: uid(), emoji: "🎁", name: "New prize", cost: 20 }); Store.save(); render(); },
@@ -1558,6 +3061,288 @@ const actions = {
   },
   changePin() { createPin(() => {}); },
 };
+/* ---------- Avatar closet screen ---------- */
+const CLOSET_TABS = ["skin", "hair", "hairColor", "eyes", "top", "dress", "bottom", "shoes", "acc"];
+const ACC_TABS = ["acc.head", "acc.face", "acc.neck", "acc.hand"];
+const HEAD_TABS = ["skin", "hair", "hairColor", "eyes", "acc.head", "acc.face"];
+const COMPLIMENTS = ["Looking sharp!", "So stylish!", "Wow, great look!", "That's so you!", "Fabulous!"];
+let closetSess = null; // undo stack for this visit: {pid, undo:[{look, buy?:{key,cost}}]}
+// 1.4.0: the undo stack is mirrored in sessionStorage so a reload (the app restarts on "Who's playing?") doesn't
+// silently kill ↶. It belongs to one closet visit: leaving the closet in-app (✓ / ⬅️ / anywhere) clears it.
+const CLOSET_UNDO_KEY = "logicquest.v1.closetUndo";
+const CLOSET_CONFIRM_AT = 30; // purchases this big get a picture yes/no first
+const closetUndoStore = {
+  save() { try { if (closetSess) sessionStorage.setItem(CLOSET_UNDO_KEY, JSON.stringify({ pid: closetSess.pid, at: Date.now(), undo: closetSess.undo })); } catch (e) {} },
+  clear() { try { sessionStorage.removeItem(CLOSET_UNDO_KEY); } catch (e) {} },
+  load(pl) {
+    let d = null; try { d = JSON.parse(sessionStorage.getItem(CLOSET_UNDO_KEY)); } catch (e) { d = null; }
+    if (!d || !pl || d.pid !== pl.id || !Array.isArray(d.undo) || !(Date.now() - d.at < 6 * 3600e3)) return [];
+    return d.undo.filter(e => e && hasLookFields(e.look)).slice(-20).map(e => {
+      const st = e.buy && closetStatus(e.buy.key);
+      return { look: e.look, ...(st && st.type === "tokens" && e.buy.cost === st.cost ? { buy: { key: e.buy.key, cost: st.cost } } : {}) };
+    });
+  },
+};
+function closetSession(pl) {
+  if (!closetSess || closetSess.pid !== pl.id) closetSess = { pid: pl.id, undo: closetUndoStore.load(pl) };
+  return closetSess;
+}
+// Reset / delete: drop the player's closet backup entry and any undo stack (the next Store.save() rewrites the backup).
+function closetForget(pid, { keepProfile = false } = {}) {
+  try { const b = readClosetBackup(); if (b[pid]) { delete b[pid]; localStorage.setItem(CLOSET_BACKUP_KEY, JSON.stringify(b)); } } catch (e) {}
+  if (closetSess && closetSess.pid === pid) closetSess = null;
+  try { const d = JSON.parse(sessionStorage.getItem(CLOSET_UNDO_KEY)); if (d && d.pid === pid) closetUndoStore.clear(); } catch (e) {}
+}
+const closetLabel = k => (AV && AV.SLOT_LABELS[k]) || { icon: "❔", say: k };
+const closetSay = text => { const pl = player(); if (pl && pl.readAloud && text) Speech.say(text); };
+const swish = () => Sound.play([[520, .05], [780, .06]]);
+const reducedMotion = () => { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { return false; } };
+const cloneLook = l => JSON.parse(JSON.stringify(l));
+
+// All choices for a tab: {key (ownership key), id (value), name}
+function closetOptions(tab) {
+  if (tab === "skin") return Object.keys(AV.SKINS).map(k => ({ key: "skin." + k, id: k, name: "skin tone " + k.slice(1) }));
+  if (tab === "eyes") return Object.keys(AV.EYES).map(k => ({ key: "eyes." + k, id: k, name: (AV.EYE_WORDS || {})[k] || k }));
+  if (tab === "hairColor") return Object.keys(AV.HAIR_COLORS).map(k => ({ key: "hairColor." + k, id: k, name: AV.describeColor(k) || AV.HAIR_COLORS[k].name.toLowerCase() }));
+  const pl = player();
+  const items = AV.ITEMS.filter(it => it.slot === tab && (!it.retired || pl.closet.owned.includes(it.id)))
+    .map(it => ({ key: it.id, id: it.id, name: it.name }));
+  const none = tab === "dress" || tab.startsWith("acc.") ? [{ key: "none", id: null, name: closetLabel(tab).none || "none" }] : [];
+  return none.concat(items);
+}
+function lookValue(look, tab) { return tab.startsWith("acc.") ? look.acc[tab.slice(4)] : look[tab]; }
+function lookColor(look, tab) { return tab.startsWith("acc.") ? look.accC[tab.slice(4)] : look[{ top: "topC", bottom: "bottomC", dress: "dressC", shoes: "shoesC" }[tab]]; }
+// Pure: look with one choice applied (dress rule: a top or bottom takes the dress off; the other piece is remembered).
+function applyChoice(look, tab, id, color) {
+  const L = cloneLook(look);
+  if (["skin", "eyes", "hairColor", "hair"].includes(tab)) { L[tab] = id; return L; }
+  const it = id && AV.item(id);
+  const c = it && it.colorways ? (it.colorways.includes(color) ? color : it.colorways.includes(lookColor(look, tab)) ? lookColor(look, tab) : it.colorways[0]) : null;
+  if (tab.startsWith("acc.")) { const k = tab.slice(4); L.acc[k] = id; L.accC[k] = c; return L; }
+  L[tab] = id; L[{ top: "topC", bottom: "bottomC", dress: "dressC", shoes: "shoesC" }[tab]] = c;
+  if (tab === "top" || tab === "bottom") { L.dress = null; L.dressC = null; }
+  return L;
+}
+function priceTag(st) {
+  if (st.type === "tokens") return `<span class="ptag" aria-hidden="true">🪙 ${st.cost}</span><span class="plock" aria-hidden="true">🔒</span>`;
+  if (st.type === "reward") return `<span class="ptag reward" aria-hidden="true">🎗️ 🧗 ${st.count || ""}</span>`;
+  return "";
+}
+// What read-aloud says about an item the kid does NOT own (owned items never get price talk).
+// Younger (Little Thinkers, non-readers): no big-number talk.
+function unlockSay(st, pl) {
+  const young = isYoungerProfile(pl);
+  if (st.type === "tokens") {
+    if (young) return pl.tokens >= st.cost ? "You have enough tokens! Tap the bag to buy it." : "Keep playing to earn more!";
+    return pl.tokens >= st.cost ? `It costs ${st.cost} tokens.` : `It costs ${st.cost} tokens. You need ${st.cost - pl.tokens} more tokens.`;
+  }
+  if (st.type === "reward") return st.event === "climb.floor" ? (young ? "Climb the tower to win it!" : `Win it on floor ${st.count} of the tower.`) : "It's a special prize.";
+  return "";
+}
+const closetAbout = (pl, key) => (closetOwns(pl.closet.owned, key) ? "" : unlockSay(closetStatus(key), pl));
+function choiceName(tab, opt, color) {
+  if (!opt.id) return opt.name;
+  if (["skin", "eyes", "hairColor"].includes(tab)) return opt.name;
+  return AV.describeItem(opt.id, color) || opt.name;
+}
+
+function renderCloset() {
+  const pl = player();
+  if (!AV) { go("home", {}, { replace: true }); return; }
+  closetSession(pl); syncClimbRewards(pl);
+  const tab = view.tab || "top", sub = view.sub || "acc.head";
+  const slot = tab === "acc" ? sub : tab;
+  const pv = view.preview; // {tab, key, id, color}
+  const shown = pv ? applyChoice(pl.look, pv.tab, pv.id, pv.color) : pl.look;
+  const opts = closetOptions(slot);
+  const head = HEAD_TABS.includes(slot);
+  const tiles = opts.map((o, i) => {
+    const st = closetStatus(o.key), owned = closetOwns(pl.closet.owned, o.key);
+    const worn = lookValue(pl.look, slot) === o.id, prev = pv && pv.tab === slot && pv.key === o.key;
+    const tl = applyChoice(pl.look, slot, o.id, worn ? lookColor(pl.look, slot) : null);
+    const pic = o.id === null ? `<span class="hanger" aria-hidden="true">🪝</span>` :
+      AV.render(tl, { crop: head ? "head" : "full", size: head ? 80 : 86, idPrefix: "tl" + i });
+    const name = choiceName(slot, o, lookColor(tl, slot));
+    return `<button class="ctile ${worn ? "worn" : ""} ${prev ? "prev" : ""} ${owned ? "" : "locked"}" data-act="closetTry" data-k="${esc(o.key)}"
+      aria-pressed="${worn}" aria-label="${esc(name + (owned ? "" : ". " + unlockSay(st, pl)))}">${pic}${worn ? `<span class="wornck" aria-hidden="true">✓</span>` : ""}${owned ? "" : priceTag(st)}</button>`;
+  }).join("");
+  // color swatches for the item being previewed or worn in this tab
+  const swId = pv && pv.tab === slot ? pv.id : (["skin", "eyes", "hairColor", "hair"].includes(slot) ? null : lookValue(pl.look, slot));
+  const swIt = swId && AV.item(swId);
+  const swCur = pv && pv.tab === slot ? lookColor(shown, slot) : lookColor(pl.look, slot);
+  const swatches = swIt && swIt.colorways && swIt.colorways.length > 1 ? `<div class="swatches">${swIt.colorways.map(c => {
+    const col = AV.PALETTE[c] || "#ccc", grad = /^url/.test(col);
+    return `<button class="swatch ${c === swCur ? "on" : ""}" data-act="closetColor" data-c="${esc(c)}" aria-pressed="${c === swCur}" aria-label="${esc(AV.describeColor(c) || c)}"
+      style="background:${grad ? "conic-gradient(#ff7aa2,#ffc83d,#3ccf4e,#7fd0ff,#7c4dff,#ff7aa2)" : col}"></button>`; }).join("")}</div>` : "";
+  // buy bar
+  let buy = "";
+  if (pv) {
+    const st = closetStatus(pv.key);
+    if (st.type === "tokens") {
+      if (pl.tokens >= st.cost) buy = `<button class="btn buybtn" data-act="closetBuy" aria-label="Buy it for ${st.cost} tokens"><span class="bag" aria-hidden="true">🛍️</span><span class="bw" aria-hidden="true">Buy</span><span class="bp" aria-hidden="true">🪙 ${st.cost}</span></button>`;
+      else { const need = st.cost - pl.tokens, fill = Math.round(100 * pl.tokens / st.cost);
+        // "need more", not a price: a lock, a part-full token bar and "Need N more" (younger: no number at all, just 🎮 ➕🪙)
+        buy = `<div class="needbox" role="img" aria-label="${esc(isYoungerProfile(pl) ? "Not enough tokens yet. Keep playing to earn more!" : `Not enough tokens yet. You need ${need} more tokens.`)}">
+          <span aria-hidden="true">🔒</span><span class="needbar" aria-hidden="true"><i style="width:${fill}%"></i></span>
+          ${isYoungerProfile(pl) ? `<span class="more" aria-hidden="true">🎮 ➕🪙</span>` : `<span class="needtxt" aria-hidden="true">Need <b>${need}</b> more 🪙</span>`}</div>`; }
+    } else if (st.type === "reward") buy = `<div class="needbox" role="img" aria-label="${esc(unlockSay(st, pl))}">🎗️ <span class="mini">🧗</span><b>${st.count || ""}</b></div>`;
+  }
+  const first = pl.closet.firstVisit;
+  $app.innerHTML = topBar(pl, { back: true }) + `<div class="closet">
+    <div class="cstage ${pv ? "previewing" : ""}" id="cstage">
+      ${first ? `<div class="hello cfirst"><div class="mascot">${APP.mascot}</div><div class="bubble">Make it look like you! 👆</div></div>` : ""}
+      <div class="cav" id="cav">${AV.render(shown, { crop: "full", size: 300, mood: pv ? "yay" : "happy", idPrefix: "stage", label: pl.name, describe: true })}</div>
+      ${pv ? `<div class="sparkles" aria-hidden="true">✨</div>` : ""}
+      <div class="buybar">${buy}</div>
+    </div>
+    <div class="cpanel">
+      <div class="ctabs" role="tablist">${CLOSET_TABS.map(k => `<button class="ctab ${k === tab ? "on" : ""} ${first && k === tab ? "hint" : ""}" role="tab" aria-selected="${k === tab}" data-act="closetTab" data-v="${k}" aria-label="${esc(closetLabel(k).say)}">${closetLabel(k).icon}</button>`).join("")}</div>
+      ${tab === "acc" ? `<div class="ctabs sub">${ACC_TABS.map(k => `<button class="ctab ${k === sub ? "on" : ""}" data-act="closetSub" data-v="${k}" aria-label="${esc(closetLabel(k).say)}">${closetLabel(k).icon}</button>`).join("")}</div>` : ""}
+      <div class="cgrid">${tiles}</div>
+      ${swatches}
+    </div>
+    <div class="cbar">
+      <button class="iconbtn big ${closetSess.undo.length ? "" : "gone"}" data-act="closetUndo" aria-label="Undo" ${closetSess.undo.length ? "" : `disabled aria-hidden="true"`}>↶</button>
+      <button class="iconbtn big" data-act="closetShuffle" aria-label="Shuffle">🎲</button>
+      <button class="btn donebtn" data-act="closetDone" aria-label="Done"><span aria-hidden="true">✓</span><span class="dw" aria-hidden="true">Done</span></button>
+    </div></div>`;
+}
+function closetRefresh(pop) {
+  renderCloset();
+  if (pop && !reducedMotion()) { const a = document.getElementById("cav"); if (a) a.classList.add("pop"); }
+}
+function closetWear(newLook, extra) {
+  const pl = player(); closetSession(pl);
+  closetSess.undo.push({ look: cloneLook(pl.look), ...extra });
+  if (closetSess.undo.length > 20) closetSess.undo.shift();
+  pl.look = closetLook(newLook, pl.closet.owned);
+  Store.save(); closetUndoStore.save();
+}
+function coinFlight(n) {
+  const pill = document.querySelector(".pill.tok"), stage = document.getElementById("cav");
+  if (!pill || !stage) return;
+  const a = pill.getBoundingClientRect(), b = stage.getBoundingClientRect();
+  const big = document.createElement("div"); big.className = "bigcoin"; big.setAttribute("aria-hidden", "true");
+  big.innerHTML = `🪙<b>−${n}</b>`; document.body.appendChild(big);
+  setTimeout(() => big.remove(), 1300);
+  if (reducedMotion()) return;
+  for (let i = 0; i < Math.min(10, Math.max(4, Math.round(n / 5))); i++) {
+    const c = document.createElement("span"); c.className = "flycoin"; c.textContent = "🪙"; c.setAttribute("aria-hidden", "true");
+    c.style.left = (a.left + a.width / 2 - 22) + "px"; c.style.top = (a.top + a.height / 2 - 22) + "px";
+    document.body.appendChild(c);
+    const dx = b.left + b.width / 2 - (a.left + a.width / 2) + (Math.random() * 60 - 30), dy = b.top + b.height / 2 - (a.top + a.height / 2);
+    const an = c.animate([{ transform: "translate(0,0) scale(1)", opacity: 1 }, { transform: `translate(${dx}px,${dy}px) scale(.6)`, opacity: .2 }],
+      { duration: 600, delay: i * 60, easing: "ease-in", fill: "forwards" });
+    an.onfinish = () => c.remove(); setTimeout(() => c.remove(), 1500);
+  }
+}
+Object.assign(actions, {
+  openCloset() {
+    const pl = player(); if (!pl) return go("picker");
+    if (!AV) { toast("The closet isn't ready yet."); return; }
+    closetSession(pl); // same visit after a reload keeps its ↶ (see closetUndoStore)
+    go("closet", { from: view.name === "closet" ? "home" : (view.name || "home"), tab: pl.closet.firstVisit ? "skin" : "top" });
+    if (pl.closet.firstVisit) closetSay("Make it look like you! Tap a picture to try it on.");
+  },
+  closetTab(el) { view.tab = el.dataset.v; view.preview = null; Sound.tap(); renderCloset(); closetSay(closetLabel(el.dataset.v === "acc" ? (view.sub || "acc.head") : el.dataset.v).say); },
+  closetSub(el) { view.sub = el.dataset.v; view.preview = null; Sound.tap(); renderCloset(); closetSay(closetLabel(el.dataset.v).say); },
+  closetTry(el) {
+    const pl = player(), tab = view.tab === "acc" ? (view.sub || "acc.head") : view.tab;
+    const o = closetOptions(tab).find(x => x.key === el.dataset.k); if (!o) return;
+    if (pl.closet.firstVisit) { pl.closet.firstVisit = false; Store.save(); }
+    if (closetOwns(pl.closet.owned, o.key)) {
+      view.preview = null;
+      const nl = applyChoice(pl.look, tab, o.id);
+      if (JSON.stringify(nl) !== JSON.stringify(pl.look)) closetWear(nl);
+      swish(); closetRefresh(true);
+      closetSay(choiceName(tab, o, lookColor(pl.look, tab)) + "!");
+    } else {
+      view.preview = { tab, key: o.key, id: o.id, color: null };
+      swish(); closetRefresh(true);
+      closetSay(choiceName(tab, o, null) + "! " + closetAbout(pl, o.key));
+    }
+  },
+  closetColor(el) {
+    const pl = player(), tab = view.tab === "acc" ? (view.sub || "acc.head") : view.tab, c = el.dataset.c;
+    if (view.preview && view.preview.tab === tab) view.preview.color = c;
+    else closetWear(applyChoice(pl.look, tab, lookValue(pl.look, tab), c));
+    swish(); closetRefresh(true); closetSay(AV.describeColor(c));
+  },
+  closetBuy() {
+    const pl = player(), pv = view.preview; if (!pv) return;
+    const st = closetStatus(pv.key);
+    if (st.type !== "tokens" || pl.closet.owned.includes(pv.key)) return;
+    if (pl.tokens < st.cost) { closetSay(unlockSay(st, pl)); return; }
+    if (st.cost >= CLOSET_CONFIRM_AT) return closetConfirm(pl, pv, st);
+    closetDoBuy(pl, pv, st);
+  },
+  closetUndo() {
+    const pl = player(); if (!closetSess || !closetSess.undo.length) return;
+    view.preview = null;
+    const e = closetSess.undo.pop();
+    if (e.buy && pl.closet.owned.includes(e.buy.key)) { // refund exactly once: the entry is gone from the stack now
+      pl.tokens += e.buy.cost; pl.closet.spent = Math.max(0, pl.closet.spent - e.buy.cost);
+      pl.closet.owned = pl.closet.owned.filter(k => k !== e.buy.key);
+      toast("Changed your mind? Tokens back! 🪙"); closetSay("Tokens back!");
+    }
+    pl.look = closetLook(e.look, pl.closet.owned); Store.save(); closetUndoStore.save(); Sound.tap(); closetRefresh(true);
+  },
+  closetShuffle() {
+    const pl = player(); view.preview = null;
+    const pick = a => a[Math.floor(Math.random() * a.length)];
+    let L = cloneLook(pl.look);
+    for (const t of ["hair", "hairColor", "top", "bottom", "shoes", ...ACC_TABS]) {
+      const own = closetOptions(t).filter(o => closetOwns(pl.closet.owned, o.key));
+      if (t.startsWith("acc.") && Math.random() < .5) { L = applyChoice(L, t, null); continue; }
+      const o = pick(own); if (!o) continue; const it = o.id && AV.item(o.id);
+      L = applyChoice(L, t, o.id, it && it.colorways ? pick(it.colorways) : null);
+    }
+    const dresses = closetOptions("dress").filter(o => o.id && closetOwns(pl.closet.owned, o.key));
+    if (dresses.length && Math.random() < .3) { const d = pick(dresses); L = applyChoice(L, "dress", d.id, pick(AV.item(d.id).colorways)); }
+    closetWear(L); Sound.play([[400, .05], [600, .05], [800, .08]]);
+    renderCloset();
+    if (!reducedMotion()) { const a = document.getElementById("cav"); if (a) a.classList.add("spin"); }
+  },
+  closetDone() {
+    const pl = player(), from = view.from && view.from !== "closet" && view.from !== "lesson" ? view.from : "home";
+    closetSess = null; closetUndoStore.clear(); view.preview = null;
+    if (pl.closet.firstVisit) { pl.closet.firstVisit = false; Store.save(); }
+    const c = pick1(COMPLIMENTS);
+    const a = document.getElementById("cav");
+    if (a) a.innerHTML = AV.render(pl.look, { crop: "full", size: 300, mood: "yay", pose: "dance", idPrefix: "stage" });
+    if (a && !reducedMotion()) a.classList.add("dance");
+    toast(`${APP.mascot} ${c}`); Sound.good(); closetSay(c);
+    setTimeout(() => { if (view.name === "closet") go(from); }, reducedMotion() ? 300 : 1000);
+  },
+});
+const pick1 = a => a[Math.floor(Math.random() * a.length)];
+function closetDoBuy(pl, pv, st) {
+  if (view.name !== "closet" || pl.closet.owned.includes(pv.key)) return false;
+  const before = cloneLook(pl.look);
+  if (!spendTokens(pl, st.cost, "closet:" + pv.key)) { closetSay(unlockSay(st, pl)); return false; } // the one shared wallet
+  pl.closet.owned.push(pv.key);
+  closetSession(pl).undo.push({ look: before, buy: { key: pv.key, cost: st.cost } });
+  pl.look = closetLook(applyChoice(pl.look, pv.tab, pv.id, pv.color), pl.closet.owned);
+  view.preview = null; Store.save(); closetUndoStore.save();
+  renderCloset(); coinFlight(st.cost); Sound.win(); closetSay("It's yours!");
+  return true;
+}
+// 1.4.0: a picture yes/no before a big purchase (Fin can't read): the avatar wearing it, the price, a big ✅ and ❌.
+function closetConfirm(pl, pv, st) {
+  const look = applyChoice(pl.look, pv.tab, pv.id, pv.color), name = AV.describeItem(pv.id, lookColor(look, pv.tab)) || "it";
+  const m = openModal(`<div class="bconfirm" data-confirm="buy">
+    <div class="bcav">${AV.render(look, { crop: "full", size: 260, mood: "yay", idPrefix: "bc", label: name })}</div>
+    <div class="bcprice" aria-label="${st.cost} tokens"><span aria-hidden="true">🛍️ 🪙 ${st.cost}</span></div>
+    <div class="yn"><button class="ynbtn yes" data-m="yes" aria-label="Yes, buy it"><span aria-hidden="true">✅</span><small aria-hidden="true">Yes</small></button>
+      <button class="ynbtn no" data-m="no" aria-label="No, not now"><span aria-hidden="true">❌</span><small aria-hidden="true">No</small></button></div></div>`);
+  let done = false;
+  m.querySelector('[data-m="yes"]').onclick = () => { if (done) return; done = true; closeModal(); closetDoBuy(pl, pv, st); };
+  m.querySelector('[data-m="no"]').onclick = () => { if (done) return; done = true; closeModal(); Sound.tap(); closetSay("Okay! Maybe later."); };
+  Sound.tap();
+  closetSay(isYoungerProfile(pl) ? "Do you want to buy it? Green check for yes. Red X for no."
+    : `Buy ${name} for ${st.cost} tokens? Tap the green check for yes, or the red X for no.`);
+}
+
 const NAV_GUARD_MS = 350;
 function recover(err) {
   console.error("[recovered]", err);
@@ -1630,7 +3415,7 @@ if (resumed) {
 } else if (wantHome) { go("home"); } // coming back from a mini-game
 else go("picker"); // otherwise always start on the "Who's playing?" screen
 lastNavAt = 0; // nothing to guard against on first load
-if (/[?&]test=1\b/.test(location.search)) window.__app = { PATHS, Store, APP, explain, get lesson() { return lesson; } }; // automated tests only
+if (/[?&]test=1\b/.test(location.search)) window.__app = { PATHS, Store, APP, explain, spendTokens, closetStatus, syncClimbRewards, AV, get lesson() { return lesson; } }; // automated tests only
 try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch (e) {}
 </script>
 </body>
