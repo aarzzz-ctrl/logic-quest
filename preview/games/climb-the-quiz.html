@@ -354,8 +354,8 @@ body:has(#ov #startCard) #ov,body:has(#ov #finishCard) #ov{top:80px;padding-top:
 <div id="app"></div>
 <div id="ov"></div>
 <script>
-/*AVATAR-START v1.2.0*/
-/* ElzeeAvatar v1.2.0 - shared avatar renderer for Elzee (closet + Climb the Quiz).
+/*AVATAR-START v1.2.1*/
+/* ElzeeAvatar v1.2.1 (1.2.0 + Halloween hunt pieces) - shared avatar renderer for Elzee (closet + Climb the Quiz).
    Source of truth: lq-games/shared/avatar.js. Inline it into a page between the
    AVATAR markers (see shared/elzee-avatar.md); never load it with <script src>.
    One global: window.ElzeeAvatar. No imports, no network, no fonts, no images,
@@ -364,7 +364,7 @@ body:has(#ov #startCard) #ov,body:has(#ov #finishCard) #ov{top:80px;padding-top:
    viewBox 0 0 200 300, head crop 40 10 120 120, limbs pivot at shoulders/elbows/hips/knees. */
 (function (root) {
   "use strict";
-  var VERSION = "1.2.0";
+  var VERSION = "1.2.1";
   var INK = "#2d2a4a";
 
   /* ---------------- data: palette, skins, hair colors, eyes ---------------- */
@@ -506,6 +506,7 @@ body:has(#ov #startCard) #ov,body:has(#ov #finishCard) #ov{top:80px;padding-top:
     return o;
   }
   function reward(floor, more) { var o = { unlock: { type: "reward", event: "climb.floor", count: floor } }, k; for (k in more || {}) o[k] = more[k]; return o; }
+  function pumpkin(n, more) { var o = { unlock: { type: "reward", event: "pumpkin.hunt", count: n } }, k; for (k in more || {}) o[k] = more[k]; return o; } // v1.2.1
   var TOPC = ["red", "orange", "gold", "green", "sky", "blue", "purple", "pink", "white", "black", "gray", "lime"];
 
   /* ---------------- ITEMS: 53 free starter items + 6 Climb rewards ----------------
@@ -738,7 +739,44 @@ body:has(#ov #startCard) #ov,body:has(#ov #finishCard) #ov{top:80px;padding-top:
     }, reward(25)),
     F("acc.head.summit_crown", "acc.head", "Summit crown", "👑", ["gold_foil", "rainbow", "sparkle"], {
       head: P("M64 40L62 6L82 24L100 0L118 24L138 6L136 40Z", "{c1}", "{c1d}") + '<rect x="62" y="34" width="76" height="10" rx="5" fill="{c1d}"/><circle cx="100" cy="28" r="5" fill="#ff7aa2"/><circle cx="80" cy="32" r="4" fill="#7fd0ff"/><circle cx="120" cy="32" r="4" fill="#3ccf4e"/>'
-    }, reward(30, { hairMode: "full" }))
+    }, reward(30, { hairMode: "full" })),
+
+    // v1.2.1 Halloween Pumpkin Patch Hunt pieces (7) - reward-only, never for sale. event "pumpkin.hunt", count = pumpkins found.
+    F("acc.head.cat_ears", "acc.head", "Cat ears", "🐱", ["black", "gray", "orange", "white"], {
+      head: P("M60 46Q57 14 64 7Q79 15 91 30Z M140 46Q143 14 136 7Q121 15 109 30Z", "{c1}", "{c1d}") + P("M66 35Q65 21 68 16Q76 22 82 30Z M134 35Q135 21 132 16Q124 22 118 30Z", "#ff9fc0") +
+        '<path d="M54 58C60 26 140 26 146 58" stroke="{c1d}" stroke-width="6" fill="none" stroke-linecap="round"/>'
+    }, pumpkin(1, { hairMode: "full" })),
+    F("top.pumpkin", "top", "Pumpkin shirt", "🎃", ["orange", "purple", "lime"], merge({
+      torso: P(TORSO, "{c1}", "{c1d}") + TOP_SHADE + '<path d="M86 128Q78 164 86 200M114 128Q122 164 114 200" stroke="{c1d}" stroke-width="2.5" fill="none" opacity=".55"/>' + NECKLINE + RIB +
+        P("M81 154L90 141L98 154Z M102 154L110 141L119 154Z", INK) + P("M97 162L100 157L103 162Z", INK) +
+        P("M80 168Q100 190 120 168Q113 172 108 170L105 176L100 172L95 176L92 170Q87 172 80 168Z", INK)
+    }, sleeves("short", "{c1}", "{c1d}")), pumpkin(2)),
+    F("acc.head.witch_hat", "acc.head", "Witch hat", "🧙", ["purple", "black", "green"], {
+      head: P("M68 55L97 4Q103 -5 112 -1Q122 3 129 9Q117 7 113 15L132 55Z", "{c1}", "{c1d}") + P("M70 45L130 45L132 55L68 55Z", "#ff9f43") +
+        '<rect x="94" y="43" width="12" height="12" rx="2" fill="none" stroke="#ffc83d" stroke-width="3"/>' + P(star(108, 26, 6), "#ffc83d") +
+        P("M34 58C48 45 152 45 166 58C152 71 48 71 34 58Z", "{c1}", "{c1d}")
+    }, pumpkin(3, { hairMode: "tuck", brimY: 60 })),
+    F("acc.hand.candy_pail", "acc.hand", "Pumpkin candy pail", "🍬", ["orange", "purple"], {
+      hand: '<circle cx="-8" cy="8" r="4.5" fill="#ff7aa2"/><circle cx="2" cy="5" r="4.5" fill="#7fd0ff"/><circle cx="10" cy="9" r="4" fill="#9be15d"/>' +
+        '<path d="M-15 12Q0 -16 15 12" stroke="' + INK + '" stroke-width="2.5" fill="none"/>' +
+        P("M-17 13C-17 4 17 4 17 13L15 31C14 39 -14 39 -15 31Z", "{c1}", "{c1d}") + P("M-10 20L-6 14L-2 20Z M2 20L6 14L10 20Z", INK) + P("M-9 25Q0 33 9 25Q0 29 -9 25Z", INK)
+    }, pumpkin(4)),
+    F("acc.neck.bat_wings", "acc.neck", "Bat wings", "🦇", ["black", "purple", "gray"], {
+      behind: P("M88 132C70 118 44 108 18 110C26 120 28 130 26 140C34 136 42 138 46 146C52 140 60 142 64 150C70 146 78 150 82 158L88 160Z", "{c1}", "{c1d}") +
+        P("M112 132C130 118 156 108 182 110C174 120 172 130 174 140C166 136 158 138 154 146C148 140 140 142 136 150C130 146 122 150 118 158L112 160Z", "{c1}", "{c1d}") +
+        '<path d="M86 134L28 114M86 140L46 144M86 146L64 148M114 134L172 114M114 140L154 144M114 146L136 148" stroke="#fff" stroke-width="2" opacity=".35" fill="none"/>'
+    }, pumpkin(5)),
+    F("acc.neck.ghost_cape", "acc.neck", "Ghost cape", "👻", ["white", "lilac", "mint"], {
+      behind: P("M78 126C66 160 56 210 50 254Q60 246 70 254Q80 246 90 254Q100 246 110 254Q120 246 130 254Q140 246 150 254C144 210 134 160 122 126Z", "{c1}", "{c1d}") +
+        '<g fill="' + INK + '"><circle cx="58" cy="232" r="2.5"/><circle cx="65" cy="232" r="2.5"/><circle cx="135" cy="232" r="2.5"/><circle cx="142" cy="232" r="2.5"/></g>',
+      neck: P("M80 121C90 130 110 130 120 121L125 129C112 139 88 139 75 129Z", "{c1}", "{c1d}") +
+        '<circle cx="100" cy="133" r="6" fill="#fff" stroke="' + INK + '" stroke-width="2"/><circle cx="98" cy="132" r="1.3" fill="' + INK + '"/><circle cx="102" cy="132" r="1.3" fill="' + INK + '"/>'
+    }, pumpkin(7)),
+    F("acc.hand.broom", "acc.hand", "Witch broom", "🧹", ["purple", "orange", "green"], {
+      hand: '<path d="M10 -80L-5 26" stroke="#7a4a2c" stroke-width="6" stroke-linecap="round"/>' +
+        P("M-12 24L1 26L10 60Q-6 66 -26 56Z", "#ffc83d", "#c08a00") + '<path d="M-6 30L-14 56M-1 30L-3 60M3 30L6 58" stroke="#c08a00" stroke-width="1.5" fill="none"/>' +
+        P("M-13 21L2 23L1 30L-14 28Z", "{c1}", "{c1d}")
+    }, pumpkin(10))
   ];
 
   /* v1.2.0 prices (Aaron, Oct 3): small free starter set, everything else costs tokens (10 plain .. 60 fancy;
@@ -785,7 +823,10 @@ body:has(#ov #startCard) #ov,body:has(#ov #finishCard) #ov{top:80px;padding-top:
     "acc.head.cap": "{a} {c} baseball cap", "acc.head.bow": "{a} {c} hair bow", "acc.head.fox_ears": "{c} fox ears", "acc.head.frog_hat": "{a} {c} frog hat",
     "acc.face.round_glasses": "{c} round glasses", "acc.neck.bandana": "{a} {c} bandana", "acc.hand.balloon": "{a} {c} balloon",
     "shoes.climbers": "{c} climbing shoes", "acc.head.helmet": "{a} {c} climbing helmet", "acc.hand.flag": "{a} {c} summit flag",
-    "top.climb_jacket": "{a} {c} climbing jacket", "acc.face.star_goggles": "{c} star goggles", "acc.head.summit_crown": "{a} {c} summit crown"
+    "top.climb_jacket": "{a} {c} climbing jacket", "acc.face.star_goggles": "{c} star goggles", "acc.head.summit_crown": "{a} {c} summit crown",
+    "acc.head.cat_ears": "{c} cat ears", "top.pumpkin": "{a} {c} pumpkin shirt", "acc.head.witch_hat": "{a} {c} witch hat",
+    "acc.hand.candy_pail": "{a} {c} pumpkin candy pail", "acc.neck.bat_wings": "{c} bat wings", "acc.neck.ghost_cape": "{a} {c} ghost cape",
+    "acc.hand.broom": "{a} witch broom with {c} ribbons"
   };
   var COLOR_WORDS = {
     pink: "pink", red: "red", orange: "orange", gold: "yellow", lime: "lime green", green: "green", teal: "teal", sky: "sky blue",
@@ -912,6 +953,7 @@ body:has(#ov #startCard) #ov,body:has(#ov #finishCard) #ov{top:80px;padding-top:
     if (!u || u.type === "free") return "";
     if (u.type === "tokens") return "costs " + u.cost + " coins";
     if (u.type === "reward" && u.event === "climb.floor") return "win it on floor " + u.count + " of the tower";
+    if (u.type === "reward" && u.event === "pumpkin.hunt") return "find " + u.count + (u.count === 1 ? " pumpkin" : " pumpkins") + " in the pumpkin hunt";
     return "a special prize";
   }
   // describe(look)                 -> "Brown bob, a sky blue T-shirt, denim shorts and white sneakers."
@@ -1197,7 +1239,7 @@ body:has(#ov #startCard) #ov,body:has(#ov #finishCard) #ov{top:80px;padding-top:
     var body = sub(
       G("shadow", "", '<ellipse cx="100" cy="292" rx="42" ry="7" fill="' + INK + '" opacity=".14"/>') +
       G("root", "av-root",
-        G("hb", "av-hairBack", hair ? hair.svg.back : "") + limbLeg("L") + limbLeg("R") +
+        g("behind") + G("hb", "av-hairBack", hair ? hair.svg.back : "") + limbLeg("L") + limbLeg("R") +
         G("body", "av-body", torso + G("head", "av-head", head) + limbArm("L") + limbArm("R"))));
     var defs = defsFor(p, used) + hc[3] + (mode === "tuck" ? '<clipPath id="' + p + '-tuck"><rect x="0" y="' + (hat.brimY || 60) + '" width="200" height="260"/></clipPath>' : "");
     var vb = o.crop === "head" ? "40 10 120 120" : "0 0 200 300";

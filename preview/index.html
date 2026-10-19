@@ -15,7 +15,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="app-version" content="1.4.5-preview">
+<meta name="app-version" content="1.4.6-preview">
 <style>
 /* Fredoka (SIL Open Font License, see OFL-Fredoka.txt), self-hosted so the app never waits on a third-party server */
 @font-face{font-family:"Fredoka";font-style:normal;font-weight:300 700;font-display:swap;src:url("fredoka-latin.woff2") format("woff2")}
@@ -361,6 +361,50 @@ h1,h2,h3{margin:0;font-weight:700}
   .top .who span:last-child{display:none}
   .heroav .elzee-avatar{height:120px}
 }
+/* ---------- 1.4.6: Halloween Pumpkin Patch Hunt ---------- */
+.pkhost,.gamecard,.trackhead,.result{position:relative}
+.pk{position:absolute;z-index:3;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:34px;line-height:1;
+  border-radius:50%;cursor:pointer;animation:pkwob 2.8s ease-in-out infinite;filter:drop-shadow(0 3px 0 rgba(0,0,0,.18));-webkit-touch-callout:none}
+.pk.big{width:78px;height:78px;font-size:46px}
+@keyframes pkwob{0%,70%,100%{transform:rotate(0)}78%{transform:rotate(-14deg)}86%{transform:rotate(12deg)}93%{transform:rotate(-6deg)}}
+.pk.s-hero{left:78px;bottom:-14px}
+.pk.s-owl{right:-20px;top:-34px}
+.pk.s-track{right:8px;top:calc(50% - 30px)} .pk.big.s-track{top:calc(50% - 39px)}
+.pk.s-game{right:58px;top:-24px}
+.pk.s-shop{right:4%;top:-14px}
+.pk.s-closet{left:8px;bottom:8px}
+.pk.s-results{right:6%;top:6px}
+.pkcount{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:6px;border:3px solid #ffb36b;background:#fff4e6;border-radius:999px;
+  min-height:64px;min-width:64px;padding:6px 16px;font-size:24px;font-weight:700;color:#b85c00;box-shadow:0 4px 0 #ffd2a3}
+.pkcount:active{transform:translateY(3px);box-shadow:0 1px 0 #ffd2a3}
+.pkcount.done{background:#fff1c2;border-color:var(--gold)}
+.pkcount.bump{animation:cpop .4s ease-out 2}
+.pkfly{position:fixed;z-index:95;font-size:46px;line-height:1;pointer-events:none;animation:pkfly 1.05s cubic-bezier(.3,1.3,.5,1) forwards}
+@keyframes pkfly{0%{transform:scale(1)}28%{transform:translateY(-80px) scale(2) rotate(-14deg)}50%{transform:translateY(-50px) scale(1.7) rotate(12deg)}100%{transform:translate(var(--dx),var(--dy)) scale(.5);opacity:.15}}
+.pkwin{position:fixed;left:50%;top:44%;z-index:92;pointer-events:none;text-align:center;background:#fff;border-radius:30px;padding:16px 28px;
+  box-shadow:0 10px 0 rgba(0,0,0,.15);border:5px solid #ff9f43;animation:pkwin 3.6s ease-out forwards;transform:translate(-50%,-50%)}
+.pkwin .row{font-size:50px;letter-spacing:4px;line-height:1.1}.pkwin .pav{display:flex;justify-content:center}.pkwin .pav .elzee-avatar{height:190px;width:auto}
+.pkwin b{display:block;font-size:34px;color:#b85c00}
+@keyframes pkwin{0%{transform:translate(-50%,-50%) scale(.3);opacity:0}12%{transform:translate(-50%,-50%) scale(1.08);opacity:1}20%{transform:translate(-50%,-50%) scale(1)}85%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+.modal.pkhint{max-width:660px}
+.pkhint .pkbig{font-size:44px;color:#b85c00}
+.pkspots{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:10px 0 14px}
+.pkspot{position:relative;border:4px solid #ffd2a3;background:#fff8ef;border-radius:22px;min-height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px;box-shadow:0 5px 0 #ffd2a3;color:var(--ink)}
+.pkspot .pe{font-size:46px;line-height:1;display:flex;align-items:center;gap:2px}.pkspot .pe .g2{font-size:24px}
+.pkspot .pe .elzee-avatar{width:56px;height:56px;border-radius:50%;background:#efe9ff}
+.pkspot .ps{font-size:24px;line-height:1.1}
+.pkspot small{font-size:14px;color:var(--muted);line-height:1.1;max-width:100%;overflow-wrap:anywhere}
+.pkspot.got{border-color:var(--good);background:var(--good-l);box-shadow:0 5px 0 var(--good)}
+.pkprizes{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin:6px 0 14px}
+.pkprize{position:relative;border:3px solid var(--line);background:#fff;border-radius:18px;min-height:80px;display:flex;align-items:center;justify-content:center;padding:2px;overflow:hidden}
+.pkprize .elzee-avatar{max-width:100%;height:auto;max-height:72px}
+.pkprize.locked .elzee-avatar{filter:grayscale(1);opacity:.5}
+.pkprize.got{border-color:var(--gold)}
+.pkprize .pn{position:absolute;left:2px;bottom:2px;background:#ffe3c7;border-radius:10px;font-size:14px;font-weight:700;padding:0 5px}
+.pkprize .pl{position:absolute;top:2px;right:3px;font-size:15px}
+.pkspot.hop,.pkprize.hop{animation:cpop .3s ease-out}
+.pkacts{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center}
+@media (max-width:640px){.pkspots{grid-template-columns:repeat(3,minmax(0,1fr))}.pkprizes{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (prefers-reduced-motion:reduce){.heroav,.sparkles,.ctab.hint{animation:none}.cav.pop,.cav.spin,.cav.dance{animation:none}.bigcoin{animation:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -439,8 +483,8 @@ h1,h2,h3{margin:0;font-weight:700}
 /*VOICE-END*/
 </script>
 <script>
-/*AVATAR-START v1.2.0*/
-/* ElzeeAvatar v1.2.0 - shared avatar renderer for Elzee (closet + Climb the Quiz).
+/*AVATAR-START v1.2.1*/
+/* ElzeeAvatar v1.2.1 (1.2.0 + Halloween hunt pieces) - shared avatar renderer for Elzee (closet + Climb the Quiz).
    Source of truth: lq-games/shared/avatar.js. Inline it into a page between the
    AVATAR markers (see shared/elzee-avatar.md); never load it with <script src>.
    One global: window.ElzeeAvatar. No imports, no network, no fonts, no images,
@@ -449,7 +493,7 @@ h1,h2,h3{margin:0;font-weight:700}
    viewBox 0 0 200 300, head crop 40 10 120 120, limbs pivot at shoulders/elbows/hips/knees. */
 (function (root) {
   "use strict";
-  var VERSION = "1.2.0";
+  var VERSION = "1.2.1";
   var INK = "#2d2a4a";
 
   /* ---------------- data: palette, skins, hair colors, eyes ---------------- */
@@ -591,6 +635,7 @@ h1,h2,h3{margin:0;font-weight:700}
     return o;
   }
   function reward(floor, more) { var o = { unlock: { type: "reward", event: "climb.floor", count: floor } }, k; for (k in more || {}) o[k] = more[k]; return o; }
+  function pumpkin(n, more) { var o = { unlock: { type: "reward", event: "pumpkin.hunt", count: n } }, k; for (k in more || {}) o[k] = more[k]; return o; } // v1.2.1
   var TOPC = ["red", "orange", "gold", "green", "sky", "blue", "purple", "pink", "white", "black", "gray", "lime"];
 
   /* ---------------- ITEMS: 53 free starter items + 6 Climb rewards ----------------
@@ -823,7 +868,44 @@ h1,h2,h3{margin:0;font-weight:700}
     }, reward(25)),
     F("acc.head.summit_crown", "acc.head", "Summit crown", "👑", ["gold_foil", "rainbow", "sparkle"], {
       head: P("M64 40L62 6L82 24L100 0L118 24L138 6L136 40Z", "{c1}", "{c1d}") + '<rect x="62" y="34" width="76" height="10" rx="5" fill="{c1d}"/><circle cx="100" cy="28" r="5" fill="#ff7aa2"/><circle cx="80" cy="32" r="4" fill="#7fd0ff"/><circle cx="120" cy="32" r="4" fill="#3ccf4e"/>'
-    }, reward(30, { hairMode: "full" }))
+    }, reward(30, { hairMode: "full" })),
+
+    // v1.2.1 Halloween Pumpkin Patch Hunt pieces (7) - reward-only, never for sale. event "pumpkin.hunt", count = pumpkins found.
+    F("acc.head.cat_ears", "acc.head", "Cat ears", "🐱", ["black", "gray", "orange", "white"], {
+      head: P("M60 46Q57 14 64 7Q79 15 91 30Z M140 46Q143 14 136 7Q121 15 109 30Z", "{c1}", "{c1d}") + P("M66 35Q65 21 68 16Q76 22 82 30Z M134 35Q135 21 132 16Q124 22 118 30Z", "#ff9fc0") +
+        '<path d="M54 58C60 26 140 26 146 58" stroke="{c1d}" stroke-width="6" fill="none" stroke-linecap="round"/>'
+    }, pumpkin(1, { hairMode: "full" })),
+    F("top.pumpkin", "top", "Pumpkin shirt", "🎃", ["orange", "purple", "lime"], merge({
+      torso: P(TORSO, "{c1}", "{c1d}") + TOP_SHADE + '<path d="M86 128Q78 164 86 200M114 128Q122 164 114 200" stroke="{c1d}" stroke-width="2.5" fill="none" opacity=".55"/>' + NECKLINE + RIB +
+        P("M81 154L90 141L98 154Z M102 154L110 141L119 154Z", INK) + P("M97 162L100 157L103 162Z", INK) +
+        P("M80 168Q100 190 120 168Q113 172 108 170L105 176L100 172L95 176L92 170Q87 172 80 168Z", INK)
+    }, sleeves("short", "{c1}", "{c1d}")), pumpkin(2)),
+    F("acc.head.witch_hat", "acc.head", "Witch hat", "🧙", ["purple", "black", "green"], {
+      head: P("M68 55L97 4Q103 -5 112 -1Q122 3 129 9Q117 7 113 15L132 55Z", "{c1}", "{c1d}") + P("M70 45L130 45L132 55L68 55Z", "#ff9f43") +
+        '<rect x="94" y="43" width="12" height="12" rx="2" fill="none" stroke="#ffc83d" stroke-width="3"/>' + P(star(108, 26, 6), "#ffc83d") +
+        P("M34 58C48 45 152 45 166 58C152 71 48 71 34 58Z", "{c1}", "{c1d}")
+    }, pumpkin(3, { hairMode: "tuck", brimY: 60 })),
+    F("acc.hand.candy_pail", "acc.hand", "Pumpkin candy pail", "🍬", ["orange", "purple"], {
+      hand: '<circle cx="-8" cy="8" r="4.5" fill="#ff7aa2"/><circle cx="2" cy="5" r="4.5" fill="#7fd0ff"/><circle cx="10" cy="9" r="4" fill="#9be15d"/>' +
+        '<path d="M-15 12Q0 -16 15 12" stroke="' + INK + '" stroke-width="2.5" fill="none"/>' +
+        P("M-17 13C-17 4 17 4 17 13L15 31C14 39 -14 39 -15 31Z", "{c1}", "{c1d}") + P("M-10 20L-6 14L-2 20Z M2 20L6 14L10 20Z", INK) + P("M-9 25Q0 33 9 25Q0 29 -9 25Z", INK)
+    }, pumpkin(4)),
+    F("acc.neck.bat_wings", "acc.neck", "Bat wings", "🦇", ["black", "purple", "gray"], {
+      behind: P("M88 132C70 118 44 108 18 110C26 120 28 130 26 140C34 136 42 138 46 146C52 140 60 142 64 150C70 146 78 150 82 158L88 160Z", "{c1}", "{c1d}") +
+        P("M112 132C130 118 156 108 182 110C174 120 172 130 174 140C166 136 158 138 154 146C148 140 140 142 136 150C130 146 122 150 118 158L112 160Z", "{c1}", "{c1d}") +
+        '<path d="M86 134L28 114M86 140L46 144M86 146L64 148M114 134L172 114M114 140L154 144M114 146L136 148" stroke="#fff" stroke-width="2" opacity=".35" fill="none"/>'
+    }, pumpkin(5)),
+    F("acc.neck.ghost_cape", "acc.neck", "Ghost cape", "👻", ["white", "lilac", "mint"], {
+      behind: P("M78 126C66 160 56 210 50 254Q60 246 70 254Q80 246 90 254Q100 246 110 254Q120 246 130 254Q140 246 150 254C144 210 134 160 122 126Z", "{c1}", "{c1d}") +
+        '<g fill="' + INK + '"><circle cx="58" cy="232" r="2.5"/><circle cx="65" cy="232" r="2.5"/><circle cx="135" cy="232" r="2.5"/><circle cx="142" cy="232" r="2.5"/></g>',
+      neck: P("M80 121C90 130 110 130 120 121L125 129C112 139 88 139 75 129Z", "{c1}", "{c1d}") +
+        '<circle cx="100" cy="133" r="6" fill="#fff" stroke="' + INK + '" stroke-width="2"/><circle cx="98" cy="132" r="1.3" fill="' + INK + '"/><circle cx="102" cy="132" r="1.3" fill="' + INK + '"/>'
+    }, pumpkin(7)),
+    F("acc.hand.broom", "acc.hand", "Witch broom", "🧹", ["purple", "orange", "green"], {
+      hand: '<path d="M10 -80L-5 26" stroke="#7a4a2c" stroke-width="6" stroke-linecap="round"/>' +
+        P("M-12 24L1 26L10 60Q-6 66 -26 56Z", "#ffc83d", "#c08a00") + '<path d="M-6 30L-14 56M-1 30L-3 60M3 30L6 58" stroke="#c08a00" stroke-width="1.5" fill="none"/>' +
+        P("M-13 21L2 23L1 30L-14 28Z", "{c1}", "{c1d}")
+    }, pumpkin(10))
   ];
 
   /* v1.2.0 prices (Aaron, Oct 3): small free starter set, everything else costs tokens (10 plain .. 60 fancy;
@@ -870,7 +952,10 @@ h1,h2,h3{margin:0;font-weight:700}
     "acc.head.cap": "{a} {c} baseball cap", "acc.head.bow": "{a} {c} hair bow", "acc.head.fox_ears": "{c} fox ears", "acc.head.frog_hat": "{a} {c} frog hat",
     "acc.face.round_glasses": "{c} round glasses", "acc.neck.bandana": "{a} {c} bandana", "acc.hand.balloon": "{a} {c} balloon",
     "shoes.climbers": "{c} climbing shoes", "acc.head.helmet": "{a} {c} climbing helmet", "acc.hand.flag": "{a} {c} summit flag",
-    "top.climb_jacket": "{a} {c} climbing jacket", "acc.face.star_goggles": "{c} star goggles", "acc.head.summit_crown": "{a} {c} summit crown"
+    "top.climb_jacket": "{a} {c} climbing jacket", "acc.face.star_goggles": "{c} star goggles", "acc.head.summit_crown": "{a} {c} summit crown",
+    "acc.head.cat_ears": "{c} cat ears", "top.pumpkin": "{a} {c} pumpkin shirt", "acc.head.witch_hat": "{a} {c} witch hat",
+    "acc.hand.candy_pail": "{a} {c} pumpkin candy pail", "acc.neck.bat_wings": "{c} bat wings", "acc.neck.ghost_cape": "{a} {c} ghost cape",
+    "acc.hand.broom": "{a} witch broom with {c} ribbons"
   };
   var COLOR_WORDS = {
     pink: "pink", red: "red", orange: "orange", gold: "yellow", lime: "lime green", green: "green", teal: "teal", sky: "sky blue",
@@ -997,6 +1082,7 @@ h1,h2,h3{margin:0;font-weight:700}
     if (!u || u.type === "free") return "";
     if (u.type === "tokens") return "costs " + u.cost + " coins";
     if (u.type === "reward" && u.event === "climb.floor") return "win it on floor " + u.count + " of the tower";
+    if (u.type === "reward" && u.event === "pumpkin.hunt") return "find " + u.count + (u.count === 1 ? " pumpkin" : " pumpkins") + " in the pumpkin hunt";
     return "a special prize";
   }
   // describe(look)                 -> "Brown bob, a sky blue T-shirt, denim shorts and white sneakers."
@@ -1282,7 +1368,7 @@ h1,h2,h3{margin:0;font-weight:700}
     var body = sub(
       G("shadow", "", '<ellipse cx="100" cy="292" rx="42" ry="7" fill="' + INK + '" opacity=".14"/>') +
       G("root", "av-root",
-        G("hb", "av-hairBack", hair ? hair.svg.back : "") + limbLeg("L") + limbLeg("R") +
+        g("behind") + G("hb", "av-hairBack", hair ? hair.svg.back : "") + limbLeg("L") + limbLeg("R") +
         G("body", "av-body", torso + G("head", "av-head", head) + limbArm("L") + limbArm("R"))));
     var defs = defsFor(p, used) + hc[3] + (mode === "tuck" ? '<clipPath id="' + p + '-tuck"><rect x="0" y="' + (hat.brimY || 60) + '" width="200" height="260"/></clipPath>' : "");
     var vb = o.crop === "head" ? "40 10 120 120" : "0 0 200 300";
@@ -1991,7 +2077,7 @@ const APP = {
   mascot: "🦉",
   mascotName: "Professor Hoot",
   pinLength: 4,
-  version: "1.4.5-preview",
+  version: "1.4.6-preview",
 };
 const AVATARS = ["🦊","🐼","🦄","🐯","🐸","🐙","🦖","🐰","🐨","🦁","🐧","🐝","🐬","🦋","🐱","🐶"];
 const REWARDS = {
@@ -2129,7 +2215,7 @@ const Store = {
     const str = (v, def, max) => (typeof v === "string" && v.trim() ? v.slice(0, max) : def);
     const obj = v => (v && typeof v === "object" && !Array.isArray(v) ? v : {});
     const pathIds = PATHS.map(x => x.id);
-    const closetBackup = readClosetBackup();
+    const closetBackup = readClosetBackup(), huntBackup = readHuntBackup();
     d.profiles = (Array.isArray(raw.profiles) ? raw.profiles : []).filter(p => p && typeof p === "object").map(p => {
       const pathId = pathIds.includes(p.pathId) ? p.pathId : "big";
       const progress = {};
@@ -2145,6 +2231,7 @@ const Store = {
         readAloud: typeof p.readAloud === "boolean" ? p.readAloud : getPath(pathId).readAloudDefault,
         priceX: PRICE_X.choices.includes(p.priceX) ? p.priceX : null, // 1.4.4: prize price multiplier; null = default for the path
         voice: typeof p.voice === "string" && p.voice ? p.voice.slice(0, 100) : null, // 1.4.2: this kid's read-aloud voice (ElzeeVoice)
+        hunt: sanitizeHunt(p.hunt, typeof p.id === "string" ? huntBackup[p.id] : null), // 1.4.6: pumpkin hunt (found ids; union with the backup key)
         created: num(p.created, Date.now()),
       };
     }).map(p => Object.assign(p, sanitizeClosetFields(raw.profiles.find(r => r && r.id === p.id) || p, closetBackup)));
@@ -2208,6 +2295,8 @@ const Store = {
     try { const out = JSON.stringify(this.data); localStorage.setItem(APP.storageKey, out); this.diskStr = out; this.base = JSON.parse(out); } catch (e) { /* storage full / private mode */ }
     // Downgrade protection: an old cached build drops look/closet; load() restores them from here.
     try { const b = {}; for (const p of this.data.profiles) if (p.look) b[p.id] = { look: p.look, closet: p.closet }; localStorage.setItem(CLOSET_BACKUP_KEY, JSON.stringify(b)); } catch (e) {}
+    // 1.4.6: same downgrade protection for pumpkins (an older cached build drops profiles[i].hunt on save)
+    try { const h = {}; for (const p of this.data.profiles) if (p.hunt && p.hunt.found.length) h[p.id] = { found: p.hunt.found }; localStorage.setItem(HUNT_BACKUP_KEY, JSON.stringify(h)); } catch (e) {}
   },
 };
 const state = () => Store.data;
@@ -2220,6 +2309,8 @@ function merge3(base, ours, theirs, key) {
   if (so === sb || so === st) return theirs;          // we changed nothing (or the same thing)
   if (st === sb) return ours;                         // they changed nothing
   if (typeof ours === "number" && typeof theirs === "number" && typeof base === "number" && MERGE_COUNTERS.has(key)) return Math.max(0, theirs + (ours - base));
+  if (key === "stars" && typeof ours === "number" && typeof theirs === "number") return Math.max(ours, theirs); // 1.4.6 (Ted): stars never go down
+  if (key === "done" && typeof ours === "boolean" && typeof theirs === "boolean") return ours || theirs;       // ...and a finished lesson stays finished
   if (Array.isArray(ours) && Array.isArray(theirs)) {
     const b = Array.isArray(base) ? base : [], all = [...ours, ...theirs, ...b];
     if (all.length && all.every(x => isPlain(x) && typeof x.id === "string")) { // profiles / prizes: merge by id
@@ -2272,7 +2363,7 @@ const getPath = id => PATHS.find(p => p.id === id) || PATHS[0];
 
 function newProfile(name, avatar, pathId) {
   return { id: uid(), name, avatar, pathId, tokens: 0, totalEarned: 0, streak: 0, lastPlay: null,
-           progress: {}, lessonsDone: 0, replayDay: null, replayCount: 0, readAloud: getPath(pathId).readAloudDefault, created: Date.now(),
+           progress: {}, lessonsDone: 0, replayDay: null, replayCount: 0, readAloud: getPath(pathId).readAloudDefault, created: Date.now(), hunt: { found: [] },
            ...closetDefaults(avatar) };
 }
 const progKey = (pathId, ti, li) => `${getPath(pathId).id}/${getPath(pathId).tracks[ti].id}/${li}`;
@@ -2546,6 +2637,169 @@ function forgetMiniGameData(profileId, which = () => true) {
 }
 
 /* ==========================================================================
+   1.4.6 HALLOWEEN PUMPKIN PATCH HUNT (Aaron, Oct 18). Each Mon-Sun week (local time) 5 pumpkins hide in the main
+   app: home (next to the avatar, by the owl), the lesson map (first / last world sign), one 🧠 and one 🔤 game tile,
+   and one of prize shop / closet / lesson results. Spots are seeded by the week (same for every kid); mini-games are
+   not touched. Per kid: profiles[i].hunt.found = ["<monday yyyy-mm-dd>:<spot>", ...]; save-time merge = union.
+   Costume pieces unlock at fixed totals (HUNT_PIECES), straight into closet.owned: earned only, never random,
+   never for sale, permanent (Reset progress clears them with the rest of the closet). Never blocks a lesson or
+   game: a pumpkin is a small extra button, the hint screen is opened by the kid, celebrations don't take taps.
+   Shown Oct 12 - Nov 1, 2026; hidden from Nov 2 (owned pieces stay; unwon ones leave the closet).
+   ========================================================================== */
+const HUNT = { start: new Date(2026, 9, 12), end: new Date(2026, 10, 2), perWeek: 5 };
+const HUNT_BACKUP_KEY = "logicquest.v1.hunt";
+const HUNT_PIECES = [ // [total pumpkins found, closet item] - the unlock schedule
+  [1, "acc.head.cat_ears"], [2, "top.pumpkin"], [3, "acc.head.witch_hat"], [4, "acc.hand.candy_pail"],
+  [5, "acc.neck.bat_wings"], [7, "acc.neck.ghost_cape"], [10, "acc.hand.broom"]];
+const HUNT_HOME = ["hero", "owl", "track0", "trackLast"], HUNT_PLACES = ["shop", "closet", "results"];
+const HUNT_ID_RE = /^\d{4}-\d{2}-\d{2}:[A-Za-z0-9:_.-]{1,48}$/;
+const HALLOWEEN_COLORS = ["#ff7a1a", "#ff9f43", "#7c4dff", "#3ccf4e", "#2d2a4a", "#ffc83d"];
+function readHuntBackup() { try { const b = JSON.parse(localStorage.getItem(HUNT_BACKUP_KEY)); return b && typeof b === "object" && !Array.isArray(b) ? b : {}; } catch (e) { return {}; } }
+function sanitizeHunt(h, bk) {
+  const src = [].concat(h && typeof h === "object" && Array.isArray(h.found) ? h.found : [], bk && typeof bk === "object" && Array.isArray(bk.found) ? bk.found : []);
+  return { found: [...new Set(src.filter(x => typeof x === "string" && HUNT_ID_RE.test(x)))].slice(0, 200) };
+}
+function huntForget(pid) { try { const b = readHuntBackup(); if (b[pid]) { delete b[pid]; localStorage.setItem(HUNT_BACKUP_KEY, JSON.stringify(b)); } } catch (e) {} }
+const huntActive = (d = new Date()) => d >= HUNT.start && d < HUNT.end;
+function huntWeek(d = new Date()) { const m = new Date(d.getFullYear(), d.getMonth(), d.getDate()); m.setDate(m.getDate() - (m.getDay() + 6) % 7); return ymd(m); }
+function huntRand(seed) { // FNV-1a + mulberry32: same week -> same spots on every device
+  let h = 2166136261; for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619); }
+  let a = h >>> 0;
+  return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+const huntSpotCache = new Map();
+function huntSpots(week = huntWeek()) { // seeded by the week number: weeks rotate through every spot, so each week is a new set
+  if (huntSpotCache.has(week)) return huntSpotCache.get(week);
+  const r = huntRand("elzee-pumpkins-2026"), mix = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const wk = Math.max(0, Math.round((new Date(week + "T12:00:00") - new Date(2026, 9, 12, 12)) / (7 * 864e5)));
+  const at = (arr, i) => arr[((i % arr.length) + arr.length) % arr.length];
+  const home = mix(HUNT_HOME), think = mix(MINIGAMES.filter(g => gameGroupOf(g) === "think").map(g => "game:" + g.id)),
+    words = mix(MINIGAMES.filter(g => gameGroupOf(g) === "words").map(g => "game:" + g.id)), places = mix(HUNT_PLACES);
+  const spots = [at(home, 2 * wk), at(home, 2 * wk + 1), at(think, wk), at(words, wk), at(places, wk)];
+  huntSpotCache.set(week, spots); return spots;
+}
+const huntFound = pl => (pl && pl.hunt && Array.isArray(pl.hunt.found) ? pl.hunt.found : []);
+const huntWeekFound = (pl, week = huntWeek()) => huntSpots(week).filter(sp => huntFound(pl).includes(week + ":" + sp));
+function huntOpen(pl) { // spots still hiding this week for this kid
+  if (!pl || !huntActive()) return [];
+  const w = huntWeek(), f = huntFound(pl);
+  return huntSpots(w).filter(sp => !f.includes(w + ":" + sp));
+}
+function pkHTML(pl, spot) {
+  if (!huntOpen(pl).includes(spot)) return "";
+  const cls = spot.startsWith("game:") ? "s-game" : spot.startsWith("track") ? "s-track" : "s-" + spot;
+  return `<span class="pk ${cls}${isYoungerProfile(pl) ? " big" : ""}" role="button" tabindex="0" data-act="pumpkin" data-spot="${esc(spot)}" aria-label="A pumpkin! Tap it!"><span aria-hidden="true">🎃</span></span>`;
+}
+function huntCounterHTML(pl) {
+  if (!pl || !huntActive()) return "";
+  const n = huntWeekFound(pl).length, done = n >= HUNT.perWeek;
+  return `<button class="pkcount ${done ? "done" : ""}" data-act="huntHint" aria-label="Pumpkin hunt: ${n} of ${HUNT.perWeek} found. Tap for hints."><span aria-hidden="true">🎃</span><b aria-hidden="true">${n}/${HUNT.perWeek}</b>${done ? `<span aria-hidden="true">⭐</span>` : ""}</button>`;
+}
+// Fixed schedule: every piece whose total is reached is in the closet (idempotent; also repairs a stale-tab/old-build save).
+function huntGrant(pl, { save = true } = {}) {
+  if (!AV || !pl || !pl.closet) return [];
+  const total = huntFound(pl).length, got = HUNT_PIECES.filter(([n, id]) => total >= n && grantItem(pl, id, { save: false })).map(x => x[1]);
+  if (got.length && save) Store.save();
+  return got;
+}
+const huntPiece = id => HUNT_PIECES.find(x => x[1] === id);
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+function huntSpotInfo(pl, spot) {
+  const path = getPath(pl.pathId);
+  if (spot === "hero") return { pic: avatarHTML(pl, { crop: "head", size: 56, idPrefix: "pkh", uniq: true }), label: "Home", say: "next to your picture on the home screen" };
+  if (spot === "owl") return { pic: "🦉", label: "Owl", say: "by the owl's talk bubble on the home screen" };
+  if (spot === "track0" || spot === "trackLast") {
+    const t = spot === "track0" ? path.tracks[0] : path.tracks[path.tracks.length - 1];
+    return { pic: esc(t.emoji), label: t.title, say: `on the ${t.title} sign on the map${spot === "trackLast" ? ", way down at the bottom" : ""}` };
+  }
+  if (spot.startsWith("game:")) {
+    const g = MINIGAMES.find(x => "game:" + x.id === spot) || { emoji: "🎮", name: "a game" }, G = GAME_GROUPS.find(x => x.id === gameGroupOf(g));
+    return { pic: `${esc(g.emoji)}<span class="g2">${G ? G.emoji : ""}</span>`, label: g.name, say: `on the ${g.name} game, with the ${G ? G.name.toLowerCase() : "games"}` };
+  }
+  if (spot === "shop") return { pic: "🎁", label: "Prize shop", say: "in the prize shop" };
+  if (spot === "closet") return { pic: "👚", label: "Closet", say: "in your closet" };
+  return { pic: "🏆", label: "Lesson done", say: "on the screen you see when you finish a lesson" };
+}
+function huntNextPiece(pl) { const total = huntFound(pl).length; return HUNT_PIECES.find(([n, id]) => n > total && !closetOwns(pl.closet.owned, id)) || null; }
+function huntNextSay(pl) {
+  const nx = huntNextPiece(pl); if (!nx || !AV) return "";
+  return ` Find ${plural(nx[0] - huntFound(pl).length, "more pumpkin", "more pumpkins")} to win ${AV.describeItem(nx[1])}!`;
+}
+function pkFly(r) {
+  if (reducedMotion() || !r) return;
+  const f = document.createElement("span"); f.className = "pkfly"; f.textContent = "🎃"; f.setAttribute("aria-hidden", "true");
+  f.style.left = (r.left + r.width / 2 - 23) + "px"; f.style.top = (r.top + r.height / 2 - 23) + "px";
+  const c = document.querySelector(".pkcount"), t = c ? c.getBoundingClientRect() : { left: innerWidth / 2, top: 20, width: 0, height: 0 };
+  f.style.setProperty("--dx", Math.round(t.left + t.width / 2 - (r.left + r.width / 2)) + "px"); f.style.setProperty("--dy", Math.round(t.top + t.height / 2 - (r.top + r.height / 2)) + "px");
+  document.body.appendChild(f); setTimeout(() => f.remove(), 1200);
+}
+function pkWin(pl, got) {
+  document.querySelectorAll(".pkwin").forEach(x => x.remove());
+  let look = pl.look; if (AV && got && got.length) { const id = got[got.length - 1], it = AV.item(id); if (it) look = applyChoice(pl.look, it.slot, id); }
+  const w = document.createElement("div"); w.className = "pkwin"; w.setAttribute("aria-hidden", "true");
+  w.innerHTML = `<div class="row">🎃🎃🎃🎃🎃</div>${AV ? `<div class="pav">${AV.render(look, { crop: "full", size: 190, mood: "yay", pose: "dance", idPrefix: "pkwin" })}</div>` : ""}<b>${HUNT.perWeek}/${HUNT.perWeek}! 🎉</b>`;
+  document.body.appendChild(w); setTimeout(() => w.remove(), 3700);
+}
+function huntRefreshDom(pl) {
+  const c = document.querySelector(".pkcount");
+  if (c) { c.outerHTML = huntCounterHTML(pl); const c2 = document.querySelector(".pkcount"); if (c2 && !reducedMotion()) c2.classList.add("bump"); }
+  const cb = document.querySelector('.top [data-act="openCloset"]'), fresh = closetFresh(pl).length;
+  if (cb) { cb.setAttribute("aria-label", fresh ? "My closet. Something new!" : "My closet"); cb.innerHTML = "👚" + (fresh ? `<span class="newdot" aria-hidden="true">NEW</span>` : ""); }
+  if (view.name === "closet") renderCloset();
+}
+function huntTap(el) {
+  const pl = player(); if (!pl) return;
+  Store.sync(); // 1.4.6: newest save first (another tab may have found it already)
+  const spot = el.dataset.spot, w = huntWeek(), id = w + ":" + spot, r = el.getBoundingClientRect();
+  el.remove();
+  if (!huntActive() || !huntSpots(w).includes(spot) || huntFound(pl).includes(id)) { huntRefreshDom(pl); return; } // a stale pumpkin: just tidy up
+  if (!pl.hunt || !Array.isArray(pl.hunt.found)) pl.hunt = { found: [] };
+  pl.hunt.found.push(id);
+  const got = huntGrant(pl, { save: false });
+  Store.save();
+  const left = HUNT.perWeek - huntWeekFound(pl, w).length;
+  pkFly(r); Sound.play([[523, .09], [659, .09], [784, .09], [1047, .24]]); confetti(left > 0 ? 36 : 150, HALLOWEEN_COLORS);
+  huntRefreshDom(pl);
+  const won = got.length && AV ? ` You won ${got.map(x => AV.describeItem(x)).join(" and ")}! It's in your closet.` : "";
+  if (left > 0) Speech.say(`You found a pumpkin! ${left} more to go!${won}`);
+  else {
+    const nextMon = new Date(w + "T12:00:00"); nextMon.setDate(nextMon.getDate() + 7);
+    Speech.say(`Hooray! You found all ${HUNT.perWeek} pumpkins!${won} ${huntActive(nextMon) ? "New pumpkins hide again next week." : "Happy Halloween!"}`);
+    setTimeout(() => { Sound.win(); pkWin(pl, got); }, 500);
+  }
+  if (got.length) closetNewToast(`👚 New in your closet! ${got.map(itemIcon).join(" ")} 👆`, got[got.length - 1]);
+  else toast(left > 0 ? `🎃 You found a pumpkin! ${left} more to go!` : `🎃 You found all ${HUNT.perWeek}!`, 2400);
+}
+/* Picture hint screen (opened only by tapping 🎃 n/5): where pumpkins still hide + the costume prizes. All read aloud. */
+function huntHint() {
+  const pl = player(); if (!pl || !huntActive()) return;
+  Store.sync();
+  const w = huntWeek(), spots = huntSpots(w), f = huntFound(pl), young = isYoungerProfile(pl), n = huntWeekFound(pl, w).length;
+  const left = spots.filter(sp => !f.includes(w + ":" + sp));
+  const cards = spots.map(sp => { const got = f.includes(w + ":" + sp), inf = huntSpotInfo(pl, sp);
+    return `<button class="pkspot ${got ? "got" : ""}" data-pk="${esc(sp)}" aria-label="${esc((got ? "Found! " : "A pumpkin is hiding ") + inf.say)}"><span class="pe" aria-hidden="true">${inf.pic}</span><span class="ps" aria-hidden="true">${got ? "✅" : "🎃❓"}</span>${young ? "" : `<small aria-hidden="true">${esc(inf.label)}</small>`}</button>`; }).join("");
+  const prizes = AV ? HUNT_PIECES.map(([k, id], i) => { const own = closetOwns(pl.closet.owned, id), it = AV.item(id); if (!it) return "";
+    const head = ["acc.head", "acc.face"].includes(it.slot), look = applyChoice(pl.look, it.slot, id);
+    return `<button class="pkprize ${own ? "got" : "locked"}" data-pz="${esc(id)}" aria-label="${esc(AV.describeItem(id) + (own ? ". You won it!" : `. Find ${k} pumpkins to win it.`))}">${AV.render(look, { crop: head ? "head" : "full", size: head ? 70 : 76, mood: own ? "yay" : "happy", idPrefix: "pz" + i })}${own ? `<span class="pl" aria-hidden="true">✅</span>` : `<span class="pl" aria-hidden="true">🔒</span><span class="pn" aria-hidden="true">🎃${k}</span>`}</button>`; }).join("") : "";
+  const m = openModal(`<div class="pkhintin"><h3 class="pkbig" aria-label="${n} of ${HUNT.perWeek} pumpkins found">🎃 ${n}/${HUNT.perWeek}</h3>
+    <div class="pkspots">${cards}</div>${prizes ? `<div class="pkprizes">${prizes}</div>` : ""}
+    <div class="pkacts">${Speech.supported ? `<button class="iconbtn" data-m="say" aria-label="Read aloud">🔊</button>` : "<span></span>"}<button class="btn block" data-m="ok" aria-label="Done">✓</button></div></div>`);
+  m.classList.add("pkhint");
+  const intro = () => `Pumpkin hunt! You found ${n} of ${HUNT.perWeek} this week.` +
+    (left.length ? ` Pumpkins are hiding ${left.map(sp => huntSpotInfo(pl, sp).say).join(", and ")}.` : " You found them all this week!") + huntNextSay(pl);
+  m.querySelectorAll(".pkspot").forEach(b => { b.onclick = () => { const sp = b.dataset.pk, got = f.includes(w + ":" + sp); Sound.tap();
+    b.classList.remove("hop"); void b.offsetWidth; b.classList.add("hop");
+    Speech.say(got ? "You found this one! Great looking!" : `Look ${huntSpotInfo(pl, sp).say}!`); }; });
+  m.querySelectorAll(".pkprize").forEach(b => { b.onclick = () => { const p = huntPiece(b.dataset.pz); if (!p) return; Sound.tap();
+    const own = closetOwns(pl.closet.owned, p[1]), more = p[0] - huntFound(pl).length;
+    Speech.say(own ? `You won ${AV.describeItem(p[1])}! Wear it in your closet.` : `Find ${plural(more, "more pumpkin", "more pumpkins")} to win ${AV.describeItem(p[1])}!`); }; });
+  const say = m.querySelector('[data-m="say"]'); if (say) say.onclick = () => Speech.say(intro());
+  m.querySelector('[data-m="ok"]').onclick = () => { closeModal(); Sound.tap(); };
+  m.parentElement.addEventListener("click", e => { if (e.target === m.parentElement) closeModal(); }); // tap outside closes too
+  Sound.tap(); Speech.say(intro());
+}
+
+/* ==========================================================================
    AUDIO + SPEECH
    ========================================================================== */
 const Sound = {
@@ -2636,8 +2890,8 @@ function confirmBox(title, msg, okLabel, onOk, danger = false) {
   m.querySelector('[data-m="ok"]').onclick = () => { closeModal(); onOk(); };
   m.querySelector('[data-m="cancel"]').onclick = closeModal;
 }
-function confetti(n = 90) {
-  const colors = ["#7c4dff", "#00a99d", "#ff7a29", "#ffc83d", "#3ccf4e", "#ff5d8f", "#4dabff"];
+function confetti(n = 90, palette) {
+  const colors = palette || ["#7c4dff", "#00a99d", "#ff7a29", "#ffc83d", "#3ccf4e", "#ff5d8f", "#4dabff"];
   for (let i = 0; i < n; i++) {
     const c = document.createElement("i"); c.className = "confetti";
     c.style.left = Math.random() * 100 + "vw";
@@ -2721,10 +2975,12 @@ function startGrownUpSetup(onDone) {
 }
 
 function requireGrownUp(reason, onOk) {
+  Store.sync(); // 1.4.6 (Ted): a stale tab must check the newest PIN / lockout
   const st = state();
   if (!hasPin()) { startGrownUpSetup(onOk); return; } // math check first, then make the PIN; the prize or settings open only after that
   if (st.pinLockUntil > Date.now()) { toast(`Too many tries. Please wait ${waitText(st.pinLockUntil)}.`, 2600); return; }
   pinPad({ title: "Grown-up check 🔒", msg: reason, forgot: true, onSubmit(v, a) {
+    Store.sync(); // the PIN may have changed in another tab while the pad was open
     if (checkPin(v)) { st.pinFails = 0; st.pinLockUntil = 0; Store.save(); a.close(); onOk(); return; }
     st.pinFails += 1;
     if (st.pinFails >= GATE.pinTriesBeforeLock) {
@@ -2755,7 +3011,7 @@ function render() {
   if (view.name !== "closet" && closetSess) { closetCommitSeen(player()); closetSess = null; closetUndoStore.clear(); } // undo/refund only within one visit
   if (view.name === "home") {
     const paid = claimMiniGameTokens(player());
-    const got = syncClimbRewards(player());
+    const got = syncClimbRewards(player()).concat(huntGrant(player())); // 1.4.6: pumpkin pieces too (repairs a merged / old-build save)
     const msg = paid.map(p => `+${p.n} 🪙 from ${p.game.name}!`).concat(got.length ? [`👚 New in your closet! ${got.map(id => (AV.item(id) || {}).icon || "🎁").join(" ")}`] : []);
     if (msg.length) setTimeout(() => {
       if (got.length) closetNewToast(msg.join(" ") + " 👆", got[got.length - 1]); else toast(msg.join(" "));
@@ -2826,7 +3082,7 @@ function topBar(pl, { back = false } = {}) {
     ${back ? `<button class="iconbtn" data-act="home" aria-label="Back">⬅️</button>` :
       `<button class="who" data-act="picker" aria-label="Switch player">${avatarHTML(pl, { crop: "head", size: 44, idPrefix: "tb" })}<span>${esc(pl.name)}</span></button>`}
     <div class="pill fire ${s ? "" : "off"}" title="Daily streak">🔥 <b>${s}</b></div>
-    <div class="pill tok" title="Tokens">🪙 <b data-tokens>${pl.tokens}</b></div>
+    <div class="pill tok" title="Tokens">🪙 <b data-tokens>${fmtN(pl.tokens)}</b></div>
     <div class="spacer"></div>
     <button class="iconbtn" data-act="shop" aria-label="Prize shop">🎁</button>
     ${AV ? `<button class="iconbtn" data-act="openCloset" aria-label="${closetFresh(pl).length ? "My closet. Something new!" : "My closet"}">👚${closetFresh(pl).length ? `<span class="newdot" aria-hidden="true">NEW</span>` : ""}</button>` : ""}
@@ -2844,7 +3100,7 @@ function renderPicker() {
     <div class="players">
       ${ps.map(p => `<button class="playercard" data-act="choosePlayer" data-id="${p.id}">
         ${avatarHTML(p, { crop: "head", size: 88, idPrefix: "pc", uniq: true })}<span class="nm">${esc(p.name)}</span>
-        <span class="meta">🪙 ${p.tokens} · 🔥 ${liveStreak(p)}</span></button>`).join("")}
+        <span class="meta">🪙 ${fmtN(p.tokens)} · 🔥 ${liveStreak(p)}</span></button>`).join("")}
       <button class="playercard add" data-act="addPlayer"><span class="av">➕</span><span class="nm">Add player</span></button>
     </div>`;
 }
@@ -2886,15 +3142,15 @@ function renderHome() {
   const path = getPath(pathId);
   const offsets = [0, 80, -80, 40, -40];
   $app.innerHTML = topBar(pl) + `
-    <div class="hello">${AV ? `<button class="heroav" data-act="openCloset" aria-label="My closet">${avatarHTML(pl, { crop: "full", size: 150, idPrefix: "hero" })}</button>` : ""}<div class="mascot">${APP.mascot}</div><div class="bubble">${greeting(pl)}</div></div>
+    <div class="hello pkhost">${AV ? `<button class="heroav" data-act="openCloset" aria-label="My closet">${avatarHTML(pl, { crop: "full", size: 150, idPrefix: "hero" })}</button>` : ""}${pkHTML(pl, "hero")}<div class="mascot">${APP.mascot}</div><div class="bubble">${greeting(pl)}${pkHTML(pl, "owl")}</div>${huntCounterHTML(pl)}</div>
     ${(() => { const gs = homeGames(pl), cur = homeGroup(), has = id => gs.some(g => gameGroupOf(g) === id);
       return GAME_GROUPS.filter(G => has(G.id)).length > 1 ? `<div class="ggtabs" role="tablist">${GAME_GROUPS.map(G => `<button class="ggtab ${G.id === cur ? "on" : ""}" role="tab" aria-selected="${G.id === cur}" data-act="gameGroup" data-g="${G.id}" aria-label="${G.name}"><span class="gge" aria-hidden="true">${G.emoji}</span><span class="ggn">${G.name}</span><span class="ggc" aria-hidden="true">${gs.filter(g => gameGroupOf(g) === G.id).map(g => g.emoji).join("")}</span></button>`).join("")}</div>` : ""; })()}
     ${homeGames(pl).map(g => `<a class="gamecard" href="${g.href}" data-game="${g.id}" data-group="${gameGroupOf(g)}"${gameGroupOf(g) === homeGroup() || !homeGames(pl).some(x => gameGroupOf(x) !== gameGroupOf(g)) ? "" : " hidden"}${g.act ? ` data-act="${g.act}"` : ""}><span class="ge">${g.emoji}</span>
-      <span><b>${esc(g.name)}</b><small>${esc(g.blurb)}</small></span><span class="go">▶</span></a>`).join("")}
+      <span><b>${esc(g.name)}</b><small>${esc(g.blurb)}</small></span><span class="go">▶</span>${pkHTML(pl, "game:" + g.id)}</a>`).join("")}
     <div class="tabs">${PATHS.map(p => `<button class="tab ${p.id === pathId ? "on" : ""}" data-act="viewPath" data-v="${p.id}">${p.emoji} ${esc(p.title)}</button>`).join("")}</div>
     ${path.tracks.map((t, ti) => `
       <section class="track" style="--c:${t.color};--cd:${t.dark};--cl:${t.light}">
-        <div class="trackhead"><span class="te">${t.emoji}</span><div><h2>${esc(t.title)}</h2><p>${esc(t.blurb)}</p></div></div>
+        <div class="trackhead"><span class="te">${t.emoji}</span><div><h2>${esc(t.title)}</h2><p>${esc(t.blurb)}</p></div>${pathId === pl.pathId ? pkHTML(pl, ti === 0 ? "track0" : ti === path.tracks.length - 1 ? "trackLast" : "-") : ""}</div>
         <div class="path">${t.levels.map((lv, li) => {
           const p = progOf(pl, pathId, ti, li), un = isUnlocked(pl, pathId, ti, li), next = un && !p.done;
           const attrs = `data-path="${pathId}" data-t="${ti}" data-l="${li}"`;
@@ -2946,6 +3202,7 @@ const LessonSave = {
   },
 };
 function startLesson(pathId, ti, li) {
+  Store.sync(); // 1.4.6 (Ted): newest stars / "done" before we decide first clear vs replay
   const level = getPath(pathId).tracks[ti].levels[li];
   const replay = !!progOf(player(), pathId, ti, li).done;
   lesson = { pathId, ti, li, replay, total: level.qs.length, queue: level.qs.map((_, i) => i), mastered: new Set(),
@@ -3081,6 +3338,8 @@ function keepAnswerVisible(sheet) {
 }
 function finishLesson() {
   LessonSave.clear();
+  Store.sync(); // 1.4.6 (Ted): another tab may have finished this lesson meanwhile -> pay a replay, keep the higher stars
+  if (!player()) { lesson = null; go("picker", {}, { replace: true }); return; }
   const pl = player(), key = progKey(lesson.pathId, lesson.ti, lesson.li);
   const prev = pl.progress[key] || {};
   const stars = lessonStars(pl, lesson.mistakes);
@@ -3116,14 +3375,14 @@ function finishLesson() {
 }
 function renderResults() {
   const r = view.result, pl = player();
-  $app.innerHTML = `<div class="result">
+  $app.innerHTML = `<div class="result">${pkHTML(pl, "results")}
     <div class="bigicon">${stars3(r.stars)}</div>
     <h1 class="title">Lesson complete!</h1>
     <div class="bigstars">${[0,1,2].map(i => `<span style="animation-delay:${.2 + i * .25}s"><span class="${i < r.stars ? "" : "nostar"}">⭐</span></span>`).join("")}</div>
-    <div class="tally">${r.lines.map(([label, n]) => `<div><span>${esc(label)}</span><b>+${n} 🪙</b></div>`).join("")}
-      <div><span>Total</span><b>+${r.total} 🪙</b></div></div>
+    <div class="tally">${r.lines.map(([label, n]) => `<div><span>${esc(label)}</span><b>+${fmtN(n)} 🪙</b></div>`).join("")}
+      <div><span>Total</span><b>+${fmtN(r.total)} 🪙</b></div></div>
     ${r.big && r.stars < 3 ? `<p class="muted">Each miss or “Show me” costs a ⭐. Play it again with no misses to win all 3!</p>` : ""}
-    <p class="muted">You now have <b>🪙 ${pl.tokens}</b> tokens.</p>
+    <p class="muted">You now have <b>🪙 ${fmtN(pl.tokens)}</b> tokens.</p>
     <div style="max-width:520px;margin:0 auto;display:grid;gap:12px">
       <button class="btn block" data-act="home">Continue</button>
       <button class="btn ghost block" data-act="shop">🎁 Visit the Prize Shop</button></div></div>`;
@@ -3135,7 +3394,7 @@ function renderShop() {
   const pl = player(), st = state();
   const mine = st.log.filter(l => l.profileId === pl.id).slice(0, 10);
   $app.innerHTML = topBar(pl, { back: true }) + `
-    <h1 class="title">🎁 Prize Shop</h1><p class="subtitle">Spend your tokens on real prizes! A grown-up has to say yes.</p>
+    <h1 class="title pkhost">🎁 Prize Shop${pkHTML(pl, "shop")}</h1><p class="subtitle">Spend your tokens on real prizes! A grown-up has to say yes.</p>
     ${st.prizes.length ? `<div class="shopgrid">${st.prizes.map(p => {
       const cost = prizeCost(p, pl), can = pl.tokens >= cost; // 1.4.4: each kid sees their own price
       return `<div class="prize"><div class="pe">${esc(p.emoji || "🎁")}</div><div class="pn">${esc(p.name)}</div>
@@ -3176,8 +3435,8 @@ function renderParent() {
       ${st.profiles.map(p => `<div class="plrow">
         <div class="line">${avatarSelect(p)}<input class="text" style="flex:1;min-width:160px;font-size:20px;padding:10px 12px" maxlength="16" value="${esc(p.name)}" data-field="name" data-kind="player" data-id="${p.id}"></div>
         <div class="line">${pathSelect(p)}<label class="toggle"><input type="checkbox" ${p.readAloud ? "checked" : ""} data-field="readAloud" data-kind="player" data-id="${p.id}"> Read questions aloud</label></div>
-        <div class="line"><b>🪙 ${p.tokens}</b>
-          <span class="muted">· 🔥 ${liveStreak(p)} · ${done(p)}/${totalLessons} lessons · ${p.totalEarned} earned all-time · 👚 ${p.closet ? p.closet.spent : 0} closet spent</span></div>
+        <div class="line"><b>🪙 ${fmtN(p.tokens)}</b>
+          <span class="muted">· 🔥 ${liveStreak(p)} · ${done(p)}/${totalLessons} lessons · ${fmtN(p.totalEarned)} earned all-time · 👚 ${fmtN(p.closet ? p.closet.spent : 0)} closet spent${huntFound(p).length ? ` · 🎃 ${huntFound(p).length} pumpkins` : ""}</span></div>
         <div class="line pxrow"><span class="muted">🎁 Prize prices:</span> ${PRICE_X.choices.map(x => `<button class="btn small ${priceX(p) === x ? "brand" : "ghost"}" data-act="setPriceX" data-id="${p.id}" data-x="${x}" aria-pressed="${priceX(p) === x}">${x}×</button>`).join(" ")}
           <span class="muted">(grand prize ${fmtN(prizeCost({ cost: 500 }, p))} for ${esc(p.name)}${p.priceX ? "" : ", default"})</span></div>
         ${window.ElzeeVoice ? `<div class="line"><button class="btn small ghost" data-act="voicePick" data-id="${p.id}">🔈 Voice</button> <span class="muted">${esc(p.voice || "Calm default")} (kids can pick on their own with 🔈 on the top bar)</span></div>` : ""}
@@ -3272,7 +3531,8 @@ const actions = {
   resetPlayer(el) {
     const p = state().profiles.find(x => x.id === el.dataset.id);
     confirmBox(`Reset ${p.name}?`, "This clears their lessons, stars, streak, and tokens.", "Reset", () => {
-      Object.assign(p, { tokens: 0, totalEarned: 0, streak: 0, lastPlay: null, progress: {}, lessonsDone: 0, replayDay: null, replayCount: 0 }, closetDefaults(p.avatar));
+      Object.assign(p, { tokens: 0, totalEarned: 0, streak: 0, lastPlay: null, progress: {}, lessonsDone: 0, replayDay: null, replayCount: 0, hunt: { found: [] } }, closetDefaults(p.avatar));
+      huntForget(p.id); // 1.4.6: pumpkins + costume pieces go with the rest of the progress
       p.closet.climbSeen = climbUnlocksFor(p.id); // Climb rewards won before the reset are not handed back
       closetForget(p.id, { keepProfile: true }); forgetMiniGameData(p.id, g => g.clearOnReset); LessonSave.clear(); Store.save(); render();
     }, true);
@@ -3280,7 +3540,7 @@ const actions = {
   deletePlayer(el) {
     const st = state(), p = st.profiles.find(x => x.id === el.dataset.id);
     confirmBox(`Delete ${p.name}?`, "This removes the player and all their progress.", "Delete", () => {
-      st.profiles = st.profiles.filter(x => x.id !== p.id); if (st.activeId === p.id) st.activeId = null; LessonSave.clear(); forgetMiniGameData(p.id); closetForget(p.id); Store.save(); render();
+      st.profiles = st.profiles.filter(x => x.id !== p.id); if (st.activeId === p.id) st.activeId = null; LessonSave.clear(); forgetMiniGameData(p.id); closetForget(p.id); huntForget(p.id); Store.save(); render();
     }, true);
   },
   addPrize() { state().prizes.push({ id: uid(), emoji: "🎁", name: "New prize", cost: 20 }); Store.save(); render(); },
@@ -3295,6 +3555,8 @@ const actions = {
     p.priceX = x; Store.save(); render(); toast(`${p.name}: prizes cost ${x}×`);
   },
   voicePick(el) { voicePicker(el.dataset.id || (player() ? player().id : null)); },
+  pumpkin(el, e) { if (e) e.preventDefault(); huntTap(el); }, // 1.4.6: a pumpkin on a game tile must not launch the game
+  huntHint() { huntHint(); },
   gameGroup(el) { // 1.4.3: switch the home between 🧠 thinking and 🔤 word games, and say which (for non-readers)
     const g = el.dataset.g === "words" ? "words" : "think"; setHomeGroup(g); Sound.tap();
     document.querySelectorAll(".ggtab").forEach(b => { const on = b.dataset.g === g; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); });
@@ -3347,6 +3609,7 @@ function closetOptions(tab) {
   if (tab === "hairColor") return Object.keys(AV.HAIR_COLORS).map(k => ({ key: "hairColor." + k, id: k, name: AV.describeColor(k) || AV.HAIR_COLORS[k].name.toLowerCase() }));
   const pl = player();
   const items = AV.ITEMS.filter(it => it.slot === tab && (!it.retired || pl.closet.owned.includes(it.id)))
+    .filter(it => huntActive() || !(it.unlock && it.unlock.event === "pumpkin.hunt") || pl.closet.owned.includes(it.id)) // 1.4.6: after the hunt, only won pieces stay
     .map(it => ({ key: it.id, id: it.id, name: it.name }));
   const none = tab === "dress" || tab.startsWith("acc.") ? [{ key: "none", id: null, name: closetLabel(tab).none || "none" }] : [];
   return none.concat(items);
@@ -3366,6 +3629,7 @@ function applyChoice(look, tab, id, color) {
 }
 function priceTag(st, pl) {
   if (st.type === "tokens") return `<span class="ptag" aria-hidden="true">🪙 ${st.cost}</span><span class="plock" aria-hidden="true">🔒</span>`;
+  if (st.type === "reward" && st.event === "pumpkin.hunt") return isYoungerProfile(pl) ? `<span class="ptag reward" aria-hidden="true">🔒🎃</span>` : `<span class="ptag reward" aria-hidden="true">🎃 ${st.count}</span>`;
   if (st.type === "reward") return isYoungerProfile(pl) ? `<span class="ptag reward" aria-hidden="true">🔒🧗</span>` // younger: no floor numbers
     : `<span class="ptag reward" aria-hidden="true">🎗️ 🧗 ${st.count || ""}</span>`;
   return "";
@@ -3378,6 +3642,8 @@ function unlockSay(st, pl) {
     if (young) return pl.tokens >= st.cost ? "You have enough tokens! Tap the bag to buy it." : closetNear(pl, st) ? "Almost there!" : "Keep playing to earn more!";
     return pl.tokens >= st.cost ? `It costs ${st.cost} tokens.` : `It costs ${st.cost} tokens. ${closetNear(pl, st) ? "Almost there! " : ""}You need ${st.cost - pl.tokens} more tokens.`;
   }
+  if (st.type === "reward" && st.event === "pumpkin.hunt") { const more = Math.max(1, st.count - huntFound(pl).length);
+    return young ? "Find pumpkins to win it!" : `Find ${plural(st.count, "pumpkin", "pumpkins")} to win it! ${plural(more, "more", "more")} to go.`; }
   if (st.type === "reward") return st.event === "climb.floor" ? (young ? "Climb the tower to win it!" : `Win it on floor ${st.count} of the tower.`) : "It's a special prize.";
   return "";
 }
@@ -3432,7 +3698,8 @@ function renderCloset() {
           <span aria-hidden="true">🔒</span><span class="needbar" aria-hidden="true"><i style="width:${fill}%"></i></span>
           ${isYoungerProfile(pl) ? (near ? `<span class="needtxt" aria-hidden="true">Almost there! ✨</span>` : `<span class="more" aria-hidden="true">🎮 ➕🪙</span>`)
             : `<span class="needtxt" aria-hidden="true">${near ? "Almost there! " : ""}Need <b>${need}</b> more 🪙</span>`}</div>`; }
-    } else if (st.type === "reward") buy = isYoungerProfile(pl) ? `<div class="needbox" role="img" aria-label="${esc(unlockSay(st, pl))}">🔒 <span class="more">🧗</span></div>`
+    } else if (st.type === "reward" && st.event === "pumpkin.hunt") buy = `<div class="needbox" role="img" aria-label="${esc(unlockSay(st, pl))}">🔒 <span class="more">🎃</span>${isYoungerProfile(pl) ? "" : `<b>${st.count}</b>`}</div>`;
+    else if (st.type === "reward") buy = isYoungerProfile(pl) ? `<div class="needbox" role="img" aria-label="${esc(unlockSay(st, pl))}">🔒 <span class="more">🧗</span></div>`
       : `<div class="needbox" role="img" aria-label="${esc(unlockSay(st, pl))}">🎗️ <span class="mini">🧗</span><b>${st.count || ""}</b></div>`;
   }
   const first = pl.closet.firstVisit;
@@ -3440,7 +3707,7 @@ function renderCloset() {
     <div class="cstage ${pv ? "previewing" : ""}" id="cstage">
       ${first ? `<div class="hello cfirst"><div class="mascot">${APP.mascot}</div><div class="bubble">Make it look like you! 👆</div></div>`
         : view.focus && !pv ? `<div class="hello cfirst newbubble"><div class="mascot">${APP.mascot}</div><div class="bubble">New! ${itemIcon(view.focus)} 👇</div></div>` : ""}
-      <div class="cav" id="cav">${AV.render(shown, { crop: "full", size: 300, mood: pv ? "yay" : "happy", idPrefix: "stage", label: pl.name, describe: true })}</div>
+      ${pkHTML(pl, "closet")}<div class="cav" id="cav">${AV.render(shown, { crop: "full", size: 300, mood: pv ? "yay" : "happy", idPrefix: "stage", label: pl.name, describe: true })}</div>
       ${pv ? `<div class="sparkles" aria-hidden="true">✨</div>` : ""}
       <div class="buybar">${buy}</div>
     </div>
@@ -3648,11 +3915,13 @@ function recover(err) {
 document.addEventListener("click", e => {
   const el = e.target.closest("[data-act]");
   if (!el || el.disabled || el.getAttribute("aria-disabled") === "true") return;
+  if (el.dataset.act === "pumpkin") e.preventDefault(); // even a guarded tap on a pumpkin never opens the game tile under it
   if (Date.now() - lastNavAt < NAV_GUARD_MS && !el.closest(".overlay")) return; // stray tap from the previous screen
   const fn = actions[el.dataset.act];
   if (!fn) return;
   try { fn(el, e); } catch (err) { recover(err); }
 });
+document.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches(".pk")) { e.preventDefault(); e.target.click(); } });
 document.addEventListener("change", e => { if (e.target.matches("[data-kind]")) { try { onParentFieldChange(e.target); } catch (err) { recover(err); } } });
 document.addEventListener("touchstart", e => { // enables :active press styles on iOS; pauses the level ring while touched
   const stop = e.target.closest && e.target.closest(".stop"); if (stop) stop.classList.add("touched");
@@ -3713,7 +3982,7 @@ if (resumed) {
 } else if (wantHome) { go("home"); } // coming back from a mini-game
 else go("picker"); // otherwise always start on the "Who's playing?" screen
 lastNavAt = 0; // nothing to guard against on first load
-if (/[?&]test=1\b/.test(location.search)) window.__app = { PATHS, Store, APP, explain, spendTokens, closetStatus, syncClimbRewards, AV, get lesson() { return lesson; } }; // automated tests only
+if (/[?&]test=1\b/.test(location.search)) window.__app = { PATHS, Store, APP, explain, spendTokens, closetStatus, syncClimbRewards, AV, HUNT, HUNT_PIECES, huntSpots, huntWeek, huntActive, get lesson() { return lesson; } }; // automated tests only
 try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch (e) {}
 </script>
 </body>
