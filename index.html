@@ -326,6 +326,8 @@ h1,h2,h3{margin:0;font-weight:700}
 /* 1.4.1: NEW in the closet */
 .toast.newtoast{border:none;font-family:inherit;font-weight:700;cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.2);min-height:60px;animation:fade .2s,newpulse 1.4s ease-in-out .3s 3}
 @keyframes newpulse{50%{transform:translateX(-50%) scale(1.06)}}
+.toast.toptoast{top:calc(env(safe-area-inset-top) + 12px);bottom:auto}
+.toast.sidetoast{left:auto;right:12px;transform:none;max-width:40vw;animation:fade .2s}
 .top .iconbtn{position:relative}
 .newdot{position:absolute;top:-6px;right:-8px;background:#ff3d6e;color:#fff;border-radius:10px;font-size:11px;font-weight:800;padding:2px 5px;line-height:1.1;border:2px solid #fff;pointer-events:none}
 .ctab{position:relative}
@@ -3873,7 +3875,15 @@ function closetNewToast(text, id) {
   document.querySelectorAll(".toast").forEach(t => t.remove());
   const t = document.createElement("button"); t.className = "toast newtoast"; t.dataset.act = "openClosetNew"; t.dataset.k = id;
   t.setAttribute("aria-label", "New in your closet! Tap to see it."); t.textContent = text;
-  document.body.appendChild(t); setTimeout(() => t.remove(), 6000);
+  document.body.appendChild(t); toastClear(t); setTimeout(() => t.remove(), 6000);
+}
+function toastClear(t) { // 1.4.7: never sit on top of another button (e.g. "Visit the Prize Shop" on lesson results in landscape)
+  const hits = () => { const r = t.getBoundingClientRect();
+    return [...document.querySelectorAll("button, [data-act]")].some(b => { if (b === t || t.contains(b) || b.closest(".toast")) return false;
+      const q = b.getBoundingClientRect(); return q.width && q.height && q.left < r.right && q.right > r.left && q.top < r.bottom && q.bottom > r.top; }); };
+  if (!hits()) return;
+  t.classList.add("toptoast"); if (!hits()) return;
+  t.classList.remove("toptoast"); t.classList.add("sidetoast");
 }
 function closetDoBuy(pl, pv, st) {
   if (view.name !== "closet" || pl.closet.owned.includes(pv.key)) return false;
